@@ -1,0 +1,9 @@
+package: github.com/Graylog2/graylog-project-cli
+import:
+- package: github.com/hashicorp/go-version
+- package: github.com/spf13/cobra
+- package: github.com/davecgh/go-spew
+- package: github.com/fatih/color
+  version: ^1.0.0
+- package: github.com/imdario/mergo
+- package: github.com/pkg/errors
