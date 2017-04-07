@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"os"
 
 	"github.com/Graylog2/graylog-project-cli/config"
 	"github.com/Graylog2/graylog-project-cli/logger"
@@ -54,13 +53,7 @@ func printState(latestRelease GithubRelease, onlyOutdated bool) {
 }
 
 func getLatestRelease() GithubRelease {
-
-	client := &http.Client{}
-	req, _ := http.NewRequest("GET", "https://api.github.com/repos/graylog2/graylog-project-cli/releases/latest", nil)
-	if os.Getenv("GITHUB_USER") != "" && os.Getenv("GITHUB_PASSWORD") != "" {
-		req.SetBasicAuth(os.Getenv("GITHUB_USER"), os.Getenv("GITHUB_PASSWORD"))
-	}
-	resp, err := client.Do(req)
+	resp, err := http.Get("https://api.github.com/repos/graylog2/graylog-project-cli/releases/latest")
 	if err != nil || resp.StatusCode >= 400 {
 		return GithubRelease{}
 	}
