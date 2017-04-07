@@ -1,6 +1,7 @@
 graylog-project CLI
 ===================
 
+[![Travis-CI Build Status](https://travis-ci.org/Graylog2/graylog-project-cli.svg?branch=master)](https://travis-ci.org/Graylog2/graylog-project-cli)
 [![License](https://img.shields.io/github/license/Graylog2/graylog-project-cli.svg)](https://www.gnu.org/licenses/gpl-3.0.txt)
 
 CLI tool for [graylog-project](https://github.com/Graylog2/graylog-project).

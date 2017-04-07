@@ -1,0 +1,13 @@
+language: go
+go:
+- '1.8'
+deploy:
+  provider: releases
+  api_key:
+    secure: oXCmbyJGGjQtKtTPXAZpq1srVPSmDqlBFwvSLwgwgCK9vqiieqoV6kJ/46d9B8bJGIYF+48PtuOsGSSji6pF1ssd57djhmJfqMlcy+Vk5Q0F+G2L0JVz475666nCmwcDBRMY9cdYgYBeGwnsqQbmBXZtACDHxkmEJWJdBD6t5s61r20gcpOQXDz2amMPyMdW12tWxuAv2a5DApOw04yHHb8x6EmVAWEQNCcthC8/UFTjOxQhF5hQAgHwx1uh22pmp90V6JqLxNDnYpfH4YSxY5NZC7CkFQBBi9RKsAB3a5Ebh6Z35KDdofxo1dYW04JFFbmM+WaTWkjdNrLaeKqdI+U21/uQ69QAotJ8n+3gH/ECrOMRXJzWiZfsz+SdxPPwQVtn/3lAKyClqafeARD0aYh9ROU4jlBG1PpXdMwAJfc8P8sJX9OpsTtZi5paUTasLWwjrZhF88ZdoglpZCoNIqCn/sr9N0KBAwTATu8swEkkFbFl9ceUkFG6BN72eH1LMxsXXXxFE/KPOHWfQc+IqNFe0wfBhLfaRha0P/Fj4GXWaO3Z5md4TLgrH3fdcwpncJ2Ilo59sschP1XrfICkmKqxeHhn8ouy0vt2bsg+kmc6hzyJROGtTVgJ7zFkcTRXNvyCfIpfMOdZ8xpm/R6Z27klkTPy6aLshpTU1REnev4=
+  file_glob: true
+  file:
+    - "graylog-project.*"
+  skip_cleanup: true
+  on:
+    tags: true
