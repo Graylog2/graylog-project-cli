@@ -21,3 +21,11 @@ Found a bug? Have an idea for an improvement? Feel free to [add an issue](../../
 Before we can accept any code from you, we need you to sign our Contributor
 License Agreement. If you create a pull request, a cla-assistant bot will
 ask you to sign the CLA.
+
+## Building the project
+
+- Install [golang](https://golang.org/dl/) for your operating system
+- Setup the `PATH` and `GOROOT` so the go binary is available
+- Run `make build`
+- Run `make install` to install it into `$HOME/bin`
+
