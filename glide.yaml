@@ -7,3 +7,4 @@ import:
   version: ^1.0.0
 - package: github.com/imdario/mergo
 - package: github.com/pkg/errors
+- package: github.com/spf13/viper
