@@ -103,7 +103,25 @@ func getMavenCoordinates(path string) pomparse.MavenCoordinates {
 	return pomparse.GetMavenCoordinates(filepath.Join(path, "pom.xml"))
 }
 
-func New(config config.Config, manifestFiles []string) Project {
+type projectOptions struct {
+	moduleOverride bool
+}
+
+type projectOption func(*projectOptions)
+
+func WithModuleOverride() projectOption {
+	return func(o *projectOptions) {
+		o.moduleOverride = true
+	}
+}
+
+func New(config config.Config, manifestFiles []string, options ...projectOption) Project {
+	// Create a new project options object and process all given options
+	opt := projectOptions{}
+	for _, o := range options {
+		o(&opt)
+	}
+
 	readManifest := manifest.ReadManifest(manifestFiles)
 
 	var server Module
@@ -194,6 +212,10 @@ func New(config config.Config, manifestFiles []string) Project {
 		logger.Fatal("No server module in manifests: %v", manifestFiles)
 	}
 
+	if len(config.Checkout.ModuleOverride) > 0 && opt.moduleOverride {
+		projectModules = applyModuleOverride(config, projectModules)
+	}
+
 	project := Project{
 		config:  config,
 		Server:  server,
@@ -201,6 +223,52 @@ func New(config config.Config, manifestFiles []string) Project {
 	}
 
 	return project
+}
+
+func applyModuleOverride(c config.Config, modules []Module) []Module {
+	newModules := make([]Module, 0)
+
+	// We check if there is an override for any module in our manifests
+	for _, module := range modules {
+		for _, override := range c.Checkout.ModuleOverride {
+			// The override option is "<repo-match-substring>=<repo-replacement-name>@<revision>
+			parts := strings.SplitN(override, "=", 2)
+			if len(parts) != 2 {
+				logger.Error("invalid override <%s> - skipping", override)
+				continue
+			}
+			matchString, replacement := parts[0], parts[1]
+
+			// Now split the replacement
+			replacementParts := strings.SplitN(replacement, "@", 2)
+			if len(parts) != 2 {
+				logger.Error("invalid override <%s> - skipping", override)
+				continue
+			}
+			replacementRepo, replacementRev := replacementParts[0], replacementParts[1]
+
+			// The repo-match-substring of the override is used to select if the current module has
+			// an override
+			if strings.Contains(module.Repository, matchString) {
+				// Build a new repo URL depending on the original type. (SSH, HTTPS, ...)
+				newRepo, err := utils.ReplaceGitHubURL(module.Repository, replacementRepo)
+				if err != nil {
+					logger.Error("couldn't replace repository for module <%S>: %v", module.Name, err)
+					continue
+				}
+
+				logger.Info("Overriding <%s@%s> with <%s@%s> for module <%s>",
+					module.Repository, module.Revision, newRepo, replacementRev, module.Name)
+
+				module.Repository = newRepo
+				module.Revision = replacementRev
+			}
+		}
+
+		newModules = append(newModules, module)
+	}
+
+	return newModules
 }
 
 func getModulePath(repositoryPath string, name string, module manifest.ManifestModule) string {

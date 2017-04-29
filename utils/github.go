@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"github.com/pkg/errors"
 	"path/filepath"
 	"strings"
@@ -25,6 +26,21 @@ func ParseGitHubURL(url string) (GitHubURL, error) {
 	}
 
 	return gitHubURL, nil
+}
+
+func ReplaceGitHubURL(url string, repoName string) (string, error) {
+	name := strings.TrimSuffix(repoName, ".git")
+
+	switch {
+	case strings.HasPrefix(url, "github://"):
+		return fmt.Sprintf("github://%s.git", name), nil
+	case strings.HasPrefix(url, "git@github"):
+		return fmt.Sprintf("git@github.com:%s.git", name), nil
+	case strings.HasPrefix(url, "https://github"):
+		return fmt.Sprintf("https://github.com/%s.git", name), nil
+	default:
+		return "", errors.Errorf("unknown GitHub URL: %s", url)
+	}
 }
 
 type GitHubURL struct {

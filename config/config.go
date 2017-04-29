@@ -11,10 +11,11 @@ const DefaultRepositoryRoot = "../graylog-project-repos"
 const CIRepositoryRoot = ".repos"
 
 type Checkout struct {
-	UpdateRepos   bool     `mapstructure:"update-repos"`
-	ShallowClone  bool     `mapstructure:"shallow-clone"`
-	ManifestFiles []string `mapstructure:"manifest-files"`
-	Force         bool     `mapstructure:"force"`
+	UpdateRepos    bool     `mapstructure:"update-repos"`
+	ShallowClone   bool     `mapstructure:"shallow-clone"`
+	ManifestFiles  []string `mapstructure:"manifest-files"`
+	Force          bool     `mapstructure:"force"`
+	ModuleOverride []string `mapstructure:"module-override"`
 }
 
 type ApplyManifest struct {

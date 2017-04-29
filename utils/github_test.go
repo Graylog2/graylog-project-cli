@@ -65,3 +65,38 @@ func TestParseGitHubURL(t *testing.T) {
 		t.Error("expected unknown URL to fail")
 	}
 }
+
+func TestReplaceGitHubURL(t *testing.T) {
+	url, _ := ReplaceGitHubURL("github://Graylog2/graylog2-server.git", "foo/graylog2-server")
+	expected := "github://foo/graylog2-server.git"
+	if url != expected {
+		t.Errorf("expected <%s> but got <%s>", expected, url)
+	}
+	url, _ = ReplaceGitHubURL("github://Graylog2/graylog2-server.git", "foo/graylog2-server.git")
+	expected = "github://foo/graylog2-server.git"
+	if url != expected {
+		t.Errorf("expected <%s> but got <%s>", expected, url)
+	}
+
+	url, _ = ReplaceGitHubURL("https://github.com/Graylog2/graylog2-server.git", "foo/graylog2-server")
+	expected = "https://github.com/foo/graylog2-server.git"
+	if url != expected {
+		t.Errorf("expected <%s> but got <%s>", expected, url)
+	}
+	url, _ = ReplaceGitHubURL("https://github.com/Graylog2/graylog2-server.git", "foo/graylog2-server.git")
+	expected = "https://github.com/foo/graylog2-server.git"
+	if url != expected {
+		t.Errorf("expected <%s> but got <%s>", expected, url)
+	}
+
+	url, _ = ReplaceGitHubURL("https://github.com/Graylog2/graylog2-server.git", "foo/graylog2-server")
+	expected = "https://github.com/foo/graylog2-server.git"
+	if url != expected {
+		t.Errorf("expected <%s> but got <%s>", expected, url)
+	}
+	url, _ = ReplaceGitHubURL("https://github.com/Graylog2/graylog2-server.git", "foo/graylog2-server.git")
+	expected = "https://github.com/foo/graylog2-server.git"
+	if url != expected {
+		t.Errorf("expected <%s> but got <%s>", expected, url)
+	}
+}

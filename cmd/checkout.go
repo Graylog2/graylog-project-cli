@@ -29,6 +29,11 @@ Examples:
   $ graylog-project checkout manifests/master.json
 
   $ graylog-project co manifests/master.json /path/to/other/manifest.json
+
+  # Override graylog-plugin-collector module in manifest to checkout revision
+  # "abc123"  of the a-contributor/graylog-plugin-collector repository
+  # instead of Graylog2/graylog-plugin-collector
+  $ graylog-project co --module-override Graylog2/graylog-plugin-collector=a-contributor/graylog-plugin-collector@abc123
 `,
 	Run: checkoutCommand,
 }
@@ -40,11 +45,13 @@ func init() {
 	checkoutCmd.Flags().BoolP("shallow-clone", "s", false, "Create a shallow git clone instead of a regular one")
 	checkoutCmd.Flags().BoolP("force", "f", false, "Force checkout event though repository is unexpected")
 	checkoutCmd.Flags().StringP("auth-token", "T", "", "Auth token to access protected URLs")
+	checkoutCmd.Flags().StringSliceP("module-override", "O", []string{}, "Override manifest modules, see help for details")
 
 	viper.BindPFlag("checkout.update-repos", checkoutCmd.Flags().Lookup("update-repos"))
 	viper.BindPFlag("checkout.shallow-clone", checkoutCmd.Flags().Lookup("shallow-clone"))
 	viper.BindPFlag("checkout.force", checkoutCmd.Flags().Lookup("force"))
 	viper.BindPFlag("checkout.auth-token", checkoutCmd.Flags().Lookup("auth-token"))
+	viper.BindPFlag("checkout.module-override", checkoutCmd.Flags().Lookup("module-override"))
 
 	viper.BindEnv("checkout.auth-token", "GPC_AUTH_TOKEN")
 }
@@ -73,7 +80,7 @@ func prepareCheckoutCommand(cmd *cobra.Command, args []string) (c.Config, *repo.
 
 	logger.Debug("Using manifests: %v", config.Checkout.ManifestFiles)
 
-	project := p.New(config, config.Checkout.ManifestFiles)
+	project := p.New(config, config.Checkout.ManifestFiles, p.WithModuleOverride())
 
 	return config, repoManager, project
 }
