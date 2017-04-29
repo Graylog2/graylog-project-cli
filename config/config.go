@@ -4,7 +4,11 @@ import (
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/spf13/viper"
+	"os"
 )
+
+const DefaultRepositoryRoot = "../graylog-project-repos"
+const CIRepositoryRoot = ".repos"
 
 type Checkout struct {
 	UpdateRepos   bool     `mapstructure:"update-repos"`
@@ -26,6 +30,11 @@ type Config struct {
 	Verbose         bool          `mapstructure:"verbose"`
 	NoUpdateCheck   bool          `mapstructure:"disable-update-check"`
 	ForceHttpsRepos bool          `mapstructure:"force-https-repos"`
+}
+
+// Returns true if running a CI environment. Detected environments: Jenkins, TravisCI
+func (c Config) IsCI() bool {
+	return os.Getenv("CI") != "" || os.Getenv("TRAVIS") != "" || os.Getenv("BUILD_ID") != ""
 }
 
 func Merge(config Config) Config {

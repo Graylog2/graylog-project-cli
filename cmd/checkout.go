@@ -63,6 +63,12 @@ func prepareCheckoutCommand(cmd *cobra.Command, args []string) (c.Config, *repo.
 
 	config := c.Merge(defaultConfig)
 
+	// We use a special repository root if running in a CI environment and the default hasn't been changed.
+	if config.IsCI() && config.RepositoryRoot == c.DefaultRepositoryRoot {
+		logger.Info("Running in a CI environment, using repository root: %s", c.CIRepositoryRoot)
+		config.RepositoryRoot = c.CIRepositoryRoot
+	}
+
 	repoManager := repo.NewRepoManager(config)
 
 	logger.Debug("Using manifests: %v", config.Checkout.ManifestFiles)

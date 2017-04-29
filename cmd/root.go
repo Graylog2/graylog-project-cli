@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Graylog2/graylog-project-cli/config"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -80,7 +81,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file")
-	RootCmd.PersistentFlags().StringVar(&repositoryRoot, "repository-root", "../graylog-project-repos", "Git repository root")
+	RootCmd.PersistentFlags().StringVar(&repositoryRoot, "repository-root", config.DefaultRepositoryRoot, "Git repository root")
 	RootCmd.PersistentFlags().BoolVarP(&debug, "debug", "D", false, "enable debug output (default: false)")
 	RootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "enable verbose output (default: false)")
 	RootCmd.PersistentFlags().StringVarP(&selectedModules, "selected-modules", "M", "", "apply command to given modules (comma separated)")
