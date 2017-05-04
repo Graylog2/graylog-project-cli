@@ -14,8 +14,6 @@ const DefaultProjectManifest = "manifests/master.json"
 var bootstrapShallowClone bool
 var bootstrapCheckoutPath string
 var bootstrapManifest string
-var bootstrapSsh bool
-var bootstrapHttps bool
 var bootstrapProjectBranch string
 
 // bootstrapCmd represents the bootstrap command
@@ -40,8 +38,6 @@ func init() {
 	bootstrapCmd.Flags().BoolVarP(&bootstrapShallowClone, "shallow-clone", "s", false, "Create a shallow git clone instead of a regular one")
 	bootstrapCmd.Flags().StringVarP(&bootstrapCheckoutPath, "checkout-path", "p", "", "Path for the graylog-project checkout")
 	bootstrapCmd.Flags().StringVarP(&bootstrapManifest, "manifest", "m", DefaultProjectManifest, "Manifest to checkout")
-	bootstrapCmd.Flags().BoolVarP(&bootstrapSsh, "use-ssh", "S", true, "Clone repository via SSH")
-	bootstrapCmd.Flags().BoolVarP(&bootstrapHttps, "use-https", "H", false, "Clone repository via HTTPS")
 	bootstrapCmd.Flags().StringVarP(&bootstrapProjectBranch, "project-branch", "B", "master", "graylog-project branch to check out")
 	bootstrapCmd.Flags().StringP("auth-token", "T", "", "Auth token to access protected URLs")
 
@@ -70,20 +66,15 @@ func bootstrapCommand(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	// SSH is default
-	repo := repoUrl.SSH()
-
-	if bootstrapSsh {
-		repo = repoUrl.SSH()
-	} else if bootstrapHttps {
-		repo = repoUrl.HTTPS()
+	if repoUrl.IsHTTPS() {
+		viper.Set("force-https-repos", true)
 	}
 
 	if bootstrapShallowClone {
 		viper.Set("checkout.shallow-clone", true)
-		git.Git("clone", "--depth=1", "--no-single-branch", repo, bootstrapCheckoutPath)
+		git.Git("clone", "--depth=1", "--no-single-branch", repoUrl.URL, bootstrapCheckoutPath)
 	} else {
-		git.Git("clone", repo, bootstrapCheckoutPath)
+		git.Git("clone", repoUrl.URL, bootstrapCheckoutPath)
 	}
 
 	utils.InDirectory(bootstrapCheckoutPath, func() {

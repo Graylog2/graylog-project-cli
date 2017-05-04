@@ -8,7 +8,7 @@ import (
 )
 
 func ParseGitHubURL(url string) (GitHubURL, error) {
-	gitHubURL := GitHubURL{}
+	gitHubURL := GitHubURL{URL: url}
 
 	if !strings.HasSuffix(url, ".git") {
 		return gitHubURL, errors.Errorf("GitHub URL is missing .git suffix: %s", url)
@@ -44,7 +44,16 @@ func ReplaceGitHubURL(url string, repoName string) (string, error) {
 }
 
 type GitHubURL struct {
+	URL        string
 	Repository string
+}
+
+func (url GitHubURL) IsHTTPS() bool {
+	return strings.HasPrefix(url.URL, "https://")
+}
+
+func (url GitHubURL) IsSSH() bool {
+	return strings.HasPrefix(url.URL, "git@")
 }
 
 func (url GitHubURL) SSH() string {

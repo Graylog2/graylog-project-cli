@@ -64,6 +64,19 @@ func TestParseGitHubURL(t *testing.T) {
 	if err == nil {
 		t.Error("expected unknown URL to fail")
 	}
+
+	url, _ = ParseGitHubURL("github://Graylog2/graylog2-server.git")
+	if url.IsHTTPS() || url.IsHTTPS() {
+		t.Error("expected URL to not be SSH or HTTPS")
+	}
+	url, _ = ParseGitHubURL("https://github.com/Graylog2/graylog2-server.git")
+	if !url.IsHTTPS() || url.IsSSH() {
+		t.Error("expected URL to be HTTPS and not SSH")
+	}
+	url, _ = ParseGitHubURL("git@github.com:Graylog2/graylog2-server.git")
+	if url.IsHTTPS() || !url.IsSSH() {
+		t.Error("expected URL to be SSH and not HTTPS")
+	}
 }
 
 func TestReplaceGitHubURL(t *testing.T) {
