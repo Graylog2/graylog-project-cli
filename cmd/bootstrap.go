@@ -66,15 +66,18 @@ func bootstrapCommand(cmd *cobra.Command, args []string) {
 		return
 	}
 
+	cloneUrl := repoUrl.SSH()
+
 	if repoUrl.IsHTTPS() {
+		cloneUrl = repoUrl.HTTPS()
 		viper.Set("force-https-repos", true)
 	}
 
 	if bootstrapShallowClone {
 		viper.Set("checkout.shallow-clone", true)
-		git.Git("clone", "--depth=1", "--no-single-branch", repoUrl.URL, bootstrapCheckoutPath)
+		git.Git("clone", "--depth=1", "--no-single-branch", cloneUrl, bootstrapCheckoutPath)
 	} else {
-		git.Git("clone", repoUrl.URL, bootstrapCheckoutPath)
+		git.Git("clone", cloneUrl, bootstrapCheckoutPath)
 	}
 
 	utils.InDirectory(bootstrapCheckoutPath, func() {
