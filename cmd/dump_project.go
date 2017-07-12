@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/Graylog2/graylog-project-cli/config"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/Graylog2/graylog-project-cli/project"
@@ -32,9 +33,21 @@ var parseManifestCmd = &cobra.Command{
 		logger.Println(spew.Sdump(project.MavenDependencies(projectData)))
 		logger.Println("")
 		logger.Println("#### Maven Assemblies ####")
-		logger.Println(spew.Sdump(project.MavenAssemblies(projectData)))
+		logger.Println(spew.Sdump(dumpMavenAssemblies(projectData)))
 		logger.Println("")
 	},
+}
+
+func dumpMavenAssemblies(p project.Project) []string {
+	dependencies := make([]string, 0)
+
+	project.ForEachModuleOrSubmodules(p, func(module project.Module) {
+		if module.IsMavenModule() && module.Assembly {
+			dependencies = append(dependencies, fmt.Sprintf("%s:%s", module.GroupId(), module.ArtifactId()))
+		}
+	})
+
+	return dependencies
 }
 
 func init() {

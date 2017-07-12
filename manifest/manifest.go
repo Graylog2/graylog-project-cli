@@ -19,14 +19,15 @@ type Manifest struct {
 }
 
 type ManifestModule struct {
-	Repository string           `json:"repository,omitempty"`
-	Revision   string           `json:"revision,omitempty"`
-	Maven      string           `json:"maven,omitempty"`
-	Path       string           `json:"path,omitempty"`
-	Assembly   bool             `json:"assembly,omitempty"`
-	Server     bool             `json:"server,omitempty"`
-	SubModules []ManifestModule `json:"submodules,omitempty"`
-	Apply      ManifestApply    `json:"apply,omitempty"`
+	Repository         string           `json:"repository,omitempty"`
+	Revision           string           `json:"revision,omitempty"`
+	Maven              string           `json:"maven,omitempty"`
+	Path               string           `json:"path,omitempty"`
+	Assembly           bool             `json:"assembly,omitempty"`
+	AssemblyDescriptor string           `json:"assembly_descriptor,omitempty"`
+	Server             bool             `json:"server,omitempty"`
+	SubModules         []ManifestModule `json:"submodules,omitempty"`
+	Apply              ManifestApply    `json:"apply,omitempty"`
 }
 
 func (mod ManifestModule) HasSubmodules() bool {

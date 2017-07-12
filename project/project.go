@@ -1,7 +1,6 @@
 package project
 
 import (
-	"fmt"
 	"path/filepath"
 	"strings"
 
@@ -26,15 +25,16 @@ type Apply struct {
 }
 
 type Module struct {
-	Name         string
-	Path         string
-	Repository   string
-	Revision     string
-	Assembly     bool
-	Server       bool
-	Submodules   []Module
-	apply        Apply
-	ApplyExecute bool
+	Name               string
+	Path               string
+	Repository         string
+	Revision           string
+	Assembly           bool
+	AssemblyDescriptor string
+	Server             bool
+	Submodules         []Module
+	apply              Apply
+	ApplyExecute       bool
 }
 
 func (module *Module) IsMavenModule() bool {
@@ -155,11 +155,12 @@ func New(config config.Config, manifestFiles []string, options ...projectOption)
 				}
 
 				submodules = append(submodules, Module{
-					Name:       name,
-					Path:       path,
-					Repository: moduleRepository,
-					Revision:   module.Revision,
-					Assembly:   submodule.Assembly,
+					Name:               name,
+					Path:               path,
+					Repository:         moduleRepository,
+					Revision:           module.Revision,
+					Assembly:           submodule.Assembly,
+					AssemblyDescriptor: module.AssemblyDescriptor,
 				})
 			}
 		}
@@ -181,14 +182,15 @@ func New(config config.Config, manifestFiles []string, options ...projectOption)
 		mergo.Merge(&moduleApply, defaultApply)
 
 		newModule := Module{
-			Name:       name,
-			Path:       path,
-			Repository: moduleRepository,
-			Revision:   module.Revision,
-			Assembly:   module.Assembly,
-			Server:     module.Server,
-			Submodules: submodules,
-			apply:      moduleApply,
+			Name:               name,
+			Path:               path,
+			Repository:         moduleRepository,
+			Revision:           module.Revision,
+			Assembly:           module.Assembly,
+			AssemblyDescriptor: module.AssemblyDescriptor,
+			Server:             module.Server,
+			Submodules:         submodules,
+			apply:              moduleApply,
 		}
 
 		// Set execute flag if the manifest should be applied if it contains apply config
@@ -285,18 +287,6 @@ func MavenDependencies(project Project) []Module {
 	ForEachModuleOrSubmodules(project, func(module Module) {
 		if module.IsMavenModule() {
 			dependencies = append(dependencies, module)
-		}
-	})
-
-	return dependencies
-}
-
-func MavenAssemblies(project Project) []string {
-	dependencies := make([]string, 0)
-
-	ForEachModuleOrSubmodules(project, func(module Module) {
-		if module.IsMavenModule() && module.Assembly {
-			dependencies = append(dependencies, fmt.Sprintf("%s:%s", module.GroupId(), module.ArtifactId()))
 		}
 	})
 
