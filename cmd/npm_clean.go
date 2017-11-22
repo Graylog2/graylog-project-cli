@@ -16,8 +16,9 @@ const NodeDir = "node"
 
 // npmCmd represents the npm command
 var npmCleanCmd = &cobra.Command{
-	Use:   "npm-clean",
-	Short: "Cleanup npm related state",
+	Use:     "npm-clean",
+	Aliases: []string{"yarn-clean"},
+	Short:   "Cleanup npm/yarn related state",
 	Long: `
 Removes several npm state folders. (e.g. node_modules)
 `,
