@@ -8,3 +8,11 @@ import:
 - package: github.com/imdario/mergo
 - package: github.com/pkg/errors
 - package: github.com/spf13/viper
+- package: github.com/google/go-github
+- package: golang.org/x/oauth2
+- package: github.com/google/go-querystring
+  subpackages:
+  - tree/master/query
+- package: golang.org/x/net
+  subpackages:
+  - context

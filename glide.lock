@@ -1,5 +1,5 @@
-hash: 442e3518275af2f7a2c50bfa53dcde9e30dbd4663fc609d0f7715a736e62ad1b
-updated: 2017-04-24T09:49:26.510954567+02:00
+hash: e6b04c71a57440fcfcab02566cb161abcfd50361838c6c87989f5d5e45fbe6d7
+updated: 2017-12-22T18:14:23.456062554+01:00
 imports:
 - name: github.com/cpuguy83/go-md2man
   version: 71acacd42f85e5e82f70a55327789582a5200a90
@@ -10,9 +10,22 @@ imports:
   subpackages:
   - spew
 - name: github.com/fatih/color
-  version: 9131ab34cf20d2f6d83fdc67168a5430d1c7dc23
+  version: 570b54cabe6b8eb0bc2dfce68d964677d63b5260
 - name: github.com/fsnotify/fsnotify
   version: a8a77c9133d2d6fd8334f3260d06f60e8d80a5fb
+- name: github.com/golang/protobuf
+  version: 4bd1920723d7b7c925de087aa32e2187708897f7
+  subpackages:
+  - proto
+- name: github.com/google/go-github
+  version: 0c3b302de2a6de84a2511db47ea1bb2ff8146830
+  subpackages:
+  - github
+- name: github.com/google/go-querystring
+  version: 53e6ce116135b80d037921a7fdd5138cf32d7a8a
+  subpackages:
+  - query
+  - tree/master/query
 - name: github.com/hashicorp/go-version
   version: deeb027c13a95d56c7585df3fe29207208c6706e
 - name: github.com/hashicorp/hcl
@@ -73,6 +86,15 @@ imports:
   version: 1351f936d976c60a0a48d728281922cf63eafb8d
   subpackages:
   - ssh
+- name: golang.org/x/net
+  version: d58ca6618b994150e624f6888d871f4709db51a0
+  subpackages:
+  - context
+  - context/ctxhttp
+- name: golang.org/x/oauth2
+  version: 0448841f0cbe9d174c6c1cedd177f583337b8e2c
+  subpackages:
+  - internal
 - name: golang.org/x/sys
   version: e24f485414aeafb646f6fca458b0bf869c0880a1
   repo: https://go.googlesource.com/sys
@@ -83,6 +105,16 @@ imports:
   subpackages:
   - transform
   - unicode/norm
+- name: google.golang.org/appengine
+  version: 5bee14b453b4c71be47ec1781b0fa61c2ea182db
+  subpackages:
+  - internal
+  - internal/base
+  - internal/datastore
+  - internal/log
+  - internal/remote_api
+  - internal/urlfetch
+  - urlfetch
 - name: gopkg.in/yaml.v2
   version: a83829b6f1293c91addabc89d0571c246397bbf4
 testImports: []
