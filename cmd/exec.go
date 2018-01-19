@@ -27,7 +27,9 @@ func init() {
 	RootCmd.AddCommand(execCmd)
 
 	execCmd.Flags().BoolP("force", "f", false, "Continue to execute the command even when it returns a non-zero code")
+	execCmd.Flags().BoolP("web", "w", false, "Exec command only in web modules")
 	viper.BindPFlag("exec.force", execCmd.Flags().Lookup("force"))
+	viper.BindPFlag("exec.web", execCmd.Flags().Lookup("web"))
 }
 
 func execCommand(cmd *cobra.Command, args []string) {
@@ -41,10 +43,20 @@ func execCommand(cmd *cobra.Command, args []string) {
 	project := p.New(config.Get(), manifestFiles)
 
 	logger.Info("Current manifests: %v", manifestFiles)
-	logger.Info("Executing `%v` for every selected module", strings.Join(args, " "))
-	p.ForEachSelectedModule(project, func(module p.Module) {
-		execForPath(module, args)
-	})
+
+	if viper.GetBool("exec.web") {
+		logger.Info("Executing `%v` for every selected web module", strings.Join(args, " "))
+		p.ForEachSelectedModuleOrSubmodules(project, func(module p.Module) {
+			if module.IsNpmModule() {
+				execForPath(module, args)
+			}
+		})
+	} else {
+		logger.Info("Executing `%v` for every selected module", strings.Join(args, " "))
+		p.ForEachSelectedModule(project, func(module p.Module) {
+			execForPath(module, args)
+		})
+	}
 }
 
 func execForPath(module p.Module, args []string) {
