@@ -114,6 +114,14 @@ func applyManifestCommand(cmd *cobra.Command, args []string) {
 		})
 	})
 
+	// Set release version in all web modules
+	msg("Setting release version in all web modules")
+	apply.ForEachModule(proj, true, func(module project.Module) {
+		applyManifestInDirectory(module.Path, func() {
+			applier.NpmVersionSet(module, module.Revision)
+		})
+	})
+
 	// Set release version in all modules
 	msg("Setting release version in all modules")
 	apply.ForEachModule(proj, false, func(module project.Module) {
@@ -134,6 +142,15 @@ func applyManifestCommand(cmd *cobra.Command, args []string) {
 	logger.ColorInfo(color.FgMagenta, "[%s]", utils.GetCwd())
 	applier.MavenRun("clean", "package")
 
+	// Committing new version in web modules
+	// Run this before the maven scm checkin is pushing to GitHub
+	msg("Committing new version in web modules")
+	apply.ForEachModule(proj, true, func(module project.Module) {
+		applyManifestInDirectory(module.Path, func() {
+			applier.NpmVersionCommit(module, module.Revision)
+		})
+	})
+
 	// Commit and push new versions and create and push tag
 	msg("Committing and pushing new versions and tags")
 	apply.ForEachModule(proj, false, func(module project.Module) {
@@ -148,6 +165,14 @@ func applyManifestCommand(cmd *cobra.Command, args []string) {
 	logger.ColorInfo(color.FgMagenta, "[%s]", utils.GetCwd())
 	applier.MavenRunWithProfiles([]string{"release"}, "-DskipTests", "clean", "deploy")
 
+	// Set development version in all web modules
+	msg("Setting development version in all web modules")
+	apply.ForEachModule(proj, true, func(module project.Module) {
+		applyManifestInDirectory(module.Path, func() {
+			applier.NpmVersionSet(module, module.ApplyNewVersion())
+		})
+	})
+
 	// Set development version
 	msg("Set development versions")
 	apply.ForEachModule(proj, false, func(module project.Module) {
@@ -157,6 +182,15 @@ func applyManifestCommand(cmd *cobra.Command, args []string) {
 
 		// Update all versions after each change!
 		applyManifestUpdateVersions(msg, proj, applier)
+	})
+
+	// Committing new development version in web modules
+	// Run this before the maven scm checkin is pushing to GitHub
+	msg("Committing new development version in web modules")
+	apply.ForEachModule(proj, true, func(module project.Module) {
+		applyManifestInDirectory(module.Path, func() {
+			applier.NpmVersionCommit(module, module.Revision)
+		})
 	})
 
 	// Commit development version

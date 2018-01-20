@@ -30,6 +30,10 @@ type Applier interface {
 	MavenSetParent(module project.Module, parentVersion string)
 
 	MavenSetProperty(module project.Module, name string, value string)
+
+	NpmVersionSet(module project.Module, newVersion string)
+
+	NpmVersionCommit(module project.Module, newVersion string)
 }
 
 // Ensures that the server module gets handled first.

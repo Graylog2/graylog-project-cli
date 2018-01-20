@@ -29,3 +29,11 @@ func (noop noopApplier) MavenSetProperty(module project.Module, name string, val
 func (noop noopApplier) MavenExec(commands []string) {
 	fmt.Println(strings.Join(commands, " "))
 }
+
+func (noop noopApplier) NpmVersionSet(module project.Module, newVersion string) {
+	fmt.Println("set web module version: " + newVersion)
+}
+
+func (noop noopApplier) NpmVersionCommit(module project.Module, newVersion string) {
+	fmt.Println("commit web module version: " + newVersion)
+}
