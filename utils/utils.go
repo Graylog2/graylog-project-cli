@@ -33,6 +33,7 @@ func Chdir(path string) {
 	}
 }
 
+// Returns the relative path from the current working directory for the given path.
 func GetRelativePath(path string) string {
 	if !filepath.IsAbs(path) {
 		return path
@@ -45,6 +46,21 @@ func GetRelativePath(path string) string {
 	}
 
 	return relPath
+}
+
+// Returns the relative path from the current working directory for the given path.
+// It also evaluates symlinks in the given path before it returns the relative path.
+func GetRelativePathEvalSymlinks(path string) string {
+	if !filepath.IsAbs(path) {
+		return path
+	}
+
+	newPath, err := filepath.EvalSymlinks(path)
+	if err != nil {
+		logger.Fatal("Unable to eval symlinks for %v: %v", path, err)
+	}
+
+	return GetRelativePath(newPath)
 }
 
 func GetAbsolutePath(path string) string {

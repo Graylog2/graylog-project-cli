@@ -51,7 +51,26 @@ func (module *Module) HasSubmodules() bool {
 
 func (module *Module) RelativePath() string {
 	// The path in the "<module>" tag needs to be relative to make maven happy!
-	return utils.GetRelativePath(module.Path)
+	// Using the GetRelativePathEvalSymlinks function here to make sure the relative path is as short as possible.
+	// Otherwise we might get a very long relative path if the current working dir is inside a symlink.
+	//
+	// Example:
+	//     cwd = /home/bernd/workspace/graylog-project (where workspace is a symlink to /tmp/workspace)
+	//     module.Path = /home/bernd/workspace/graylog-project-repos/graylog2-server
+	//
+	// Calling utils.GetRelativePath(module.Path) (which does not evaluate the symlink in the given path, but uses an
+	// evaluated current working dir) would result in:
+	//     ../../../home/bernd/workspace/graylog-project-repos/graylog2-server
+	//
+	// Calling utils.GetRelativePathEvalSymlinks(module.Path) returns the following instead:
+	//     ../graylog-project-repos/graylog2-server
+	//
+	// TODO: This behavior is an implementation detail of utils.GetCwd which calls filepath.EvalSymlinks on the result
+	// TODO: of os.Getwd to help filepath.Walk... This is a bit of a mess and should be fixed eventually.
+	//
+	// IntelliJ cannot handle the first variant so we have to make sure we get a short relative path when putting it
+	// in the "<module/>" attribute in pom.xml.
+	return utils.GetRelativePathEvalSymlinks(module.Path)
 }
 
 func (module *Module) GroupId() string {
