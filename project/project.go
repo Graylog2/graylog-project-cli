@@ -29,8 +29,8 @@ type Module struct {
 	Path               string
 	Repository         string
 	Revision           string
-	Assembly           bool
-	AssemblyDescriptor string
+	Assemblies         []string
+	AssemblyAttachment string
 	Server             bool
 	Submodules         []Module
 	apply              Apply
@@ -178,8 +178,8 @@ func New(config config.Config, manifestFiles []string, options ...projectOption)
 					Path:               path,
 					Repository:         moduleRepository,
 					Revision:           module.Revision,
-					Assembly:           submodule.Assembly,
-					AssemblyDescriptor: module.AssemblyDescriptor,
+					Assemblies:         submodule.Assemblies,
+					AssemblyAttachment: submodule.AssemblyAttachment,
 				})
 			}
 		}
@@ -205,8 +205,8 @@ func New(config config.Config, manifestFiles []string, options ...projectOption)
 			Path:               path,
 			Repository:         moduleRepository,
 			Revision:           module.Revision,
-			Assembly:           module.Assembly,
-			AssemblyDescriptor: module.AssemblyDescriptor,
+			Assemblies:         module.Assemblies,
+			AssemblyAttachment: module.AssemblyAttachment,
 			Server:             module.Server,
 			Submodules:         submodules,
 			apply:              moduleApply,
