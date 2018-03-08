@@ -14,33 +14,36 @@ type TemplateInventory struct {
 	Server       p.Module
 	Modules      []p.Module
 	Dependencies []p.Module
-	Assemblies   []Assembly
+	Assemblies   map[string][]Assembly
 }
 
 type Assembly struct {
 	GroupId    string
 	ArtifactId string
-	Descriptor string
+	Attachment string
 }
 
 func (a Assembly) String() string {
 	return fmt.Sprintf("%s:%s", a.GroupId, a.ArtifactId)
 }
 
-func mavenAssemblies(project p.Project) []Assembly {
-	dependencies := make([]Assembly, 0)
+func mavenAssemblies(project p.Project) map[string][]Assembly {
+	assemblies := make(map[string][]Assembly)
 
 	p.ForEachModuleOrSubmodules(project, func(module p.Module) {
-		if module.IsMavenModule() && module.Assembly {
-			dependencies = append(dependencies, Assembly{
-				GroupId:    module.GroupId(),
-				ArtifactId: module.ArtifactId(),
-				Descriptor: module.AssemblyDescriptor,
-			})
+		if module.IsMavenModule() && len(module.Assemblies) > 0 {
+			// Each module can be in one or more assemblies
+			for _, assemblyId := range module.Assemblies {
+				assemblies[assemblyId] = append(assemblies[assemblyId], Assembly{
+					GroupId:    module.GroupId(),
+					ArtifactId: module.ArtifactId(),
+					Attachment: module.AssemblyAttachment,
+				})
+			}
 		}
 	})
 
-	return dependencies
+	return assemblies
 }
 
 func WriteXmlFile(config config.Config, project p.Project, templateFile string, outputFile string) {

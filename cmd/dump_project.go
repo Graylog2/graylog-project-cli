@@ -38,16 +38,22 @@ var parseManifestCmd = &cobra.Command{
 	},
 }
 
-func dumpMavenAssemblies(p project.Project) []string {
-	dependencies := make([]string, 0)
+func dumpMavenAssemblies(p project.Project) map[string][]string {
+	assemblies := make(map[string][]string)
 
 	project.ForEachModuleOrSubmodules(p, func(module project.Module) {
-		if module.IsMavenModule() && module.Assembly {
-			dependencies = append(dependencies, fmt.Sprintf("%s:%s", module.GroupId(), module.ArtifactId()))
+		if module.IsMavenModule() && len(module.Assemblies) > 0 {
+			for _, assemblyId := range module.Assemblies {
+				if module.AssemblyAttachment != "" {
+					assemblies[assemblyId] = append(assemblies[assemblyId], fmt.Sprintf("%s:%s:%s", module.GroupId(), module.ArtifactId(), module.AssemblyAttachment))
+				} else {
+					assemblies[assemblyId] = append(assemblies[assemblyId], fmt.Sprintf("%s:%s", module.GroupId(), module.ArtifactId()))
+				}
+			}
 		}
 	})
 
-	return dependencies
+	return assemblies
 }
 
 func init() {

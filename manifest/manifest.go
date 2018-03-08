@@ -23,8 +23,9 @@ type ManifestModule struct {
 	Revision           string           `json:"revision,omitempty"`
 	Maven              string           `json:"maven,omitempty"`
 	Path               string           `json:"path,omitempty"`
-	Assembly           bool             `json:"assembly,omitempty"`
-	AssemblyDescriptor string           `json:"assembly_descriptor,omitempty"`
+	Assembly           bool             `json:"assembly,omitempty"` // DEPRECATED: use the "assemblies" field
+	Assemblies         []string         `json:"assemblies,omitempty"`
+	AssemblyAttachment string           `json:"assembly_attachment,omitempty"`
 	Server             bool             `json:"server,omitempty"`
 	SubModules         []ManifestModule `json:"submodules,omitempty"`
 	Apply              ManifestApply    `json:"apply,omitempty"`
@@ -48,7 +49,19 @@ func readManifestFile(filename string) Manifest {
 
 	var manifest Manifest
 	if err := json.Unmarshal(bytes, &manifest); err != nil {
-		logger.Fatal("Unable to decode manifest JSON: %v", err)
+		logger.Error("Unable to decode manifest %s: %v\n", filename, err)
+		logger.Error(" - Please make sure you are running the latest graylog-project-cli version")
+		logger.Fatal(" - Please make sure you pulled the latest graylog-project repository revision")
+	}
+
+	// Check if any (sub)module is using the deprecated "assembly" field so we can warn the user
+	for _, module := range manifest.Modules {
+		if module.Assembly {
+			logger.Error("WARNING: module %s", module.Repository)
+			logger.Error("    in manifest %s", filename)
+			logger.Error("    is using the deprecated \"assembly\" field")
+			logger.Error("    it will not be included in any artifact!")
+		}
 	}
 
 	return manifest
