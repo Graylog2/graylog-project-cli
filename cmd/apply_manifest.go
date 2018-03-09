@@ -130,9 +130,9 @@ func applyManifestCommand(cmd *cobra.Command, args []string) {
 	pom.WriteTemplates(config, proj)
 
 	// Run tests via package to also test the jar creation
-	msg("Running tests and assembly:single")
+	msg("Running tests and build artifacts")
 	logger.ColorInfo(color.FgMagenta, "[%s]", utils.GetCwd())
-	applier.MavenRun("clean", "package", "assembly:single")
+	applier.MavenRun("clean", "package")
 
 	// Commit and push new versions and create and push tag
 	msg("Committing and pushing new versions and tags")
@@ -143,10 +143,10 @@ func applyManifestCommand(cmd *cobra.Command, args []string) {
 		})
 	})
 
-	// Run deploy & assembly
-	msg("Running deploy and assembly:single")
+	// Run deploy & build artifacts
+	msg("Running deploy and build artifacts")
 	logger.ColorInfo(color.FgMagenta, "[%s]", utils.GetCwd())
-	applier.MavenRunWithProfiles([]string{"release"}, "-DskipTests", "clean", "deploy", "assembly:single")
+	applier.MavenRunWithProfiles([]string{"release"}, "-DskipTests", "clean", "deploy")
 
 	// Set development version
 	msg("Set development versions")
