@@ -7,6 +7,7 @@ import (
 	"github.com/Graylog2/graylog-project-cli/utils"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -134,4 +135,32 @@ func ParseEffectivePom(moduleName string, modulePath string) MavenPom {
 	}
 
 	return ParsePom(file.Name())
+}
+
+// Return pom.xml files for the given module directory and all its submodules. If the given path is empty, the current
+// directory is assumed and the pom.xml file paths are relative.
+func FindPomFiles(path string) []string {
+	var files []string
+
+	pomFile := "pom.xml"
+
+	if path != "" {
+		pomFile = filepath.Join(path, pomFile)
+	}
+
+	if !utils.FileExists(pomFile) {
+		return files
+	}
+
+	// First add this pom.xml
+	files = append(files, pomFile)
+
+	// Then check if there are modules
+	for _, module := range ParsePom(pomFile).Modules {
+		modulePath := filepath.Join(path, module)
+
+		files = append(files, FindPomFiles(modulePath)...)
+	}
+
+	return files
 }

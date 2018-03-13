@@ -49,6 +49,21 @@ func (module *Module) HasSubmodules() bool {
 	return len(module.Submodules) > 0
 }
 
+// Returns a list of pom.xml files for this modules. If the relative parameter
+// is set to "true", the path to the pom.xml files will be relative to the
+// module root.
+func (module *Module) PomFiles(relative bool) []string {
+	var list []string
+	if relative {
+		utils.InDirectory(module.Path, func() {
+			list = pomparse.FindPomFiles("")
+		})
+	} else {
+		list = pomparse.FindPomFiles(module.Path)
+	}
+	return list
+}
+
 func (module *Module) RelativePath() string {
 	// The path in the "<module>" tag needs to be relative to make maven happy!
 	// Using the GetRelativePathEvalSymlinks function here to make sure the relative path is as short as possible.
