@@ -189,7 +189,7 @@ func applyManifestCommand(cmd *cobra.Command, args []string) {
 	msg("Committing new development version in web modules")
 	apply.ForEachModule(proj, true, func(module project.Module) {
 		applyManifestInDirectory(module.Path, func() {
-			applier.NpmVersionCommit(module, module.Revision)
+			applier.NpmVersionCommit(module, module.ApplyNewVersion())
 		})
 	})
 
