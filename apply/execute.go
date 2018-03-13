@@ -63,8 +63,11 @@ func (execute executeApplier) NpmVersionSet(module project.Module, version strin
 	versionRe := regexp.MustCompile(`^\d+\.\d+\.\d+-?.*?$`)
 	filename := "package.json"
 
+	if version == "" {
+		logger.Fatal("Couldn't set version for %s because the given version is empty", module.Path)
+	}
 	if !versionRe.MatchString(version) {
-		logger.Fatal("Invalid version: %s", version)
+		logger.Fatal("Couldn't set version for %s because the given version is invalid: \"%s\"", module.Path, version)
 	}
 
 	if module.Server {
