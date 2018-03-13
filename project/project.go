@@ -175,6 +175,9 @@ func New(config config.Config, manifestFiles []string, options ...projectOption)
 		moduleRepository := module.Repository
 		submodules := make([]Module, 0)
 
+		// Create apply data for this module and fill the blanks from the default apply data
+		moduleApply := newApplyFromTemplate(module, defaultApply)
+
 		if config.ForceHttpsRepos {
 			moduleRepository = utils.ConvertGithubGitToHTTPS(module.Repository)
 		}
@@ -183,6 +186,9 @@ func New(config config.Config, manifestFiles []string, options ...projectOption)
 			for _, submodule := range module.SubModules {
 				path := getModulePath(repositoryRoot, moduleName, submodule)
 				name := getMavenCoordinates(path).ArtifactId
+
+				// Create apply data for this submodule and fill the blanks from the parent module apply data
+				submoduleApply := newApplyFromTemplate(submodule, moduleApply)
 
 				if name == "" {
 					name = moduleName
@@ -195,6 +201,7 @@ func New(config config.Config, manifestFiles []string, options ...projectOption)
 					Revision:           module.Revision,
 					Assemblies:         submodule.Assemblies,
 					AssemblyAttachment: submodule.AssemblyAttachment,
+					apply:              submoduleApply,
 				})
 			}
 		}
@@ -205,15 +212,6 @@ func New(config config.Config, manifestFiles []string, options ...projectOption)
 		if name == "" {
 			name = moduleName
 		}
-
-		moduleApply := Apply{
-			FromRevision: module.Apply.FromRevision,
-			NewBranch:    module.Apply.NewBranch,
-			NewVersion:   module.Apply.NewVersion,
-		}
-
-		// Merge the module `apply` field with the default apply values.
-		mergo.Merge(&moduleApply, defaultApply)
 
 		newModule := Module{
 			Name:               name,
@@ -259,6 +257,21 @@ func New(config config.Config, manifestFiles []string, options ...projectOption)
 	}
 
 	return project
+}
+
+func newApplyFromTemplate(module manifest.ManifestModule, template Apply) Apply {
+	newApply := Apply{
+		FromRevision: module.Apply.FromRevision,
+		NewBranch:    module.Apply.NewBranch,
+		NewVersion:   module.Apply.NewVersion,
+	}
+
+	// Fill in missing Apply attributes from template
+	if err := mergo.Merge(&newApply, template); err != nil {
+		logger.Fatal("Couldn't merge apply state: src=%#v dst=%#v", template, newApply)
+	}
+
+	return newApply
 }
 
 func applyModuleOverride(c config.Config, modules []Module) []Module {
