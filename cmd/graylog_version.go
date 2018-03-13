@@ -53,7 +53,6 @@ func graylogVersionCommand(cmd *cobra.Command, args []string) {
 
 	applier := apply.NewExecuteApplier([]string{})
 
-	// Set version in all modules
 	msg("Setting version in all modules")
 	apply.ForEachModule(proj, false, func(module project.Module) {
 		applyManifestInDirectory(module.Path, func() {
@@ -62,6 +61,13 @@ func graylogVersionCommand(cmd *cobra.Command, args []string) {
 
 		// Update all versions after each change!
 		applyManifestUpdateVersions(msg, proj, applier)
+	})
+
+	msg("Setting version in all web modules")
+	apply.ForEachModule(proj, true, func(module project.Module) {
+		applyManifestInDirectory(module.Path, func() {
+			applier.NpmVersionSet(module, graylogVersion)
+		})
 	})
 
 	// Regenerate the graylog-project pom and assembly files to get the latest versions
