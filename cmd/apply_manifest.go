@@ -38,15 +38,18 @@ Example:
 
 var applyManifestExecute bool
 var applyManifestForce bool
+var applyManifestSkipMavenDeploy bool
 
 func init() {
 	RootCmd.AddCommand(applyManifestCmd)
 
 	applyManifestCmd.Flags().BoolVarP(&applyManifestExecute, "execute", "", false, "Actually apply the manifest!")
 	applyManifestCmd.Flags().BoolVarP(&applyManifestForce, "force", "f", false, "Ignore some sanity checks")
+	applyManifestCmd.Flags().BoolVarP(&applyManifestSkipMavenDeploy, "skip-maven-deploy", "", false, "Skip maven deployment")
 
 	viper.BindPFlag("apply-manifest.execute", applyManifestCmd.Flags().Lookup("execute"))
 	viper.BindPFlag("apply-manifest.force", applyManifestCmd.Flags().Lookup("force"))
+	viper.BindPFlag("apply-manifest.skip-deploy", applyManifestCmd.Flags().Lookup("skip-maven-deploy"))
 }
 
 func applyManifestInDirectory(path string, callback utils.DirectoryCallback) {
@@ -163,7 +166,12 @@ func applyManifestCommand(cmd *cobra.Command, args []string) {
 	// Run deploy & build artifacts
 	msg("Running deploy and build artifacts")
 	logger.ColorInfo(color.FgMagenta, "[%s]", utils.GetCwd())
-	applier.MavenRunWithProfiles([]string{"release"}, "-DskipTests", "clean", "deploy")
+	if applyManifestSkipMavenDeploy {
+		msg("Skipping maven deployment!")
+		applier.MavenRunWithProfiles([]string{"release"}, "-DskipTests", "clean", "package")
+	} else {
+		applier.MavenRunWithProfiles([]string{"release"}, "-DskipTests", "clean", "deploy")
+	}
 
 	// Set development version in all web modules
 	msg("Setting development version in all web modules")
