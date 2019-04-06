@@ -12,10 +12,10 @@ all: test build
 build: build-linux build-darwin
 
 build-linux:
-	GOOS=linux GOARCH=amd64 go build $(BUILD_OPTS) -o $(BIN_LINUX) main.go
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build $(BUILD_OPTS) -o $(BIN_LINUX) main.go
 
 build-darwin:
-	GOOS=darwin GOARCH=amd64 go build $(BUILD_OPTS) -o $(BIN_DARWIN) main.go
+	GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build $(BUILD_OPTS) -o $(BIN_DARWIN) main.go
 
 install: install-linux install-darwin
 
