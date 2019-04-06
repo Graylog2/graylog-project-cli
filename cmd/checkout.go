@@ -2,6 +2,7 @@ package cmd
 
 import (
 	c "github.com/Graylog2/graylog-project-cli/config"
+	"github.com/Graylog2/graylog-project-cli/hooks"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/Graylog2/graylog-project-cli/manifest"
 	"github.com/Graylog2/graylog-project-cli/pom"
@@ -46,12 +47,14 @@ func init() {
 	checkoutCmd.Flags().BoolP("force", "f", false, "Force checkout event though repository is unexpected")
 	checkoutCmd.Flags().StringP("auth-token", "T", "", "Auth token to access protected URLs")
 	checkoutCmd.Flags().StringSliceP("module-override", "O", []string{}, "Override manifest modules, see help for details")
+	checkoutCmd.Flags().BoolP("skip-hooks", "", false, "Do not execute hooks")
 
 	viper.BindPFlag("checkout.update-repos", checkoutCmd.Flags().Lookup("update-repos"))
 	viper.BindPFlag("checkout.shallow-clone", checkoutCmd.Flags().Lookup("shallow-clone"))
 	viper.BindPFlag("checkout.force", checkoutCmd.Flags().Lookup("force"))
 	viper.BindPFlag("checkout.auth-token", checkoutCmd.Flags().Lookup("auth-token"))
 	viper.BindPFlag("checkout.module-override", checkoutCmd.Flags().Lookup("module-override"))
+	viper.BindPFlag("checkout.skip-hooks", checkoutCmd.Flags().Lookup("skip-hooks"))
 
 	viper.BindEnv("checkout.auth-token", "GPC_AUTH_TOKEN")
 }
@@ -169,6 +172,13 @@ func checkoutCommand(cmd *cobra.Command, args []string) {
 	pom.WriteTemplates(config, project)
 
 	manifest.WriteState(cleanupManifestFiles(config.Checkout.ManifestFiles))
+
+	if !viper.GetBool("checkout.skip-hooks") {
+		if err := hooks.Run(cmd.Name(), false); err != nil {
+			logger.Error("Couldn't run hooks for %s: %s", cmd.Name(), err)
+			return
+		}
+	}
 
 	CheckForUpdate()
 }

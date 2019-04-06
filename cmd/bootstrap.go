@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/Graylog2/graylog-project-cli/git"
+	"github.com/Graylog2/graylog-project-cli/hooks"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/Graylog2/graylog-project-cli/utils"
 	"github.com/spf13/cobra"
@@ -15,6 +16,7 @@ var bootstrapShallowClone bool
 var bootstrapCheckoutPath string
 var bootstrapManifest string
 var bootstrapProjectBranch string
+var bootstrapSkipHooks bool
 
 // bootstrapCmd represents the bootstrap command
 var bootstrapCmd = &cobra.Command{
@@ -40,6 +42,7 @@ func init() {
 	bootstrapCmd.Flags().StringVarP(&bootstrapManifest, "manifest", "m", DefaultProjectManifest, "Manifest to checkout")
 	bootstrapCmd.Flags().StringVarP(&bootstrapProjectBranch, "project-branch", "B", "master", "graylog-project branch to check out")
 	bootstrapCmd.Flags().StringP("auth-token", "T", "", "Auth token to access protected URLs")
+	bootstrapCmd.Flags().BoolVarP(&bootstrapSkipHooks, "skip-hooks", "", false, "Do not execute hooks")
 
 	viper.BindPFlag("checkout.auth-token", bootstrapCmd.Flags().Lookup("auth-token"))
 	viper.BindEnv("checkout.auth-token", "GPC_AUTH_TOKEN")
@@ -83,5 +86,12 @@ func bootstrapCommand(cmd *cobra.Command, args []string) {
 	utils.InDirectory(bootstrapCheckoutPath, func() {
 		git.Git("checkout", bootstrapProjectBranch)
 		checkoutCommand(cmd, []string{bootstrapManifest})
+
+		if !bootstrapSkipHooks {
+			if hooks.Run(cmd.Name(), false) != nil {
+				logger.Error("Couldn't run hooks for %s: %s", cmd.Name(), err)
+			}
+		}
 	})
+
 }
