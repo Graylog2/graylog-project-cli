@@ -2,7 +2,7 @@ package gh
 
 import (
 	"context"
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v24/github"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
 	"strings"
@@ -29,8 +29,8 @@ func (c Client) EnableBranchProtection(owner string, repo string, branch string)
 		RequiredStatusChecks: nil,
 		RequiredPullRequestReviews: &github.PullRequestReviewsEnforcementRequest{
 			DismissalRestrictionsRequest: &github.DismissalRestrictionsRequest{
-				Users: []string{},
-				Teams: []string{},
+				Users: &[]string{},
+				Teams: &[]string{},
 			},
 			DismissStaleReviews:     false,
 			RequireCodeOwnerReviews: false,
