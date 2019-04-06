@@ -84,6 +84,4 @@ func bootstrapCommand(cmd *cobra.Command, args []string) {
 		git.Git("checkout", bootstrapProjectBranch)
 		checkoutCommand(cmd, []string{bootstrapManifest})
 	})
-
-	CheckForUpdate()
 }
