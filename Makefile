@@ -26,13 +26,13 @@ install-linux: build-linux
 	install -m 555 $(BIN_LINUX) $(HOME)/bin/$(BIN)
 
 fmt:
-	gofmt -l -w `find . -name "*.go" | fgrep -v /vendor`
+	go fmt ./...
 
 vet:
-	go tool vet -all -shadow `find . -name "*.go" | fgrep -v /vendor`
+	go vet ./...
 
 test:
-	@go test $$(go list ./... | grep -v /vendor/)
+	go test ./...
 
 clean:
 	rm -f $(BIN_LINUX) $(BIN_DARWIN)
