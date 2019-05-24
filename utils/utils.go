@@ -7,6 +7,7 @@ import (
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -76,14 +77,12 @@ func GetAbsolutePath(path string) string {
 }
 
 func NameFromRepository(repository string) string {
-	if strings.HasPrefix(repository, "https://") {
-		return strings.Replace(strings.Split(strings.TrimPrefix(repository, "https://"), "/")[2], ".git", "", 1)
-	} else if strings.HasPrefix(repository, "git@") {
-		return strings.Replace(strings.Split(repository, "/")[1], ".git", "", 1)
-	} else {
+	index := strings.Index(repository, "/")
+	if index == -1 {
 		logger.Fatal("Unable to get name from repository: %s", repository)
 	}
-	return ""
+
+	return strings.Replace(path.Base(repository[index:]), ".git", "", 1)
 }
 
 func ConvertGithubGitToHTTPS(repository string) string {
