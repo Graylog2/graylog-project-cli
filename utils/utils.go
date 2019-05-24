@@ -76,14 +76,25 @@ func GetAbsolutePath(path string) string {
 }
 
 func NameFromRepository(repository string) string {
-	if strings.HasPrefix(repository, "https://") {
-		return strings.Replace(strings.Split(strings.TrimPrefix(repository, "https://"), "/")[2], ".git", "", 1)
-	} else if strings.HasPrefix(repository, "git@") {
-		return strings.Replace(strings.Split(repository, "/")[1], ".git", "", 1)
-	} else {
+	length := len(repository)
+	if length < 2 {
 		logger.Fatal("Unable to get name from repository: %s", repository)
 	}
-	return ""
+
+	index := strings.LastIndex(repository[:length-1], "/")
+	if index == -1 {
+		logger.Fatal("Unable to get name from repository: %s", repository)
+	}
+
+	if repository[length-1] == '/' {
+		length -= 1
+	}
+
+	if index == length {
+		logger.Fatal("Unable to get name from repository: %s", repository)
+	}
+
+	return strings.Replace(repository[index+1:length], ".git", "", 1)
 }
 
 func ConvertGithubGitToHTTPS(repository string) string {

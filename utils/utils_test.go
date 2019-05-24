@@ -8,6 +8,15 @@ import (
 const sshRepo = "git@github.com:Graylog2/graylog2-server.git"
 const httpsRepo = "https://github.com/Graylog2/graylog2-server.git"
 
+var repos = [...]string {
+	"git@github.com:Graylog2/graylog2-server.git",
+	"https://github.com/Graylog2/graylog2-server.git",
+	"user@example.org:External/Graylog2/graylog2-server.git",
+	"https://example.org/External/Graylog2/graylog2-server.git",
+	"file:///home/user/Graylog2/graylog2-server",
+	"git@github.com:Graylog2/graylog2-server/",
+}
+
 func TestNameFromRepository(t *testing.T) {
 	expected := "graylog2-server"
 
@@ -19,6 +28,14 @@ func TestNameFromRepository(t *testing.T) {
 	httpsRepoName := utils.NameFromRepository(httpsRepo)
 	if httpsRepoName != expected {
 		t.Errorf("Repository %s does not resolve to name %s - result: `%s`", httpsRepo, expected, httpsRepoName)
+	}
+
+
+	for _, repo := range repos {
+		repoName := utils.NameFromRepository(repo)
+		if repoName != expected {
+			t.Errorf("Repository %s does not resolve to name %s - result: `%s`", repo, expected, repoName)
+		}
 	}
 }
 
