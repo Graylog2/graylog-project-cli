@@ -15,6 +15,9 @@ var repos = [...]string {
 	"https://example.org/External/Graylog2/graylog2-server.git",
 	"file:///home/user/Graylog2/graylog2-server",
 	"git@github.com:Graylog2/graylog2-server/",
+	"user@example.org:graylog2-server",
+	"user@example.org:graylog2-server/",
+	"../../graylog2-server",
 }
 
 func TestNameFromRepository(t *testing.T) {

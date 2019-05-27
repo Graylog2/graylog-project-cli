@@ -7,6 +7,7 @@ import (
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -76,25 +77,33 @@ func GetAbsolutePath(path string) string {
 }
 
 func NameFromRepository(repository string) string {
-	length := len(repository)
-	if length < 2 {
-		logger.Fatal("Unable to get name from repository: %s", repository)
+	name := repository
+
+	scheme := regexp.MustCompile("^[a-zA-Z]+://")
+	needle := scheme.FindStringIndex(name)
+	if needle != nil {
+		name = name[needle[1]:]
+	}
+	user := regexp.MustCompile("^[a-zA-Z0-9_.-]+@")
+	needle = user.FindStringIndex(name)
+	if needle != nil {
+		name = name[needle[1]:]
 	}
 
-	index := strings.LastIndex(repository[:length-1], "/")
-	if index == -1 {
-		logger.Fatal("Unable to get name from repository: %s", repository)
+	host := regexp.MustCompile("^[a-zA-Z0-9_.-]+[:/]")
+	needle = host.FindStringIndex(name)
+	if needle != nil {
+		name = name[needle[1]:]
 	}
 
-	if repository[length-1] == '/' {
-		length -= 1
+	name = strings.Replace(path.Base(name), ".git", "", 1)
+
+	if name == "." || name == "/" || name == "" {
+		 logger.Fatal("Unable to get name from repository: %s", repository)
 	}
 
-	if index == length {
-		logger.Fatal("Unable to get name from repository: %s", repository)
-	}
+	return name
 
-	return strings.Replace(repository[index+1:length], ".git", "", 1)
 }
 
 func ConvertGithubGitToHTTPS(repository string) string {
