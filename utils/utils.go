@@ -84,7 +84,7 @@ func NameFromRepository(repository string) string {
 	if needle != nil {
 		name = name[needle[1]:]
 	}
-	user := regexp.MustCompile("^[a-zA-Z0-9_.-]+@")
+	user := regexp.MustCompile("^[a-zA-Z0-9_.-:]+@")
 	needle = user.FindStringIndex(name)
 	if needle != nil {
 		name = name[needle[1]:]
