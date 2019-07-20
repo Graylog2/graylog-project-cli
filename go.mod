@@ -5,8 +5,8 @@ go 1.12
 require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/fatih/color v1.7.0
-	github.com/golang/protobuf v1.3.1 // indirect
-	github.com/google/go-github/v24 v24.0.1
+	github.com/golang/protobuf v1.3.2 // indirect
+	github.com/google/go-github/v27 v27.0.0
 	github.com/hashicorp/go-version v1.1.0
 	github.com/imdario/mergo v0.3.7
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
@@ -20,11 +20,11 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/viper v1.3.2
 	github.com/stretchr/testify v1.3.0 // indirect
-	golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3 // indirect
-	golang.org/x/oauth2 v0.0.0-20190402181905-9f3314589c9a
-	golang.org/x/sys v0.0.0-20190405154228-4b34438f7a67 // indirect
-	golang.org/x/text v0.3.1-0.20180807135948-17ff2d5776d2 // indirect
-	google.golang.org/appengine v1.5.0 // indirect
+	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
+	golang.org/x/net v0.0.0-20190628185345-da137c7871d7 // indirect
+	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
+	golang.org/x/sys v0.0.0-20190712062909-fae7ac547cb7 // indirect
+	google.golang.org/appengine v1.6.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 )
 
