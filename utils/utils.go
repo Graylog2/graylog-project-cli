@@ -99,7 +99,7 @@ func NameFromRepository(repository string) string {
 	name = strings.Replace(path.Base(name), ".git", "", 1)
 
 	if name == "." || name == "/" || name == "" {
-		 logger.Fatal("Unable to get name from repository: %s", repository)
+		logger.Fatal("Unable to get name from repository: %s", repository)
 	}
 
 	return name
