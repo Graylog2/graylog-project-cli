@@ -27,12 +27,12 @@ func init() {
 	RootCmd.AddCommand(applyManifestGenerateCmd)
 }
 
-func applyManifestGenerateAskModule(asker *ask.Asker) (string, manifest.ManifestApply) {
+func applyManifestGenerateAskModule(asker *ask.Asker, module manifest.ManifestModule) (string, manifest.ManifestApply) {
 	newApply := manifest.ManifestApply{}
 
 	newVersion := asker.Ask("Please enter the new version:", "", versionRegex)
 
-	newApply.FromRevision = asker.Ask("From which revision (branch/tag) should this release be created?", "master", `^\S+$`)
+	newApply.FromRevision = asker.Ask("From which revision (branch/tag) should this release be created?", module.Revision, `^\S+$`)
 	if asker.AskYesNo("Should we create a new branch?", false) {
 		newApply.NewBranch = asker.Ask("New branch name:", "", `^\S+$`)
 	}
@@ -51,7 +51,15 @@ func applyManifestGenerateCommand(cmd *cobra.Command, args []string) {
 	newManifest := manifest.ReadManifest(args[0:])
 	asker := ask.NewAsker(os.Stdin)
 
-	newVersion, newApply := applyManifestGenerateAskModule(&asker)
+	var serverModule manifest.ManifestModule
+	for _, m := range newManifest.Modules {
+		if !m.Server {
+			continue
+		}
+		serverModule = m
+	}
+
+	newVersion, newApply := applyManifestGenerateAskModule(&asker, serverModule)
 
 	newManifest.DefaultApply = newApply
 
@@ -66,7 +74,7 @@ func applyManifestGenerateCommand(cmd *cobra.Command, args []string) {
 		if useDefaults || asker.AskYesNo("Do you want to use the defaults for module "+module.Repository+"?", true) {
 			newModuleVersion = newVersion
 		} else {
-			newModuleVersion, newModuleApply = applyManifestGenerateAskModule(&asker)
+			newModuleVersion, newModuleApply = applyManifestGenerateAskModule(&asker, module)
 		}
 
 		module.Revision = newModuleVersion
