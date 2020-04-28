@@ -7,6 +7,8 @@ require (
 	github.com/fatih/color v1.7.0
 	github.com/golang/protobuf v1.3.2 // indirect
 	github.com/google/go-github/v27 v27.0.1
+	github.com/google/renameio v0.1.0
+	github.com/google/uuid v1.1.1
 	github.com/hashicorp/go-version v1.2.0
 	github.com/imdario/mergo v0.3.7
 	github.com/magiconair/properties v1.8.1 // indirect
