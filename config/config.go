@@ -34,7 +34,7 @@ type Config struct {
 }
 
 // Returns true if running a CI environment. Detected environments: Jenkins, TravisCI
-func (c Config) IsCI() bool {
+func IsCI() bool {
 	return os.Getenv("CI") != "" || os.Getenv("TRAVIS") != "" || os.Getenv("BUILD_ID") != ""
 }
 

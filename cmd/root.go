@@ -65,6 +65,12 @@ Example usage:
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		logger.SetDebug(viper.GetBool("debug"))
 		logger.SetPrefix(viper.GetString("logger-prefix"))
+
+		// We use a special repository root if running in a CI environment and the default hasn't been changed.
+		if config.IsCI() && viper.GetString("repository-root") == config.DefaultRepositoryRoot {
+			logger.Info("Running in a CI environment, using repository root: %s", config.CIRepositoryRoot)
+			viper.Set("repository-root", config.CIRepositoryRoot)
+		}
 	},
 }
 
