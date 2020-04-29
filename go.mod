@@ -5,6 +5,7 @@ go 1.12
 require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/fatih/color v1.7.0
+	github.com/go-cmd/cmd v1.2.0
 	github.com/golang/protobuf v1.3.2 // indirect
 	github.com/google/go-github/v27 v27.0.1
 	github.com/google/renameio v0.1.0
