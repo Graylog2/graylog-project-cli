@@ -6,11 +6,20 @@ import (
 	"strings"
 )
 
+const (
+	DevCommand         = "dev"
+	DevServicesCommand = "dev:services"
+	DevServerCommand   = "dev:server"
+	ReleaseCommand     = "release"
+	SnapshotCommand    = "snapshot"
+)
+
 type Config struct {
 	Command       string
 	Graylog       GraylogConfig
 	Elasticsearch ElasticsearchConfig
 	MongoDB       MongoDBConfig
+	RunnerRoot    string
 }
 
 type GraylogConfig struct {
@@ -26,7 +35,28 @@ type MongoDBConfig struct {
 }
 
 func DispatchCommand(config Config) error {
-	return nil
+	switch config.Command {
+	case DevCommand:
+		return devCommand(config)
+	case DevServerCommand:
+		return devServerCommand(config)
+	case DevServicesCommand:
+		return devServicesCommand(config)
+	default:
+		return errors.Errorf("%s command not supported yet", config.Command)
+	}
+}
+
+func devCommand(config Config) error {
+	return execRunnerScript(config, []string{})
+}
+
+func devServerCommand(config Config) error {
+	return execRunnerScript(config, []string{})
+}
+
+func devServicesCommand(config Config) error {
+	return execRunnerScript(config, []string{})
 }
 
 func CheckSetup() error {

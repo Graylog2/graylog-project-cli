@@ -1,29 +1,29 @@
 package cmd
 
 import (
+	"github.com/Graylog2/graylog-project-cli/git"
 	"github.com/Graylog2/graylog-project-cli/runner"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"path/filepath"
 )
 
 func init() {
 	runCmd := &cobra.Command{
 		Use:   "run",
 		Short: "Run Graylog server, MongoDB , Elasticsearch and other services",
-		Long: `This command offers several sub-commands to start Graylog servers, MongoDB, Elasticsearch and other services.
-
-Examples:
-  # Always change into the graylog-project directory first
+		Long:  "This command offers several sub-commands to start Graylog servers, MongoDB, Elasticsearch and other services.",
+		Example: `  # Always change into the graylog-project directory first
   cd /path/to/graylog-project
 
   # Start a Graylog DEV server including MongoDB and Elasticsearch
   graylog-project run dev
 
   # Start MongoDB and Elasticsearch services
-  graylog-project run services
+  graylog-project run dev:services
 
   # Start Graylog DEV server without MongoDB and Elasticsearch
-  graylog-project run dev-server
+  graylog-project run dev:server
 `,
 		PersistentPreRunE: persistentPreRunCommand,
 	}
@@ -34,26 +34,44 @@ Examples:
 	runCmd.PersistentFlags().IntP("mongodb-port", "m", 27027, "MongoDB port") // TODO: Use 27017 as default
 
 	runDevCmd := &cobra.Command{
-		Use:   "dev",
+		Use:   runner.DevCommand,
 		Short: "Starts a Graylog DEV server + MongoDB and Elasticsearch",
 		RunE:  runCommand,
 	}
 
 	runDevServerCmd := &cobra.Command{
-		Use:   "dev-server",
+		Use:   runner.DevServerCommand,
 		Short: "Starts a Graylog DEV server",
 		RunE:  runCommand,
 	}
 
-	runServicesCmd := &cobra.Command{
-		Use:   "services",
-		Short: "Starts services like MongoDB and Elasticsearch",
+	runDevServicesCmd := &cobra.Command{
+		Use:   runner.DevServicesCommand,
+		Short: "Starts MongoDB and Elasticsearch",
 		RunE:  runCommand,
+	}
+
+	// graylog-project run release 3.2.5
+	runReleaseCmd := &cobra.Command{
+		Use:    runner.ReleaseCommand,
+		Hidden: true, // Not implemented yet
+		Short:  "Starts a Graylog release build + MongoDB and Elasticsearch",
+		RunE:   runCommand,
+	}
+
+	// graylog-project run snapshot latest
+	runSnapshotCmd := &cobra.Command{
+		Use:    runner.SnapshotCommand,
+		Hidden: true, // Not implemented yet
+		Short:  "Starts a Graylog snapshot build + MongoDB and Elasticsearch",
+		RunE:   runCommand,
 	}
 
 	runCmd.AddCommand(runDevCmd)
 	runCmd.AddCommand(runDevServerCmd)
-	runCmd.AddCommand(runServicesCmd)
+	runCmd.AddCommand(runDevServicesCmd)
+	runCmd.AddCommand(runReleaseCmd)
+	runCmd.AddCommand(runSnapshotCmd)
 
 	RootCmd.AddCommand(runCmd)
 
@@ -67,8 +85,14 @@ func persistentPreRunCommand(cmd *cobra.Command, args []string) error {
 }
 
 func runCommand(cmd *cobra.Command, args []string) error {
+	path, err := git.ToplevelPath()
+	if err != nil {
+		return err
+	}
+
 	return runner.DispatchCommand(runner.Config{
-		Command: cmd.Name(),
+		Command:    cmd.Name(),
+		RunnerRoot: filepath.Join(path, "runner"),
 		Graylog: runner.GraylogConfig{
 			HTTPPort: viper.GetInt("run.graylog.http-port"),
 		},

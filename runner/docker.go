@@ -2,48 +2,38 @@ package runner
 
 import (
 	"fmt"
-	"github.com/Graylog2/graylog-project-cli/logger"
-	"github.com/go-cmd/cmd"
 	"github.com/pkg/errors"
 	"os"
+	"os/exec"
 	"os/signal"
+	"strings"
 	"syscall"
 )
 
-func dockerCompose(workDir string, subCommand string, args ...string) error {
-	// Depending on the command, this should compose (ha!) different docker-compose.yml files
-	// See: https://docs.docker.com/compose/extends/
-	//
-	// Example: docker-compose -f docker-compose.services.yml -f docker-compose.dev-server.yml
-	//          docker-compose -f docker-compose.services.yml
-	// Use github.com/go-cmd/cmd here instead of os/exec to ensure proper signal handling
+// Exec a script command. This will install a SIGINT signal handler hat swallows the signal so we wait
+// for the script process to finish. (which also gets a SIGINT because it's running in the same process group)
+func execRunnerScript(config Config, env []string) error {
+	// Command "dev:server" becomes "bin/dev-server.sh"
+	scriptName := fmt.Sprintf("./bin/%s.sh", strings.ReplaceAll(config.Command, ":", "-"))
+	command := exec.Command(scriptName)
+	command.Dir = config.RunnerRoot
+	command.Env = append(os.Environ(), env...)
+	command.Stdin = os.Stdin
+	command.Stdout = os.Stdout
+	command.Stderr = os.Stderr
 
-	command := cmd.NewCmdOptions(
-		cmd.Options{Buffered: false, Streaming: true},
-		"docker-compose",
-		append([]string{subCommand}, args...)...,
-	)
-	command.Dir = workDir
+	go monitorCommandExecSignals()
 
-	// Print STDOUT and STDERR lines streaming from Cmd
-	doneChan := make(chan struct{})
-
-	go monitorSignals(command)
-	go handleProcessOutput(doneChan, command)
-
-	finalStatus := <-command.Start() // Wait for command to be finished
-	<-doneChan                       // Wait for output printer to be finished
-
-	if finalStatus.Error != nil {
-		return errors.Wrapf(finalStatus.Error, "error running command: %v", finalStatus)
+	if err := command.Run(); err != nil {
+		return errors.Wrapf(err, "couldn't run script %s", strings.Join(command.Args, " "))
 	}
 
 	return nil
 }
 
-func monitorSignals(command *cmd.Cmd) {
+func monitorCommandExecSignals() {
 	handler := make(chan os.Signal, 1)
-	signal.Notify(handler, syscall.SIGALRM, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)
+	signal.Notify(handler, syscall.SIGINT)
 
 	for sig := range handler {
 		switch sig {
@@ -51,31 +41,8 @@ func monitorSignals(command *cmd.Cmd) {
 			fmt.Println(" | ctrl-c detected")
 			fallthrough
 		default:
-			if err := command.Stop(); err != nil {
-				logger.Error("error stopping command: %v", err)
-			}
-		}
-	}
-}
-
-func handleProcessOutput(doneChan chan struct{}, command *cmd.Cmd) {
-	defer close(doneChan)
-	// Done when both channels have been closed
-	// https://dave.cheney.net/2013/04/30/curious-channels
-	for command.Stdout != nil || command.Stderr != nil {
-		select {
-		case line, open := <-command.Stdout:
-			if !open {
-				command.Stdout = nil
-				continue
-			}
-			fmt.Println(line)
-		case line, open := <-command.Stderr:
-			if !open {
-				command.Stderr = nil
-				continue
-			}
-			_, _ = fmt.Fprintln(os.Stderr, line)
+			// We assume that this is function is only used to monitor signals when running a blocking exec call.
+			// So we don't have to do anything here and just continue the program flow.
 		}
 	}
 }

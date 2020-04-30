@@ -73,6 +73,14 @@ func HasLocalBranch(branch string) bool {
 	return true
 }
 
+func ToplevelPath() (string, error) {
+	path, err := GitValueE("rev-parse", "--show-toplevel")
+	if err != nil {
+		return "", err
+	}
+	return path, nil
+}
+
 func GitErrOk(commands ...string) {
 	var stderr bytes.Buffer
 
