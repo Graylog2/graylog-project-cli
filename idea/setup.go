@@ -18,6 +18,9 @@ var runConfigurationDir = filepath.Join(".idea", "runConfigurations")
 var runConfigurations = map[string]string{
 	"Graylog_Server.xml": `<component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Graylog Server" type="Application" factoryName="Application" singleton="true">
+    <envs>
+      <env name="DEVELOPMENT" value="true" />
+    </envs>
     <option name="MAIN_CLASS_NAME" value="org.graylog2.bootstrap.Main" />
     <module name="runner" />
     <option name="PROGRAM_PARAMETERS" value="server -f graylog.conf -np --local" />
