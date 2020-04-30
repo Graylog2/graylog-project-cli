@@ -6,11 +6,8 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/fatih/color v1.7.0
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
-	github.com/go-cmd/cmd v1.2.0
 	github.com/golang/protobuf v1.3.2 // indirect
 	github.com/google/go-github/v27 v27.0.1
-	github.com/google/renameio v0.1.0
-	github.com/google/uuid v1.1.1
 	github.com/hashicorp/go-version v1.2.0
 	github.com/imdario/mergo v0.3.7
 	github.com/mattn/go-colorable v0.1.2 // indirect
