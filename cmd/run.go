@@ -28,13 +28,22 @@ func init() {
 
   # Start a Graylog DEV server including MongoDB and Elasticsearch
   graylog-project run dev
+  graylog-project run dev --web    # Include production web build
+  graylog-project run dev --clean  # Run clean server build
 
   # Start MongoDB and Elasticsearch services
   graylog-project run dev:services
 
   # Start Graylog DEV server without MongoDB and Elasticsearch
   graylog-project run dev:server
-`,
+  graylog-project run dev:server --web    # Include production web build
+  graylog-project run dev:server --clean  # Run clean server build
+
+  # Start Graylog DEV web server
+  graylog-project run dev:web
+
+  # Cleanup all containers
+  graylog-project run dev:cleanup  # Use -V to remove all volumes as well`,
 		PersistentPreRunE: persistentPreRunCommand,
 	}
 
@@ -55,7 +64,7 @@ func init() {
 
 	runDevServerCmd := &cobra.Command{
 		Use:   runner.DevServerCommand,
-		Short: "Starts a Graylog DEV server",
+		Short: "Starts a Graylog DEV server (without MongoDB and Elasticsearch)",
 		RunE:  runCommand,
 	}
 
