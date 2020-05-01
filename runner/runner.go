@@ -10,6 +10,7 @@ const (
 	DevCommand         = "dev"
 	DevServicesCommand = "dev:services"
 	DevServerCommand   = "dev:server"
+	DevWebCommand      = "dev:web"
 	ReleaseCommand     = "release"
 	SnapshotCommand    = "snapshot"
 )
@@ -24,6 +25,7 @@ type Config struct {
 
 type GraylogConfig struct {
 	HTTPPort int
+	WebPort  int
 }
 
 type ElasticsearchConfig struct {
@@ -40,6 +42,8 @@ func DispatchCommand(config Config) error {
 		return devCommand(config)
 	case DevServerCommand:
 		return devServerCommand(config)
+	case DevWebCommand:
+		return devWebCommand(config)
 	case DevServicesCommand:
 		return devServicesCommand(config)
 	default:
@@ -52,6 +56,10 @@ func devCommand(config Config) error {
 }
 
 func devServerCommand(config Config) error {
+	return execRunnerScript(config, []string{})
+}
+
+func devWebCommand(config Config) error {
 	return execRunnerScript(config, []string{})
 }
 

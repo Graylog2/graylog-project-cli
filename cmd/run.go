@@ -4,8 +4,14 @@ import (
 	"github.com/Graylog2/graylog-project-cli/git"
 	"github.com/Graylog2/graylog-project-cli/runner"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"path/filepath"
+)
+
+var (
+	runApiPort           int
+	runWebPort           int
+	runElasticsearchPort int
+	runMongoDBPort       int
 )
 
 func init() {
@@ -29,9 +35,10 @@ func init() {
 	}
 
 	// Flags for all sub-commands
-	runCmd.PersistentFlags().IntP("http-port", "g", 9000, "Graylog HTTP port")
-	runCmd.PersistentFlags().IntP("es-port", "e", 9220, "Elasticsearch port") // TODO: Use 9200 as default
-	runCmd.PersistentFlags().IntP("mongodb-port", "m", 27027, "MongoDB port") // TODO: Use 27017 as default
+	runCmd.PersistentFlags().IntVarP(&runApiPort, "api-port", "g", 9000, "Graylog HTTP API port")
+	runCmd.PersistentFlags().IntVarP(&runWebPort, "web-port", "w", 9000, "Graylog HTTP web port")
+	runCmd.PersistentFlags().IntVarP(&runElasticsearchPort, "es-port", "e", 9220, "Elasticsearch port") // TODO: Use 9200 as default
+	runCmd.PersistentFlags().IntVarP(&runMongoDBPort, "mongodb-port", "m", 27027, "MongoDB port")       // TODO: Use 27017 as default
 
 	runDevCmd := &cobra.Command{
 		Use:   runner.DevCommand,
@@ -42,6 +49,12 @@ func init() {
 	runDevServerCmd := &cobra.Command{
 		Use:   runner.DevServerCommand,
 		Short: "Starts a Graylog DEV server",
+		RunE:  runCommand,
+	}
+
+	runDevWebCmd := &cobra.Command{
+		Use:   runner.DevWebCommand,
+		Short: "Starts a Graylog Web DEV server",
 		RunE:  runCommand,
 	}
 
@@ -69,15 +82,12 @@ func init() {
 
 	runCmd.AddCommand(runDevCmd)
 	runCmd.AddCommand(runDevServerCmd)
+	runCmd.AddCommand(runDevWebCmd)
 	runCmd.AddCommand(runDevServicesCmd)
 	runCmd.AddCommand(runReleaseCmd)
 	runCmd.AddCommand(runSnapshotCmd)
 
 	RootCmd.AddCommand(runCmd)
-
-	viper.BindPFlag("run.graylog.http-port", runCmd.PersistentFlags().Lookup("http-port"))
-	viper.BindPFlag("run.elasticsearch.port", runCmd.PersistentFlags().Lookup("es-port"))
-	viper.BindPFlag("run.mongodb.port", runCmd.PersistentFlags().Lookup("mongodb-port"))
 }
 
 func persistentPreRunCommand(cmd *cobra.Command, args []string) error {
@@ -94,13 +104,14 @@ func runCommand(cmd *cobra.Command, args []string) error {
 		Command:    cmd.Name(),
 		RunnerRoot: filepath.Join(path, "runner"),
 		Graylog: runner.GraylogConfig{
-			HTTPPort: viper.GetInt("run.graylog.http-port"),
+			HTTPPort: runApiPort,
+			WebPort:  runWebPort,
 		},
 		MongoDB: runner.MongoDBConfig{
-			Port: viper.GetInt("run.mongodb.port"),
+			Port: runMongoDBPort,
 		},
 		Elasticsearch: runner.ElasticsearchConfig{
-			Port: viper.GetInt("run.elasticsearch.port"),
+			Port: runElasticsearchPort,
 		},
 	})
 }
