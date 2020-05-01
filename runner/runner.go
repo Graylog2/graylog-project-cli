@@ -1,70 +1,95 @@
 package runner
 
 import (
+	"fmt"
 	"github.com/pkg/errors"
 	"os/exec"
 	"strings"
 )
 
 const (
+	DevCleanupCommand  = "dev:cleanup"
 	DevCommand         = "dev"
 	DevServicesCommand = "dev:services"
 	DevServerCommand   = "dev:server"
 	DevWebCommand      = "dev:web"
 	ReleaseCommand     = "release"
 	SnapshotCommand    = "snapshot"
+
+	EnvDockerComposeBuildImages    = "DOCKER_COMPOSE_BUILD_IMAGES"
+	EnvDockerComposeCleanupVolumes = "DOCKER_COMPOSE_CLEANUP_VOLUMES"
+	EnvGraylogWebHTTPPort          = "GRAYLOG_WEB_HTTP_PORT"
+	EnvGraylogAPIHTTPPort          = "GRAYLOG_API_HTTP_PORT"
+	EnvGraylogBuildSkipWeb         = "GRAYLOG_BUILD_SKIP_WEB"
+	EnvGraylogBuildClean           = "GRAYLOG_BUILD_CLEAN"
+	EnvMongoDBPort                 = "MONGODB_PORT"
+	EnvElasticsearchPort           = "ELASTICSEARCH_PORT"
 )
 
 type Config struct {
-	Command       string
-	Graylog       GraylogConfig
-	Elasticsearch ElasticsearchConfig
-	MongoDB       MongoDBConfig
-	RunnerRoot    string
+	Command        string
+	Graylog        GraylogConfig
+	Elasticsearch  ElasticsearchConfig
+	MongoDB        MongoDBConfig
+	RunnerRoot     string
+	BuildImages    bool
+	CleanupVolumes bool
 }
 
 type GraylogConfig struct {
-	HTTPPort int
-	WebPort  int
+	APIPort    string
+	WebPort    string
+	BuildClean bool
+	BuildWeb   bool
 }
 
 type ElasticsearchConfig struct {
-	Port int
+	Port string
 }
 
 type MongoDBConfig struct {
-	Port int
+	Port string
 }
 
 func DispatchCommand(config Config) error {
 	switch config.Command {
+	case DevCleanupCommand:
+		fallthrough
 	case DevCommand:
-		return devCommand(config)
+		fallthrough
 	case DevServerCommand:
-		return devServerCommand(config)
+		fallthrough
 	case DevWebCommand:
-		return devWebCommand(config)
+		fallthrough
 	case DevServicesCommand:
-		return devServicesCommand(config)
+		return execRunnerScript(config, getEnv(config))
 	default:
 		return errors.Errorf("%s command not supported yet", config.Command)
 	}
 }
 
-func devCommand(config Config) error {
-	return execRunnerScript(config, []string{})
-}
+func getEnv(config Config) []string {
+	var env []string
 
-func devServerCommand(config Config) error {
-	return execRunnerScript(config, []string{})
-}
+	if config.BuildImages {
+		env = append(env, fmt.Sprintf("%s=%s", EnvDockerComposeBuildImages, "true"))
+	}
+	if config.Graylog.BuildClean {
+		env = append(env, fmt.Sprintf("%s=%s", EnvGraylogBuildClean, "true"))
+	}
+	if config.Graylog.BuildWeb {
+		env = append(env, fmt.Sprintf("%s=%s", EnvGraylogBuildSkipWeb, "false"))
+	}
+	if config.CleanupVolumes {
+		env = append(env, fmt.Sprintf("%s=%s", EnvDockerComposeCleanupVolumes, "true"))
+	}
 
-func devWebCommand(config Config) error {
-	return execRunnerScript(config, []string{})
-}
+	env = append(env, fmt.Sprintf("%s=%s", EnvGraylogAPIHTTPPort, config.Graylog.APIPort))
+	env = append(env, fmt.Sprintf("%s=%s", EnvGraylogWebHTTPPort, config.Graylog.WebPort))
+	env = append(env, fmt.Sprintf("%s=%s", EnvMongoDBPort, config.MongoDB.Port))
+	env = append(env, fmt.Sprintf("%s=%s", EnvElasticsearchPort, config.Elasticsearch.Port))
 
-func devServicesCommand(config Config) error {
-	return execRunnerScript(config, []string{})
+	return env
 }
 
 func CheckSetup() error {

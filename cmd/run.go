@@ -8,10 +8,14 @@ import (
 )
 
 var (
-	runApiPort           int
-	runWebPort           int
-	runElasticsearchPort int
-	runMongoDBPort       int
+	runApiPort           string
+	runWebPort           string
+	runElasticsearchPort string
+	runMongoDBPort       string
+	runCleanupVolumes    bool
+	runBuildImages       bool
+	runBuildClean        bool
+	runBuildWeb          bool
 )
 
 func init() {
@@ -35,10 +39,13 @@ func init() {
 	}
 
 	// Flags for all sub-commands
-	runCmd.PersistentFlags().IntVarP(&runApiPort, "api-port", "g", 9000, "Graylog HTTP API port")
-	runCmd.PersistentFlags().IntVarP(&runWebPort, "web-port", "w", 9000, "Graylog HTTP web port")
-	runCmd.PersistentFlags().IntVarP(&runElasticsearchPort, "es-port", "e", 9220, "Elasticsearch port") // TODO: Use 9200 as default
-	runCmd.PersistentFlags().IntVarP(&runMongoDBPort, "mongodb-port", "m", 27027, "MongoDB port")       // TODO: Use 27017 as default
+	runCmd.PersistentFlags().StringVarP(&runApiPort, "api-port", "g", "9000", "Graylog HTTP API port")
+	runCmd.PersistentFlags().StringVarP(&runWebPort, "web-port", "w", "8080", "Graylog HTTP web port")
+	runCmd.PersistentFlags().StringVarP(&runElasticsearchPort, "es-port", "e", "9200", "Elasticsearch port")
+	runCmd.PersistentFlags().StringVarP(&runMongoDBPort, "mongodb-port", "m", "27017", "MongoDB port")
+	runCmd.PersistentFlags().BoolVarP(&runBuildImages, "build-images", "B", false, "Rebuild Docker images")
+	runCmd.PersistentFlags().BoolVar(&runBuildClean, "clean", false, "Run clean server build")
+	runCmd.PersistentFlags().BoolVar(&runBuildWeb, "web", false, "Run server build including the web interface")
 
 	runDevCmd := &cobra.Command{
 		Use:   runner.DevCommand,
@@ -64,6 +71,13 @@ func init() {
 		RunE:  runCommand,
 	}
 
+	runDevCleanupCmd := &cobra.Command{
+		Use:   runner.DevCleanupCommand,
+		Short: "Removes all containers (keeps data volumes by default)",
+		RunE:  runCommand,
+	}
+	runDevCleanupCmd.Flags().BoolVarP(&runCleanupVolumes, "volumes", "V", false, "Remove data volumes as well")
+
 	// graylog-project run release 3.2.5
 	runReleaseCmd := &cobra.Command{
 		Use:    runner.ReleaseCommand,
@@ -84,6 +98,7 @@ func init() {
 	runCmd.AddCommand(runDevServerCmd)
 	runCmd.AddCommand(runDevWebCmd)
 	runCmd.AddCommand(runDevServicesCmd)
+	runCmd.AddCommand(runDevCleanupCmd)
 	runCmd.AddCommand(runReleaseCmd)
 	runCmd.AddCommand(runSnapshotCmd)
 
@@ -101,11 +116,15 @@ func runCommand(cmd *cobra.Command, args []string) error {
 	}
 
 	return runner.DispatchCommand(runner.Config{
-		Command:    cmd.Name(),
-		RunnerRoot: filepath.Join(path, "runner"),
+		Command:        cmd.Name(),
+		RunnerRoot:     filepath.Join(path, "runner"),
+		BuildImages:    runBuildImages,
+		CleanupVolumes: runCleanupVolumes,
 		Graylog: runner.GraylogConfig{
-			HTTPPort: runApiPort,
-			WebPort:  runWebPort,
+			APIPort:    runApiPort,
+			WebPort:    runWebPort,
+			BuildClean: runBuildClean,
+			BuildWeb:   runBuildWeb,
 		},
 		MongoDB: runner.MongoDBConfig{
 			Port: runMongoDBPort,
