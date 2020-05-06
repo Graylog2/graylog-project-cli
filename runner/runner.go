@@ -22,6 +22,7 @@ const (
 	EnvGraylogAPIHTTPPort          = "GRAYLOG_API_HTTP_PORT"
 	EnvGraylogBuildSkipWeb         = "GRAYLOG_BUILD_SKIP_WEB"
 	EnvGraylogBuildClean           = "GRAYLOG_BUILD_CLEAN"
+	EnvDebug                       = "DEBUG"
 	EnvMongoDBPort                 = "MONGODB_PORT"
 	EnvElasticsearchPort           = "ELASTICSEARCH_PORT"
 )
@@ -41,6 +42,7 @@ type GraylogConfig struct {
 	WebPort    string
 	BuildClean bool
 	BuildWeb   bool
+	BuildDebug bool
 }
 
 type ElasticsearchConfig struct {
@@ -79,6 +81,9 @@ func getEnv(config Config) []string {
 	}
 	if config.Graylog.BuildWeb {
 		env = append(env, fmt.Sprintf("%s=%s", EnvGraylogBuildSkipWeb, "false"))
+	}
+	if config.Graylog.BuildDebug {
+		env = append(env, fmt.Sprintf("%s=%s", EnvDebug, "true"))
 	}
 	if config.CleanupVolumes {
 		env = append(env, fmt.Sprintf("%s=%s", EnvDockerComposeCleanupVolumes, "true"))

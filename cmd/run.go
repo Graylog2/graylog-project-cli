@@ -16,6 +16,7 @@ var (
 	runBuildImages       bool
 	runBuildClean        bool
 	runBuildWeb          bool
+	runDebug             bool
 )
 
 func init() {
@@ -55,6 +56,7 @@ func init() {
 	runCmd.PersistentFlags().BoolVarP(&runBuildImages, "build-images", "B", false, "Rebuild Docker images")
 	runCmd.PersistentFlags().BoolVar(&runBuildClean, "clean", false, "Run clean server build")
 	runCmd.PersistentFlags().BoolVar(&runBuildWeb, "web", false, "Run server build including the web interface")
+	runCmd.PersistentFlags().BoolVar(&runDebug, "debug", false, "Run build in debug mode")
 
 	runDevCmd := &cobra.Command{
 		Use:   runner.DevCommand,
@@ -134,6 +136,7 @@ func runCommand(cmd *cobra.Command, args []string) error {
 			WebPort:    runWebPort,
 			BuildClean: runBuildClean,
 			BuildWeb:   runBuildWeb,
+			BuildDebug: runDebug,
 		},
 		MongoDB: runner.MongoDBConfig{
 			Port: runMongoDBPort,
