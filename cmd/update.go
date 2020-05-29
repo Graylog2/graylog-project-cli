@@ -21,7 +21,7 @@ Update all repositories for the current manifest.
 This is the equivalent of executing the following git commands in every repository:
 
   git fetch --all --tags (--prune)
-  git merge --ff-only origin/<branch-name>
+  git merge --ff-only origin/<branch-name> (--ff with relaxed flag)
 `,
 	Run: updateCommand,
 }
@@ -30,8 +30,10 @@ func init() {
 	RootCmd.AddCommand(updateCmd)
 
 	updateCmd.Flags().BoolP("prune", "p", false, "Prune local branches that no longer exists in the remote repository. (i.e. \"git fetch --prune\")")
+	updateCmd.Flags().BoolP("relaxed", "r", false, "Relax merge option - don't require a fast-forward merge. (i.e. \"git merge --ff\")")
 
 	viper.BindPFlag("update.prune", updateCmd.Flags().Lookup("prune"))
+	viper.BindPFlag("update.relaxed", updateCmd.Flags().Lookup("relaxed"))
 }
 
 func updateCommand(cmd *cobra.Command, args []string) {

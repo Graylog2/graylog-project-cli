@@ -24,7 +24,8 @@ type ApplyManifest struct {
 }
 
 type Update struct {
-	Prune bool `mapstructure:"prune"`
+	Prune   bool `mapstructure:"prune"`
+	Relaxed bool `mapstructure:"relaxed"`
 }
 
 type Config struct {

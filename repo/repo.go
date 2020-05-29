@@ -147,6 +147,11 @@ func (manager *RepoManager) UpdateRepository(module p.Module) {
 		} else {
 			git.GitErrOk("fetch", "--all", "--tags")
 		}
-		git.GitErrOk("merge", "--ff-only", "origin/"+module.Revision)
+
+		if manager.Config.Update.Relaxed {
+			git.GitErrOk("merge", "--ff", "origin/"+module.Revision)
+		} else {
+			git.GitErrOk("merge", "--ff-only", "origin/"+module.Revision)
+		}
 	})
 }
