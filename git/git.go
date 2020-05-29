@@ -27,10 +27,8 @@ func git(verbose bool, commands ...string) {
 	command.Stderr = &stderr
 	out, err := command.Output()
 	if err != nil {
-		if ee, ok := err.(*exec.ExitError); ok {
-			logger.Info("Git stderr: %v", string(ee.Stderr))
-		}
-		logger.Fatal("Error executing: git %v (%v)", commands, err)
+		logger.Error("Git stderr: %v", string(stderr.Bytes()))
+		logger.Fatal("Error executing: git %s (%v)", strings.Join(commands, " "), err)
 	}
 
 	logOutputBuffer(stderr.Bytes())
