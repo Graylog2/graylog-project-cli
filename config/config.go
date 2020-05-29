@@ -23,6 +23,10 @@ type ApplyManifest struct {
 	Force   bool `mapstructure:"force"`
 }
 
+type Update struct {
+	Prune bool `mapstructure:"prune"`
+}
+
 type Config struct {
 	RepositoryRoot  string        `mapstructure:"repository-root"`
 	SelectedModules string        `mapstructure:"selected-modules"`
@@ -31,6 +35,7 @@ type Config struct {
 	Verbose         bool          `mapstructure:"verbose"`
 	NoUpdateCheck   bool          `mapstructure:"disable-update-check"`
 	ForceHttpsRepos bool          `mapstructure:"force-https-repos"`
+	Update          Update        `mapstructure:"update"`
 }
 
 // Returns true if running a CI environment. Detected environments: Jenkins, TravisCI

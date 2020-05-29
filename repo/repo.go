@@ -87,15 +87,13 @@ modules:
 func (manager *RepoManager) EnsureRepository(module p.Module, path string) {
 	defer utils.Chdir(utils.GetCwd())
 
-	if _, err := os.Stat(filepath.Join(path, ".git")); err != nil {
-		if os.IsNotExist(err) {
-			if manager.Config.Checkout.ShallowClone {
-				logger.Info("Cloning %v into %v (shallow clone)", module.Repository, path)
-				git.Git("clone", "--depth=1", "--no-single-branch", module.Repository, path)
-			} else {
-				logger.Info("Cloning %v into %v", module.Repository, path)
-				git.Git("clone", module.Repository, path)
-			}
+	if manager.HasRepository(path) {
+		if manager.Config.Checkout.ShallowClone {
+			logger.Info("Cloning %v into %v (shallow clone)", module.Repository, path)
+			git.Git("clone", "--depth=1", "--no-single-branch", module.Repository, path)
+		} else {
+			logger.Info("Cloning %v into %v", module.Repository, path)
+			git.Git("clone", module.Repository, path)
 		}
 	} else {
 		if manager.Config.Checkout.UpdateRepos {
@@ -104,6 +102,16 @@ func (manager *RepoManager) EnsureRepository(module p.Module, path string) {
 			git.Git("fetch", "--all", "--tags")
 		}
 	}
+}
+
+func (manager *RepoManager) HasRepository(path string) bool {
+	if _, err := os.Stat(filepath.Join(path, ".git")); err != nil {
+		if !os.IsNotExist(err) {
+			logger.Error("couldn't access %s because of error: %v", path, err)
+		}
+		return false
+	}
+	return true
 }
 
 func (manager *RepoManager) CheckoutRevision(repoPath string, revision string) {
@@ -126,4 +134,19 @@ func (manager *RepoManager) CheckoutRevision(repoPath string, revision string) {
 	if manager.Config.Checkout.UpdateRepos {
 		git.Git("merge", "--ff-only", "origin/"+trimmedRevision)
 	}
+}
+
+func (manager *RepoManager) UpdateRepository(module p.Module) {
+	if !manager.HasRepository(module.Path) {
+		logger.Info("Skipping module %v because it does not exist yet", module.Name)
+		return
+	}
+	utils.InDirectory(module.Path, func() {
+		if manager.Config.Update.Prune {
+			git.Git("fetch", "--all", "--tags", "--prune")
+		} else {
+			git.Git("fetch", "--all", "--tags")
+		}
+		git.Git("merge", "--ff-only", "origin/"+module.Revision)
+	})
 }
