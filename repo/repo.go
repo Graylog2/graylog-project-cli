@@ -143,10 +143,10 @@ func (manager *RepoManager) UpdateRepository(module p.Module) {
 	}
 	utils.InDirectory(module.Path, func() {
 		if manager.Config.Update.Prune {
-			git.Git("fetch", "--all", "--tags", "--prune")
+			git.GitErrOk("fetch", "--all", "--tags", "--prune")
 		} else {
-			git.Git("fetch", "--all", "--tags")
+			git.GitErrOk("fetch", "--all", "--tags")
 		}
-		git.Git("merge", "--ff-only", "origin/"+module.Revision)
+		git.GitErrOk("merge", "--ff-only", "origin/"+module.Revision)
 	})
 }

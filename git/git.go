@@ -61,6 +61,8 @@ func GitErrOk(commands ...string) {
 	command.Stderr = &stderr
 	out, err := command.Output()
 	if err != nil {
+		logOutputBufferWithColor(stderr.Bytes(), color.FgRed)
+		logOutputBufferWithColor(out, color.FgRed)
 		return
 	}
 
@@ -69,9 +71,13 @@ func GitErrOk(commands ...string) {
 }
 
 func logOutputBuffer(buf []byte) {
+	logOutputBufferWithColor(buf, color.FgYellow)
+}
+
+func logOutputBufferWithColor(buf []byte, c color.Attribute) {
 	for _, s := range strings.Split(string(buf), "\n") {
 		if len(strings.TrimSpace(s)) > 0 {
-			logger.ColorInfo(color.FgYellow, "      %v", s)
+			logger.ColorInfo(c, "      %v", s)
 		}
 	}
 }
