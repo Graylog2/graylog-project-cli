@@ -89,6 +89,12 @@ func init() {
 	}
 	runDevCleanupCmd.Flags().BoolVarP(&runCleanupVolumes, "volumes", "V", false, "Remove data volumes as well")
 
+	runDevExecCmd := &cobra.Command{
+		Use:   runner.DevExecCommand,
+		Short: "Runs \"docker-compose exec\" with the given arguments",
+		RunE:  runCommand,
+	}
+
 	// graylog-project run release 3.2.5
 	runReleaseCmd := &cobra.Command{
 		Use:    runner.ReleaseCommand,
@@ -106,6 +112,7 @@ func init() {
 	}
 
 	runCmd.AddCommand(runDevCmd)
+	runCmd.AddCommand(runDevExecCmd)
 	runCmd.AddCommand(runDevServerCmd)
 	runCmd.AddCommand(runDevWebCmd)
 	runCmd.AddCommand(runDevServicesCmd)
@@ -128,6 +135,7 @@ func runCommand(cmd *cobra.Command, args []string) error {
 
 	return runner.DispatchCommand(runner.Config{
 		Command:        cmd.Name(),
+		Arguments:      args,
 		RunnerRoot:     filepath.Join(path, "runner"),
 		BuildImages:    runBuildImages,
 		CleanupVolumes: runCleanupVolumes,

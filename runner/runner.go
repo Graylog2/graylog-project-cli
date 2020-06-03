@@ -9,6 +9,7 @@ import (
 
 const (
 	DevCleanupCommand  = "dev:cleanup"
+	DevExecCommand     = "dev:exec"
 	DevCommand         = "dev"
 	DevServicesCommand = "dev:services"
 	DevServerCommand   = "dev:server"
@@ -29,6 +30,7 @@ const (
 
 type Config struct {
 	Command        string
+	Arguments      []string
 	Graylog        GraylogConfig
 	Elasticsearch  ElasticsearchConfig
 	MongoDB        MongoDBConfig
@@ -56,6 +58,8 @@ type MongoDBConfig struct {
 func DispatchCommand(config Config) error {
 	switch config.Command {
 	case DevCleanupCommand:
+		fallthrough
+	case DevExecCommand:
 		fallthrough
 	case DevCommand:
 		fallthrough

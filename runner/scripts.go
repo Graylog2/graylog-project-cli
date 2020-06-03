@@ -15,7 +15,7 @@ import (
 func execRunnerScript(config Config, env []string) error {
 	// Command "dev:server" becomes "bin/dev-server.sh"
 	scriptName := fmt.Sprintf("./bin/%s.sh", strings.ReplaceAll(config.Command, ":", "-"))
-	command := exec.Command(scriptName)
+	command := exec.Command(scriptName, config.Arguments...)
 	command.Dir = config.RunnerRoot
 	command.Env = append(os.Environ(), env...)
 	command.Stdin = os.Stdin
