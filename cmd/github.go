@@ -23,6 +23,9 @@ Examples:
 
     # Disable branch protection for a GitHub repository branch
     graylog-project github branch-protection --disable --repo Graylog2/graylog2-server --branch 2.4
+
+    # Enable branch protection for all GitHub repositories in the currently checked out manifest
+    graylog-project github branch-protection --enable --manifest --branch 2.4
 `,
 }
 
