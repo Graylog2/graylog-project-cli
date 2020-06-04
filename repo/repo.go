@@ -87,7 +87,7 @@ modules:
 func (manager *RepoManager) EnsureRepository(module p.Module, path string) {
 	defer utils.Chdir(utils.GetCwd())
 
-	if manager.HasRepository(path) {
+	if !manager.HasRepository(path) {
 		if manager.Config.Checkout.ShallowClone {
 			logger.Info("Cloning %v into %v (shallow clone)", module.Repository, path)
 			git.Git("clone", "--depth=1", "--no-single-branch", module.Repository, path)
