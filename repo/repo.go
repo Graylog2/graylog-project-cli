@@ -126,8 +126,10 @@ func (manager *RepoManager) CheckoutRevision(repoPath string, revision string) {
 
 	logger.Info("Checkout revision: %v", trimmedRevision)
 
-	// Create local branch first. Ignore error if branch already exists.
-	git.GitErrOk("branch", trimmedRevision, "origin/"+trimmedRevision)
+	// Create local branch first
+	if !git.HasLocalBranch(trimmedRevision) {
+		git.Git("branch", trimmedRevision, "origin/"+trimmedRevision)
+	}
 	// Checkout the <revision> branch
 	git.Git("checkout", trimmedRevision)
 

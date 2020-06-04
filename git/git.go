@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/fatih/color"
+	"github.com/pkg/errors"
 	"os/exec"
 	"strings"
 )
@@ -53,6 +54,25 @@ func GitValue(commands ...string) string {
 	return strings.TrimSuffix(string(out), "\n")
 }
 
+func GitValueE(commands ...string) (string, error) {
+	command := exec.Command("git", commands...)
+	out, err := command.Output()
+	if err != nil {
+		return "", errors.Wrapf(err, "error executing: %s %s", command.Path, strings.Join(command.Args, " "))
+	}
+
+	return strings.TrimSpace(string(out)), nil
+}
+
+func HasLocalBranch(branch string) bool {
+	// Command exits with 1 if the local branch doesn't exist
+	_, err := GitValueE("rev-parse", "--verify", "--quiet", branch)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
 func GitErrOk(commands ...string) {
 	var stderr bytes.Buffer
 
@@ -61,8 +81,8 @@ func GitErrOk(commands ...string) {
 	command.Stderr = &stderr
 	out, err := command.Output()
 	if err != nil {
-		logOutputBufferWithColor(stderr.Bytes(), color.FgRed)
-		logOutputBufferWithColor(out, color.FgRed)
+		logOutputBufferWithColor(stderr.Bytes(), color.FgGreen)
+		logOutputBufferWithColor(out, color.FgGreen)
 		return
 	}
 
