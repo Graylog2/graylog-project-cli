@@ -16,6 +16,7 @@ type Checkout struct {
 	ManifestFiles  []string `mapstructure:"manifest-files"`
 	Force          bool     `mapstructure:"force"`
 	ModuleOverride []string `mapstructure:"module-override"`
+	PullRequests   []string `mapstructure:"pull-requests"`
 }
 
 type ApplyManifest struct {

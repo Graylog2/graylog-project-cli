@@ -77,9 +77,9 @@ modules:
 		}
 
 		if withApply {
-			manager.CheckoutRevision(module.Path, module.ApplyFromRevision())
+			manager.CheckoutRevision(module.Path, module.ApplyFromRevision(), module.FetchRevision)
 		} else {
-			manager.CheckoutRevision(module.Path, module.Revision)
+			manager.CheckoutRevision(module.Path, module.Revision, module.FetchRevision)
 		}
 	}
 }
@@ -114,7 +114,7 @@ func (manager *RepoManager) HasRepository(path string) bool {
 	return true
 }
 
-func (manager *RepoManager) CheckoutRevision(repoPath string, revision string) {
+func (manager *RepoManager) CheckoutRevision(repoPath string, revision string, fetchRevision string) {
 	trimmedRevision := strings.TrimSpace(revision)
 
 	if trimmedRevision == "" {
@@ -126,7 +126,11 @@ func (manager *RepoManager) CheckoutRevision(repoPath string, revision string) {
 
 	logger.Info("Checkout revision: %v", trimmedRevision)
 
-	// Create local branch first
+	if fetchRevision != "" {
+		git.Git("fetch", "origin", fetchRevision)
+	}
+
+	// Create local branch if needed
 	if !git.HasLocalBranch(trimmedRevision) {
 		git.Git("branch", trimmedRevision, "origin/"+trimmedRevision)
 	}
