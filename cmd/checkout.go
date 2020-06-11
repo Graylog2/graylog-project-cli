@@ -34,6 +34,9 @@ Examples:
   # "abc123"  of the a-contributor/graylog-plugin-collector repository
   # instead of Graylog2/graylog-plugin-collector
   $ graylog-project co --module-override Graylog2/graylog-plugin-collector=a-contributor/graylog-plugin-collector@abc123
+
+  # To checkout GitHub pull-requests, use the --pull-requests flag. (only one PR per repository, last one wins)
+  $ graylog-project co --pull-requests Graylog2/graylog-plugin-collector#123
 `,
 	Run: checkoutCommand,
 }
@@ -46,12 +49,14 @@ func init() {
 	checkoutCmd.Flags().BoolP("force", "f", false, "Force checkout event though repository is unexpected")
 	checkoutCmd.Flags().StringP("auth-token", "T", "", "Auth token to access protected URLs")
 	checkoutCmd.Flags().StringSliceP("module-override", "O", []string{}, "Override manifest modules, see help for details")
+	checkoutCmd.Flags().StringSliceP("pull-requests", "p", []string{}, "Checkout GitHub pull requests (e.g. Graylog2/graylog2-server#123)")
 
 	viper.BindPFlag("checkout.update-repos", checkoutCmd.Flags().Lookup("update-repos"))
 	viper.BindPFlag("checkout.shallow-clone", checkoutCmd.Flags().Lookup("shallow-clone"))
 	viper.BindPFlag("checkout.force", checkoutCmd.Flags().Lookup("force"))
 	viper.BindPFlag("checkout.auth-token", checkoutCmd.Flags().Lookup("auth-token"))
 	viper.BindPFlag("checkout.module-override", checkoutCmd.Flags().Lookup("module-override"))
+	viper.BindPFlag("checkout.pull-requests", checkoutCmd.Flags().Lookup("pull-requests"))
 
 	viper.BindEnv("checkout.auth-token", "GPC_AUTH_TOKEN")
 }
@@ -74,7 +79,7 @@ func prepareCheckoutCommand(cmd *cobra.Command, args []string) (c.Config, *repo.
 
 	logger.Debug("Using manifests: %v", config.Checkout.ManifestFiles)
 
-	project := p.New(config, config.Checkout.ManifestFiles, p.WithModuleOverride())
+	project := p.New(config, config.Checkout.ManifestFiles, p.WithModuleOverride(), p.WithPullRequests())
 
 	return config, repoManager, project
 }

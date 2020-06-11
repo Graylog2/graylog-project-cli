@@ -77,9 +77,9 @@ modules:
 		}
 
 		if withApply {
-			manager.CheckoutRevision(module.Path, module.ApplyFromRevision())
+			manager.CheckoutRevision(module.Path, module.ApplyFromRevision(), module.FetchRevision)
 		} else {
-			manager.CheckoutRevision(module.Path, module.Revision)
+			manager.CheckoutRevision(module.Path, module.Revision, module.FetchRevision)
 		}
 	}
 }
@@ -87,7 +87,7 @@ modules:
 func (manager *RepoManager) EnsureRepository(module p.Module, path string) {
 	defer utils.Chdir(utils.GetCwd())
 
-	if manager.HasRepository(path) {
+	if !manager.HasRepository(path) {
 		if manager.Config.Checkout.ShallowClone {
 			logger.Info("Cloning %v into %v (shallow clone)", module.Repository, path)
 			git.Git("clone", "--depth=1", "--no-single-branch", module.Repository, path)
@@ -114,7 +114,7 @@ func (manager *RepoManager) HasRepository(path string) bool {
 	return true
 }
 
-func (manager *RepoManager) CheckoutRevision(repoPath string, revision string) {
+func (manager *RepoManager) CheckoutRevision(repoPath string, revision string, fetchRevision string) {
 	trimmedRevision := strings.TrimSpace(revision)
 
 	if trimmedRevision == "" {
@@ -126,8 +126,14 @@ func (manager *RepoManager) CheckoutRevision(repoPath string, revision string) {
 
 	logger.Info("Checkout revision: %v", trimmedRevision)
 
-	// Create local branch first. Ignore error if branch already exists.
-	git.GitErrOk("branch", trimmedRevision, "origin/"+trimmedRevision)
+	if fetchRevision != "" {
+		git.Git("fetch", "origin", fetchRevision)
+	}
+
+	// Create local branch if needed
+	if !git.HasLocalBranch(trimmedRevision) {
+		git.Git("branch", trimmedRevision, "origin/"+trimmedRevision)
+	}
 	// Checkout the <revision> branch
 	git.Git("checkout", trimmedRevision)
 
