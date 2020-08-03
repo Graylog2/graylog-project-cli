@@ -356,7 +356,12 @@ func applyPullRequestsOverride(c config.Config, modules []Module) []Module {
 				continue
 			}
 
-			if strings.Contains(module.Repository, prRepo) {
+			repoUrl, err := utils.ParseGitHubURL(module.Repository)
+			if err != nil {
+				logger.Error("couldn't parse repository URL: %v", err)
+			}
+
+			if repoUrl.Matches(prRepo) {
 				logger.Debug("Checking out pull-request %s for module %s", pullRequest, module.Name)
 
 				module.Revision = fmt.Sprintf("pull-request/%d", prNumber)

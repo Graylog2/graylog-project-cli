@@ -68,6 +68,11 @@ func (url GitHubURL) Directory() string {
 	return strings.TrimSuffix(filepath.Base(url.Repository), filepath.Ext(url.Repository))
 }
 
+func (url GitHubURL) Matches(match string) bool {
+	repoName := strings.TrimSuffix(url.Repository, filepath.Ext(url.Repository))
+	return strings.Compare(strings.ToLower(repoName), strings.ToLower(match)) == 0
+}
+
 func (url GitHubURL) String() string {
 	return "github://" + url.Repository
 }

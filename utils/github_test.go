@@ -53,6 +53,27 @@ func TestParseGitHubURL(t *testing.T) {
 		t.Errorf("expected <%s> but got <%s>", expected, url.HTTPS())
 	}
 
+	// Matches ok
+	url, _ = ParseGitHubURL("https://github.com/Graylog2/graylog2-server.git")
+	match := "Graylog2/graylog2-server"
+	if !url.Matches(match) {
+		t.Errorf("expected <%s> to match <%s>", url, match)
+	}
+
+	// Matches case
+	url, _ = ParseGitHubURL("https://github.com/Graylog2/graylog2-server.git")
+	match = "GraYloG2/GraYlog2-SErver"
+	if !url.Matches(match) {
+		t.Errorf("expected <%s> to match <%s>", url, match)
+	}
+
+	// Match fails
+	url, _ = ParseGitHubURL("https://github.com/Graylog2/graylog2-server.git")
+	match = "Graylog2/graylog2-server-does-not-work"
+	if url.Matches(match) {
+		t.Errorf("expected <%s> to not match <%s>", url, match)
+	}
+
 	// Missing .git suffix
 	_, err = ParseGitHubURL("https://github.com/Graylog2/graylog2-server")
 	if err == nil {
