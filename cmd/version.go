@@ -32,7 +32,7 @@ func init() {
 func versionCommand(cmd *cobra.Command, args []string) {
 	config := config.Get()
 	logger.Info("Version %v, built on %v (revision %v)", gitTag, buildDate, gitRevision)
-	logger.Info("Test test test!")
+	logger.Info("Test test test!!")
 
 	if !config.NoUpdateCheck {
 		printState(getLatestRelease(), true)
