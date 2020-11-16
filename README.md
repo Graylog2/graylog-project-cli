@@ -53,4 +53,4 @@ Please read [the contributing instructions](CONTRIBUTING.md) to get started.
 
 ## License
 
-_graylog-project-cli_ is released under version 3.0 of the [GNU General Public License](COPYING).
+_graylog-project-cli_ is released under the [SSPL](LICENSE).
