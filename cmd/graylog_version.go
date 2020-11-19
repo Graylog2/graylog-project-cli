@@ -5,8 +5,8 @@ import (
 	"github.com/Graylog2/graylog-project-cli/config"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/Graylog2/graylog-project-cli/manifest"
-	"github.com/Graylog2/graylog-project-cli/pom"
 	"github.com/Graylog2/graylog-project-cli/project"
+	"github.com/Graylog2/graylog-project-cli/projectstate"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"os"
@@ -72,5 +72,5 @@ func graylogVersionCommand(cmd *cobra.Command, args []string) {
 
 	// Regenerate the graylog-project pom and assembly files to get the latest versions
 	msg("Regenerate pom and assembly templates")
-	pom.WriteTemplates(cfg, proj)
+	projectstate.Sync(proj, cfg)
 }

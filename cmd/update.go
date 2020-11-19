@@ -5,8 +5,8 @@ import (
 	"github.com/Graylog2/graylog-project-cli/git"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/Graylog2/graylog-project-cli/manifest"
-	"github.com/Graylog2/graylog-project-cli/pom"
 	p "github.com/Graylog2/graylog-project-cli/project"
+	"github.com/Graylog2/graylog-project-cli/projectstate"
 	"github.com/Graylog2/graylog-project-cli/repo"
 	"github.com/Graylog2/graylog-project-cli/utils"
 	"github.com/spf13/cobra"
@@ -70,5 +70,5 @@ func updateCommand(cmd *cobra.Command, args []string) {
 		repoMgr.UpdateRepository(module)
 	})
 
-	pom.WriteTemplates(config, project)
+	projectstate.Sync(project, config)
 }

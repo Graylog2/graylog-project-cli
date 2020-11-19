@@ -4,8 +4,8 @@ import (
 	c "github.com/Graylog2/graylog-project-cli/config"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/Graylog2/graylog-project-cli/manifest"
-	"github.com/Graylog2/graylog-project-cli/pom"
 	p "github.com/Graylog2/graylog-project-cli/project"
+	"github.com/Graylog2/graylog-project-cli/projectstate"
 	"github.com/Graylog2/graylog-project-cli/repo"
 	"github.com/Graylog2/graylog-project-cli/utils"
 	"github.com/spf13/cobra"
@@ -165,7 +165,7 @@ func checkoutCommand(cmd *cobra.Command, args []string) {
 
 	repoManager.SetupProjectRepositories(project)
 
-	pom.WriteTemplates(config, project)
+	projectstate.Sync(project, config)
 
 	manifest.WriteState(cleanupManifestFiles(config.Checkout.ManifestFiles))
 

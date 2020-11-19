@@ -5,9 +5,9 @@ import (
 	"github.com/Graylog2/graylog-project-cli/git"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/Graylog2/graylog-project-cli/manifest"
-	"github.com/Graylog2/graylog-project-cli/pom"
 	"github.com/Graylog2/graylog-project-cli/pomparse"
 	"github.com/Graylog2/graylog-project-cli/project"
+	"github.com/Graylog2/graylog-project-cli/projectstate"
 	"github.com/Graylog2/graylog-project-cli/utils"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -96,7 +96,7 @@ func applyManifestCommand(cmd *cobra.Command, args []string) {
 
 	repoManager.SetupProjectRepositoriesWithApply(proj, true)
 
-	pom.WriteTemplates(config, proj)
+	projectstate.Sync(proj, config)
 	manifest.WriteState(config.Checkout.ManifestFiles)
 
 	// Check that there are no modifications in the repositories via "git status --porcelain ."
@@ -138,7 +138,7 @@ func applyManifestCommand(cmd *cobra.Command, args []string) {
 
 	// Regenerate the graylog-project pom and assembly files to get the latest versions
 	msg("Regenerate pom and assembly templates")
-	pom.WriteTemplates(config, proj)
+	projectstate.Sync(proj, config)
 
 	// Run tests via package to also test the jar creation
 	msg("Running tests and build artifacts")
