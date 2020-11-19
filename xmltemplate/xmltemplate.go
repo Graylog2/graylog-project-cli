@@ -47,7 +47,7 @@ func mavenAssemblies(project p.Project) map[string][]Assembly {
 }
 
 func WriteXmlFile(config config.Config, project p.Project, templateFile string, outputFile string) {
-	logger.Info("Generating %v file from template %v", outputFile, templateFile)
+	logger.Info("Generating %v", outputFile)
 	bts, err := ioutil.ReadFile(templateFile)
 	if err != nil {
 		logger.Fatal("Error reading %v: %v", templateFile, err)
