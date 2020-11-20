@@ -67,7 +67,7 @@ func writeWebModules(project p.Project) error {
 }
 
 func writeWebModulesFile(path string, modules []WebModule) error {
-	buf, err := json.Marshal(WebModules{modules})
+	buf, err := json.MarshalIndent(WebModules{modules}, "", "  ")
 
 	if err != nil {
 		return errors.Wrap(err, "Couldn't serialize the web modules")
