@@ -44,8 +44,14 @@ func writeWebModules(project p.Project) error {
 		return errors.New("Couldn't find any server module in project")
 	}
 
+	serverWebPath := ""
+
 	p.ForEachModuleOrSubmodules(project, func(module p.Module) {
 		if module.IsNpmModule() {
+			// We need to find the web module for the server to get the correct output path
+			if module.Repository == serverModule.Repository {
+				serverWebPath = module.Path
+			}
 			webModules = append(webModules, WebModule{
 				Name: module.Name,
 				Path: module.Path,
@@ -53,7 +59,11 @@ func writeWebModules(project p.Project) error {
 		}
 	})
 
-	return writeWebModulesFile(filepath.Join(serverModule.Path, webModulesFile), webModules)
+	if serverWebPath == "" {
+		return errors.New("Couldn't find web output path for server module")
+	}
+
+	return writeWebModulesFile(filepath.Join(serverWebPath, webModulesFile), webModules)
 }
 
 func writeWebModulesFile(path string, modules []WebModule) error {
