@@ -134,3 +134,36 @@ func TestReplaceGitHubURL(t *testing.T) {
 		t.Errorf("expected <%s> but got <%s>", expected, url)
 	}
 }
+
+func TestParseGitHubPRString(t *testing.T) {
+	var cases = []struct {
+		input    string
+		prRepo   string
+		prNumber int
+		err      bool
+	}{
+		{"Graylog2/graylog2-server#123", "Graylog2/graylog2-server", 123, false},
+		{"https://github.com/Graylog2/graylog-plugin-collector/pull/9692", "Graylog2/graylog-plugin-collector", 9692, false},
+		{"https://github.com/Graylog2/graylog-plugin-collector/pull/", "", 0, true},
+		{"https://github.com/9692", "", 0, true},
+		{"https://example.com/Graylog2/graylog-plugin-collector/pull/9692", "", 0, true},
+	}
+
+	for _, c := range cases {
+		t.Run(c.input, func(t *testing.T) {
+			repo, num, err := ParseGitHubPRString(c.input)
+			if repo != c.prRepo {
+				t.Errorf("expected <%s>, got <%s>", c.prRepo, repo)
+			}
+			if num != c.prNumber {
+				t.Errorf("expected <%d>, got <%d>", c.prNumber, num)
+			}
+			if err == nil && c.err {
+				t.Errorf("expected an error but got none")
+			}
+			if err != nil && !c.err {
+				t.Errorf("expected no error but got: %v", err)
+			}
+		})
+	}
+}

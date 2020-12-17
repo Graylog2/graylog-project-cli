@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"path/filepath"
 	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/Graylog2/graylog-project-cli/config"
@@ -342,18 +341,9 @@ func applyPullRequestsOverride(c config.Config, modules []Module) []Module {
 	// We check if there is an override for any module in our manifests
 	for _, module := range modules {
 		for _, pullRequest := range c.Checkout.PullRequests {
-			// Each pull request string looks like "<owner>/<repo>#<pr-num>" (e.g. Graylog2/graylog2-server#123)
-			parts := strings.SplitN(pullRequest, "#", 2)
-
-			prRepo := parts[0]
-			if prRepo == "" {
-				logger.Error("couldn't parse pull request repository from <%s> - skipping", pullRequest)
-				continue
-			}
-			prNumber, err := strconv.Atoi(parts[1])
+			prRepo, prNumber, err := utils.ParseGitHubPRString(pullRequest)
 			if err != nil {
-				logger.Error("couldn't parse pull request number from <%s> - skipping", pullRequest)
-				continue
+				logger.Fatal("Error parsing pull request: %v", err)
 			}
 
 			repoUrl, err := utils.ParseGitHubURL(module.Repository)
