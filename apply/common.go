@@ -11,7 +11,7 @@ type CommonMaven struct {
 }
 
 func (common CommonMaven) MavenRunWithProfiles(profiles []string, args ...string) {
-	commands := []string{"mvn --show-version --batch-mode --fail-fast"}
+	commands := []string{"mvn --show-version --batch-mode --fail-fast -Dstyle.color=always"}
 
 	if len(profiles) > 0 {
 		commands = append(commands, "--activate-profiles")
