@@ -7,6 +7,7 @@ import (
 	"github.com/Graylog2/graylog-project-cli/manifest"
 	"github.com/Graylog2/graylog-project-cli/pom"
 	"github.com/Graylog2/graylog-project-cli/project"
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"strconv"
 )
@@ -53,6 +54,12 @@ func mavenParentCommand(cmd *cobra.Command, args []string) {
 
 	logger.Info("Maven parents:")
 	project.ForEachSelectedModule(p, func(module project.Module) {
+		// The server module is supposed to be the parent of all other modules so we don't touch its parent
+		if module.Server {
+			logger.ColorPrintln(color.FgYellow, "    %-"+strconv.Itoa(int(maxLength))+"s  %s", module.Name, "Not setting parent for server module")
+			return
+		}
+
 		if mavenSetParentGroupId != "" {
 			pom.SetParent(module, mavenSetParentGroupId, module.ParentArtifactId(), module.ParentVersion(), module.ParentRelativePath())
 		}
