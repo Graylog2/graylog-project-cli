@@ -46,22 +46,36 @@ func writeWebModules(project p.Project) error {
 
 	serverWebPath := ""
 
+	// Find the server web path first
 	p.ForEachModuleOrSubmodules(project, func(module p.Module) {
 		if module.IsNpmModule() {
 			// We need to find the web module for the server to get the correct output path
 			if module.Repository == serverModule.Repository {
 				serverWebPath = module.Path
 			}
-			webModules = append(webModules, WebModule{
-				Name: module.Name,
-				Path: module.Path,
-			})
 		}
 	})
 
 	if serverWebPath == "" {
 		return errors.New("Couldn't find web output path for server module")
 	}
+
+	p.ForEachModuleOrSubmodules(project, func(module p.Module) {
+		if module.IsNpmModule() {
+			// Use a relative path to the module to make this work in other environments where the absolute
+			// path might be different. (e.g. Docker container)
+			modulePath, err := filepath.Rel(serverWebPath, module.Path)
+			if err != nil {
+				logger.Error("Couldn't get relative path for <%s>, using absolute path.", module.Path)
+				modulePath = module.Path
+			}
+
+			webModules = append(webModules, WebModule{
+				Name: module.Name,
+				Path: modulePath,
+			})
+		}
+	})
 
 	return writeWebModulesFile(filepath.Join(serverWebPath, webModulesFile), webModules)
 }
