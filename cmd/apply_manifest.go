@@ -39,6 +39,7 @@ Example:
 var applyManifestExecute bool
 var applyManifestForce bool
 var applyManifestSkipMavenDeploy bool
+var applyManifestSkipTests bool
 
 func init() {
 	RootCmd.AddCommand(applyManifestCmd)
@@ -46,10 +47,12 @@ func init() {
 	applyManifestCmd.Flags().BoolVarP(&applyManifestExecute, "execute", "", false, "Actually apply the manifest!")
 	applyManifestCmd.Flags().BoolVarP(&applyManifestForce, "force", "f", false, "Ignore some sanity checks")
 	applyManifestCmd.Flags().BoolVarP(&applyManifestSkipMavenDeploy, "skip-maven-deploy", "", false, "Skip maven deployment")
+	applyManifestCmd.Flags().BoolVarP(&applyManifestSkipTests, "skip-tests", "", false, "Skip running tests via maven")
 
 	viper.BindPFlag("apply-manifest.execute", applyManifestCmd.Flags().Lookup("execute"))
 	viper.BindPFlag("apply-manifest.force", applyManifestCmd.Flags().Lookup("force"))
 	viper.BindPFlag("apply-manifest.skip-deploy", applyManifestCmd.Flags().Lookup("skip-maven-deploy"))
+	viper.BindPFlag("apply-manifest.skip-tests", applyManifestCmd.Flags().Lookup("skip-tests"))
 }
 
 func applyManifestInDirectory(path string, callback utils.DirectoryCallback) {
@@ -143,7 +146,12 @@ func applyManifestCommand(cmd *cobra.Command, args []string) {
 	// Run tests via package to also test the jar creation
 	msg("Running tests and build artifacts")
 	logger.ColorInfo(color.FgMagenta, "[%s]", utils.GetCwd())
-	applier.MavenRun("clean", "package")
+	if applyManifestSkipTests {
+		msg("Skipping tests!")
+		applier.MavenRun("-DskipTests", "clean", "package")
+	} else {
+		applier.MavenRun("clean", "package")
+	}
 
 	// Committing new version in web modules
 	// Run this before the maven scm checkin is pushing to GitHub
