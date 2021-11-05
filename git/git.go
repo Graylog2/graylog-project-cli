@@ -89,8 +89,8 @@ func GitErrOk(commands ...string) {
 	command.Stderr = &stderr
 	out, err := command.Output()
 	if err != nil {
-		logOutputBufferWithColor(stderr.Bytes(), color.FgGreen)
-		logOutputBufferWithColor(out, color.FgGreen)
+		logOutputBufferWithColor(stderr.Bytes(), color.FgRed)
+		logOutputBufferWithColor(out, color.FgRed)
 		return
 	}
 
