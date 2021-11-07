@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/Graylog2/graylog-project-cli/config"
 	"github.com/Graylog2/graylog-project-cli/logger"
@@ -27,7 +28,7 @@ var forceHttpsRepos bool
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:   "graylog-project-cli",
+	Use:   filepath.Base(os.Args[0]),
 	Short: "graylog-project management CLI",
 	Long: `
 CLI tool to manage a graylog-project setup
