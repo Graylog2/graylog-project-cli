@@ -46,6 +46,7 @@ func statusCommand(cmd *cobra.Command, args []string) {
 			continue
 		}
 		utils.InDirectory(module.Path, func() {
+			commitId := git.GitValue("rev-parse", "HEAD")
 			revision := git.GitValue("rev-parse", "--abbrev-ref", "HEAD")
 			gitStatus := git.GitValue("status", "--porcelain")
 			filesModified, filesDeleted, filesAdded := 0, 0, 0
@@ -64,19 +65,19 @@ func statusCommand(cmd *cobra.Command, args []string) {
 			}
 
 			if !module.HasParent() {
-				logger.Info("    %-"+strconv.Itoa(int(maxNameLength))+"s  %s (branch: %s)", module.Name, module.Version(), revision)
+				logger.Info("    %-"+strconv.Itoa(int(maxNameLength))+"s  %s (commit: %s, branch: %s)", module.Name, module.Version(), commitId, revision)
 				if config.Verbose {
 					logger.ColorInfo(color.FgYellow, "        <no parent>")
 				}
 			} else {
 				if config.Verbose {
-					logger.Info("    %-"+strconv.Itoa(int(maxNameLength))+"s  %s (branch: %s)", module.Name, module.Version(), revision)
+					logger.Info("    %-"+strconv.Itoa(int(maxNameLength))+"s  %s (commit: %s, branch: %s)", module.Name, module.Version(), commitId, revision)
 					logger.ColorInfo(color.FgYellow, "        Parent groupId:      %s", module.ParentGroupId())
 					logger.ColorInfo(color.FgYellow, "        Parent artifactId:   %s", module.ParentArtifactId())
 					logger.ColorInfo(color.FgYellow, "        Parent version:      %s", module.ParentVersion())
 					logger.ColorInfo(color.FgYellow, "        Parent relativePath: %s", module.ParentRelativePath())
 				} else {
-					logger.Info("    %-"+strconv.Itoa(int(maxNameLength))+"s  %s (branch: %s, parent: %s)", module.Name, module.Version(), revision, module.ParentVersion())
+					logger.Info("    %-"+strconv.Itoa(int(maxNameLength))+"s  %s (commit: %s, branch: %s, parent: %s)", module.Name, module.Version(), commitId, revision, module.ParentVersion())
 				}
 			}
 			if !config.Verbose && (filesModified > 0 || filesDeleted > 0 || filesAdded > 0) {
