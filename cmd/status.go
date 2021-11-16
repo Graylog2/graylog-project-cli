@@ -3,7 +3,7 @@ package cmd
 import (
 	"strconv"
 
-	"github.com/Graylog2/graylog-project-cli/config"
+	c "github.com/Graylog2/graylog-project-cli/config"
 	"github.com/Graylog2/graylog-project-cli/git"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/Graylog2/graylog-project-cli/manifest"
@@ -29,7 +29,7 @@ func init() {
 }
 
 func statusCommand(cmd *cobra.Command, args []string) {
-	config := config.Get()
+	config := c.Get()
 	manifestFiles := manifest.ReadState().Files()
 	project := p.New(config, manifestFiles)
 
@@ -46,7 +46,14 @@ func statusCommand(cmd *cobra.Command, args []string) {
 			continue
 		}
 		utils.InDirectory(module.Path, func() {
-			commitId := git.GitValue("rev-parse", "--short", "HEAD")
+			var commitId string
+			if c.IsCI() {
+				// Don't display shortened commit IDs in CI environments to avoid future ambiguities regarding the
+				// shortened commit IDs
+				commitId = git.GitValue("rev-parse", "HEAD")
+			} else  {
+				commitId = git.GitValue("rev-parse", "--short", "HEAD")
+			}
 			revision := git.GitValue("rev-parse", "--abbrev-ref", "HEAD")
 			gitStatus := git.GitValue("status", "--porcelain")
 			filesModified, filesDeleted, filesAdded := 0, 0, 0
