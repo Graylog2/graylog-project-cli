@@ -46,7 +46,7 @@ func statusCommand(cmd *cobra.Command, args []string) {
 			continue
 		}
 		utils.InDirectory(module.Path, func() {
-			commitId := git.GitValue("rev-parse", "HEAD")
+			commitId := git.GitValue("rev-parse", "--short", "HEAD")
 			revision := git.GitValue("rev-parse", "--abbrev-ref", "HEAD")
 			gitStatus := git.GitValue("status", "--porcelain")
 			filesModified, filesDeleted, filesAdded := 0, 0, 0
