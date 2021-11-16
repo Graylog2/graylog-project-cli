@@ -2,7 +2,7 @@ BIN = graylog-project
 BIN_LINUX = $(BIN).linux
 BIN_DARWIN = $(BIN).darwin
 
-GIT_REV=$(shell git rev-parse --short HEAD)
+GIT_REV=$(shell git rev-parse HEAD)
 BUILD_DATE=$(shell date -u +%Y-%m-%dT%H:%M:%S%z)
 GIT_TAG=$(shell git describe --tags --abbrev=0 --dirty)
 BUILD_OPTS = -mod=vendor -ldflags "-s -X github.com/Graylog2/graylog-project-cli/cmd.gitRevision=$(GIT_REV) -X github.com/Graylog2/graylog-project-cli/cmd.buildDate=$(BUILD_DATE) -X github.com/Graylog2/graylog-project-cli/cmd.gitTag=$(GIT_TAG)"
