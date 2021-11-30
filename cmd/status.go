@@ -72,19 +72,19 @@ func statusCommand(cmd *cobra.Command, args []string) {
 			}
 
 			if !module.HasParent() {
-				logger.Info("    %-"+strconv.Itoa(int(maxNameLength))+"s  %s (commit: %s, branch: %s)", module.Name, module.Version(), commitId, revision)
+				logger.Info("    %-"+strconv.Itoa(int(maxNameLength))+"s  %s (branch: %s, commit: %s)", module.Name, module.Version(), revision, commitId)
 				if config.Verbose {
 					logger.ColorInfo(color.FgYellow, "        <no parent>")
 				}
 			} else {
 				if config.Verbose {
-					logger.Info("    %-"+strconv.Itoa(int(maxNameLength))+"s  %s (commit: %s, branch: %s)", module.Name, module.Version(), commitId, revision)
+					logger.Info("    %-"+strconv.Itoa(int(maxNameLength))+"s  %s (branch: %s, commit: %s)", module.Name, module.Version(), revision, commitId)
 					logger.ColorInfo(color.FgYellow, "        Parent groupId:      %s", module.ParentGroupId())
 					logger.ColorInfo(color.FgYellow, "        Parent artifactId:   %s", module.ParentArtifactId())
 					logger.ColorInfo(color.FgYellow, "        Parent version:      %s", module.ParentVersion())
 					logger.ColorInfo(color.FgYellow, "        Parent relativePath: %s", module.ParentRelativePath())
 				} else {
-					logger.Info("    %-"+strconv.Itoa(int(maxNameLength))+"s  %s (commit: %s, branch: %s, parent: %s)", module.Name, module.Version(), commitId, revision, module.ParentVersion())
+					logger.Info("    %-"+strconv.Itoa(int(maxNameLength))+"s  %s (branch: %s, commit: %s, parent: %s)", module.Name, module.Version(), revision, commitId, module.ParentVersion())
 				}
 			}
 			if !config.Verbose && (filesModified > 0 || filesDeleted > 0 || filesAdded > 0) {
