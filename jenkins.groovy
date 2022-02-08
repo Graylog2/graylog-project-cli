@@ -37,7 +37,8 @@ pipeline
             success
             {
                archiveArtifacts '*.linux'
-               archiveArtifacts '*.darwin'
+               archiveArtifacts '*.darwin-amd64'
+               archiveArtifacts '*.darwin-arm64'
             }
          }
       }
@@ -66,7 +67,8 @@ pipeline
              env.RELEASE_ID = props.id
 
              sh 'curl -H "Authorization: token $GITHUB_CREDS" -H "Content-Type: application/octet-stream" --data-binary @graylog-project.linux https://uploads.github.com/repos/Graylog2/graylog-project-cli/releases/$RELEASE_ID/assets?name=graylog-project.linux'
-             sh 'curl -H "Authorization: token $GITHUB_CREDS" -H "Content-Type: application/octet-stream" --data-binary @graylog-project.darwin https://uploads.github.com/repos/Graylog2/graylog-project-cli/releases/$RELEASE_ID/assets?name=graylog-project.darwin'
+             sh 'curl -H "Authorization: token $GITHUB_CREDS" -H "Content-Type: application/octet-stream" --data-binary @graylog-project.darwin https://uploads.github.com/repos/Graylog2/graylog-project-cli/releases/$RELEASE_ID/assets?name=graylog-project.darwin-amd64'
+             sh 'curl -H "Authorization: token $GITHUB_CREDS" -H "Content-Type: application/octet-stream" --data-binary @graylog-project.darwin https://uploads.github.com/repos/Graylog2/graylog-project-cli/releases/$RELEASE_ID/assets?name=graylog-project.darwin-arm64'
            }
          }
       }
