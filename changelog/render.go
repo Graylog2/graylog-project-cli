@@ -3,10 +3,13 @@ package changelog
 import (
 	"bytes"
 	"fmt"
+	"github.com/Graylog2/graylog-project-cli/git"
 	"github.com/Graylog2/graylog-project-cli/logger"
+	"github.com/Graylog2/graylog-project-cli/utils"
 	"github.com/pelletier/go-toml/v2"
 	"io/fs"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -34,12 +37,13 @@ type SnippetDetails struct {
 	Operators string `toml:"ops"`
 }
 type Snippet struct {
-	Type         string         `toml:"type"`
-	Message      string         `toml:"message"`
-	Issues       []string       `toml:"issues"`
-	PullRequests []string       `toml:"pulls"`
-	Contributors []string       `toml:"contributors"`
-	Details      SnippetDetails `toml:"details"`
+	Type          string         `toml:"type"`
+	Message       string         `toml:"message"`
+	Issues        []string       `toml:"issues"`
+	PullRequests  []string       `toml:"pulls"`
+	Contributors  []string       `toml:"contributors"`
+	Details       SnippetDetails `toml:"details"`
+	GitHubRepoURL string
 }
 
 func Render(format string, path string) error {
@@ -72,6 +76,30 @@ func Render(format string, path string) error {
 	return nil
 }
 
+func getGitHubURL(path string) (string, error) {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return "", fmt.Errorf("couldn't get Git repository URL: %w", err)
+	}
+	defer os.Chdir(cwd)
+
+	if err := os.Chdir(path); err != nil {
+		return "", fmt.Errorf("couldn't get Git repository URL: %w", err)
+	}
+
+	urlString, err := git.GitValueE("remote", "get-url", "--push", "origin")
+	if err != nil {
+		return "", fmt.Errorf("couldn't get Git repository URL: %w", err)
+	}
+
+	githubURL, err := utils.ParseGitHubURL(urlString)
+	if err != nil {
+		return "", fmt.Errorf("couldn't get Git repository URL: %w", err)
+	}
+
+	return githubURL.BrowserURL(), nil
+}
+
 func parseSnippets(path string) (map[string][]Snippet, error) {
 	snippetFiles := make([]string, 0)
 	parsedSnippets := make(map[string][]Snippet)
@@ -95,6 +123,11 @@ func parseSnippets(path string) (map[string][]Snippet, error) {
 		return parsedSnippets, fmt.Errorf("couldn't traverse path %s: %w", path, err)
 	}
 
+	githubURL, err := getGitHubURL(path)
+	if err != nil {
+		return parsedSnippets, err
+	}
+
 	for _, snippetFile := range snippetFiles {
 		snippetBytes, err := ioutil.ReadFile(snippetFile)
 		if err != nil {
@@ -105,6 +138,8 @@ func parseSnippets(path string) (map[string][]Snippet, error) {
 		if err := toml.Unmarshal(snippetBytes, &snippetData); err != nil {
 			return parsedSnippets, fmt.Errorf("couldn't parse snippet %s: %w", snippetFile, err)
 		}
+
+		snippetData.GitHubRepoURL = githubURL
 
 		for prefix, value := range typePrefixMap {
 			if strings.HasPrefix(strings.ToLower(snippetData.Type), prefix) {

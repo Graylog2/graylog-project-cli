@@ -3,6 +3,7 @@ package changelog
 import (
 	"bytes"
 	"fmt"
+	"github.com/Graylog2/graylog-project-cli/utils"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"strings"
@@ -24,6 +25,25 @@ type Renderer interface {
 	RenderSnippets(snippets []Snippet, buf *bytes.Buffer) error
 }
 
+func iterateIssuesAndPulls(snippet Snippet, callback func(string, string) error) error {
+	for _, issuesOrPulls := range [][]string{snippet.Issues, snippet.PullRequests} {
+		for _, value := range issuesOrPulls {
+			issueURL, err := utils.ResolveGitHubIssueURL(snippet.GitHubRepoURL, value)
+			if err != nil {
+				return err
+			}
+
+			title := utils.PrettifyGitHubIssueURL(issueURL, utils.PrettyModeRepo)
+
+			if err := callback(title, issueURL); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
 type HTMLFormatter struct {
 }
 
@@ -41,6 +61,15 @@ func (h HTMLFormatter) RenderSnippets(snippets []Snippet, buf *bytes.Buffer) err
 		if err := mdMessageRenderer.Convert([]byte(snippet.Message), buf); err != nil {
 			return fmt.Errorf("couldn't convert message to HTML \"%s\": %w", snippet.Message, err)
 		}
+
+		err := iterateIssuesAndPulls(snippet, func(title, url string) error {
+			buf.WriteString(fmt.Sprintf(` <a href="%s">%s</a>`, url, title))
+			return nil
+		})
+		if err != nil {
+			return err
+		}
+
 		// TODO: Write details
 		buf.WriteString("</li>\n")
 	}
@@ -62,6 +91,15 @@ func (m MarkdownFormatter) RenderSnippets(snippets []Snippet, buf *bytes.Buffer)
 	for _, snippet := range snippets {
 		buf.WriteString("- ")
 		buf.WriteString(snippet.Message)
+
+		err := iterateIssuesAndPulls(snippet, func(title, url string) error {
+			buf.WriteString(fmt.Sprintf(` [%s](%s)`, title, url))
+			return nil
+		})
+		if err != nil {
+			return err
+		}
+
 		buf.WriteString("\n")
 	}
 	return nil

@@ -66,6 +66,54 @@ func ParseGitHubPRString(prString string) (string, int, error) {
 	return prRepo, prNumber, nil
 }
 
+func ResolveGitHubIssueURL(baseRepo string, issueString string) (string, error) {
+	repo := strings.TrimSuffix(baseRepo, ".git")
+	fullURLPattern := regexp.MustCompile("^https://github\\.com/[^/]+/[^/]+/(?:issues|pull)/\\d+$")
+	numPattern := regexp.MustCompile("^#?(\\d+)$")
+	repoNamePattern := regexp.MustCompile("^([^/\\s]+)#(\\d+)$")
+	orgRepoNamePattern := regexp.MustCompile("^([^/\\s]+)/([^/\\s]+)#(\\d+)$")
+
+	if fullURLPattern.FindStringSubmatch(issueString) != nil {
+		return issueString, nil
+	}
+	if matches := numPattern.FindStringSubmatch(issueString); matches != nil {
+		return repo + "/issues/" + matches[1], nil
+	}
+	if matches := repoNamePattern.FindStringSubmatch(issueString); matches != nil {
+		org := strings.Split(strings.TrimPrefix(repo, "https://github.com/"), "/")[0]
+		return "https://github.com/" + org + "/" + matches[1] + "/issues/" + matches[2], nil
+	}
+	if matches := orgRepoNamePattern.FindStringSubmatch(issueString); matches != nil {
+		return "https://github.com/" + matches[1] + "/" + matches[2] + "/issues/" + matches[3], nil
+	}
+
+	return "", fmt.Errorf("couldn't parse issue string \"%s\" for repository \"%s\"", issueString, baseRepo)
+}
+
+type PrettyMode int
+
+const (
+	PrettyModeNum PrettyMode = iota
+	PrettyModeRepo
+	PrettyModeOrgRepo
+)
+
+func PrettifyGitHubIssueURL(githubURL string, mode PrettyMode) string {
+	pattern := regexp.MustCompile("^https://github\\.com/([^/]+)/([^/]+)/(?:issues|pull)/(\\d+)$")
+	match := pattern.FindStringSubmatch(githubURL)
+
+	switch mode {
+	case PrettyModeNum:
+		return fmt.Sprintf("#%s", match[3])
+	case PrettyModeRepo:
+		return fmt.Sprintf("%s#%s", match[2], match[3])
+	case PrettyModeOrgRepo:
+		fallthrough
+	default:
+		return fmt.Sprintf("%s/%s#%s", match[1], match[2], match[3])
+	}
+}
+
 func ReplaceGitHubURL(url string, repoName string) (string, error) {
 	name := strings.TrimSuffix(repoName, ".git")
 
@@ -104,6 +152,10 @@ func (url GitHubURL) HTTPS() string {
 
 func (url GitHubURL) Directory() string {
 	return strings.TrimSuffix(filepath.Base(url.Repository), filepath.Ext(url.Repository))
+}
+
+func (url GitHubURL) BrowserURL() string {
+	return strings.TrimSuffix(url.HTTPS(), filepath.Ext(url.Repository))
 }
 
 func (url GitHubURL) Matches(match string) bool {
