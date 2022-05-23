@@ -17,9 +17,6 @@ var changelogCmd = &cobra.Command{
 	Long: `Management of repository changelogs.
 
 Examples:
-    # Create new changelog snippet based on a built-in template
-    graylog-project changelog create
-
     # Render changelog for the given directory
     graylog-project changelog render path/to/snippets
 `,
