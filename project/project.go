@@ -393,6 +393,16 @@ func forEachModule(modules []Module, callback func(Module)) {
 	}
 }
 
+func forEachModuleE(modules []Module, callback func(Module) error) error {
+	for _, module := range modules {
+		if err := callback(module); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func forEachModuleOrSubmodules(modules []Module, callback func(Module)) {
 	for _, module := range modules {
 		if module.HasSubmodules() {
@@ -418,6 +428,10 @@ func ForEachModule(project Project, callback func(Module)) {
 
 func ForEachSelectedModule(project Project, callback func(Module)) {
 	forEachModule(SelectedModules(project), callback)
+}
+
+func ForEachSelectedModuleE(project Project, callback func(Module) error) error {
+	return forEachModuleE(SelectedModules(project), callback)
 }
 
 func ForEachModuleOrSubmodules(project Project, callback func(Module)) {

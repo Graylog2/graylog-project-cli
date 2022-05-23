@@ -2,6 +2,7 @@ package git
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/fatih/color"
 	"github.com/pkg/errors"
@@ -11,6 +12,11 @@ import (
 
 func Git(commands ...string) {
 	git(true, commands...)
+}
+
+func GitE(commands ...string) (string, error) {
+	out, err := gitE(true, commands...)
+	return out, err
 }
 
 func SilentGit(commands ...string) {
@@ -34,6 +40,23 @@ func git(verbose bool, commands ...string) {
 
 	logOutputBuffer(stderr.Bytes())
 	logOutputBuffer(out)
+}
+
+func gitE(verbose bool, commands ...string) (string, error) {
+	var outBuf bytes.Buffer
+
+	if verbose {
+		logger.ColorInfo(color.FgGreen, "    git %v", strings.Join(commands, " "))
+	}
+
+	command := exec.Command("git", commands...)
+	command.Stderr = &outBuf
+	command.Stdout = &outBuf
+	if err := command.Run(); err != nil {
+		return outBuf.String(), fmt.Errorf("couldn't execute \"git %s\": %w", strings.Join(commands, " "), err)
+	}
+
+	return outBuf.String(), nil
 }
 
 func GitValue(commands ...string) string {
