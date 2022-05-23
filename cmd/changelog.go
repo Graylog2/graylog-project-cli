@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 var changelogCmd = &cobra.Command{
@@ -38,12 +39,18 @@ Example:
 }
 
 var changelogRenderFormat string
+var changelogReleaseDate string
+var changelogReleaseVersion string
+var changelogProduct string
 
 func init() {
 	changelogCmd.AddCommand(changelogRenderCmd)
 	RootCmd.AddCommand(changelogCmd)
 
-	changelogRenderCmd.Flags().StringVarP(&changelogRenderFormat, "format", "f", "md", "The render format. (e.g., \"md\" or \"html\")")
+	changelogRenderCmd.Flags().StringVarP(&changelogRenderFormat, "format", "f", changelog.FormatMD, "The render format. (e.g., \"md\" or \"html\")")
+	changelogRenderCmd.Flags().StringVarP(&changelogReleaseDate, "date", "d", time.Now().Format("2006-01-02"), "The release date.")
+	changelogRenderCmd.Flags().StringVarP(&changelogReleaseVersion, "version", "V", "0.0.0", "The release version.")
+	changelogRenderCmd.Flags().StringVarP(&changelogProduct, "product", "p", "Graylog", "The product name. (e.g., \"Graylog\", \"Graylog Enterprise\")")
 }
 
 func changelogRenderCommand(cmd *cobra.Command, args []string) {
@@ -71,7 +78,15 @@ func changelogRenderCommand(cmd *cobra.Command, args []string) {
 		logger.Fatal(err.Error())
 	}
 
-	if err := changelog.Render(changelogRenderFormat, snippetsPath); err != nil {
+	config := changelog.Config{
+		RenderFormat:   changelogRenderFormat,
+		SnippetsPath:   snippetsPath,
+		ReleaseDate:    changelogReleaseDate,
+		ReleaseVersion: changelogReleaseVersion,
+		Product:        changelogProduct,
+	}
+
+	if err := changelog.Render(config); err != nil {
 		logger.Fatal(err.Error())
 	}
 }

@@ -46,16 +46,22 @@ type Snippet struct {
 	GitHubRepoURL string
 }
 
-func Render(format string, path string) error {
-	parsedSnippets, err := parseSnippets(path)
+func Render(config Config) error {
+	parsedSnippets, err := parseSnippets(config.SnippetsPath)
 	if err != nil {
 		return err
 	}
 
-	renderer, err := GetRenderer(format)
+	renderer, err := GetRenderer(config.RenderFormat)
 	if err != nil {
 		return err
 	}
+
+	headBuf := bytes.Buffer{}
+	if err := renderer.RenderHeader(config, &headBuf); err != nil {
+		return fmt.Errorf("couldn't render header: %w", err)
+	}
+	fmt.Print(headBuf.String())
 
 	for _, _type := range typeOrder {
 		if len(parsedSnippets[_type]) > 0 {

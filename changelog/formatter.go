@@ -20,6 +20,8 @@ var renderers = map[string]Renderer{}
 var titleCaser = cases.Title(language.English)
 
 type Renderer interface {
+	RenderHeader(config Config, buf *bytes.Buffer) error
+
 	RenderType(snippetType string, buf *bytes.Buffer) error
 
 	RenderSnippets(snippets []Snippet, buf *bytes.Buffer) error
@@ -45,6 +47,12 @@ func iterateIssuesAndPulls(snippet Snippet, callback func(string, string) error)
 }
 
 type HTMLFormatter struct {
+}
+
+func (h HTMLFormatter) RenderHeader(config Config, buf *bytes.Buffer) error {
+	buf.WriteString(fmt.Sprintf("<h1>%s %s</h1>\n\n", config.Product, config.ReleaseVersion))
+	buf.WriteString(fmt.Sprintf("<p>Released: %s</p>\n\n", config.ReleaseDate))
+	return nil
 }
 
 func (h HTMLFormatter) RenderType(snippetType string, buf *bytes.Buffer) error {
@@ -78,6 +86,12 @@ func (h HTMLFormatter) RenderSnippets(snippets []Snippet, buf *bytes.Buffer) err
 }
 
 type MarkdownFormatter struct {
+}
+
+func (m MarkdownFormatter) RenderHeader(config Config, buf *bytes.Buffer) error {
+	buf.WriteString(fmt.Sprintf("# %s %s\n\n", config.Product, config.ReleaseVersion))
+	buf.WriteString(fmt.Sprintf("Released: %s\n\n", config.ReleaseDate))
+	return nil
 }
 
 func (m MarkdownFormatter) RenderType(snippetType string, buf *bytes.Buffer) error {
