@@ -26,6 +26,11 @@ const (
 	EnvDebug                       = "DEBUG"
 	EnvMongoDBPort                 = "MONGODB_PORT"
 	EnvElasticsearchPort           = "ELASTICSEARCH_PORT"
+
+	GraylogAPIDefaultPort    = "9000"
+	GraylogWebDefaultPort    = "8080"
+	ElasticsearchDefaultPort = "9200"
+	MongoDBDefaultPort       = "27017"
 )
 
 type Config struct {
@@ -93,10 +98,21 @@ func getEnv(config Config) []string {
 		env = append(env, fmt.Sprintf("%s=%s", EnvDockerComposeCleanupVolumes, "true"))
 	}
 
-	env = append(env, fmt.Sprintf("%s=%s", EnvGraylogAPIHTTPPort, config.Graylog.APIPort))
-	env = append(env, fmt.Sprintf("%s=%s", EnvGraylogWebHTTPPort, config.Graylog.WebPort))
-	env = append(env, fmt.Sprintf("%s=%s", EnvMongoDBPort, config.MongoDB.Port))
-	env = append(env, fmt.Sprintf("%s=%s", EnvElasticsearchPort, config.Elasticsearch.Port))
+	// Don't set the environment variables if the default doesn't change to make sure the .env file for
+	// docker-compose works. Variables defined in the environment are preferred over the one in the .env file by
+	// docker-compose.
+	if config.Graylog.APIPort != GraylogAPIDefaultPort {
+		env = append(env, fmt.Sprintf("%s=%s", EnvGraylogAPIHTTPPort, config.Graylog.APIPort))
+	}
+	if config.Graylog.WebPort != GraylogWebDefaultPort {
+		env = append(env, fmt.Sprintf("%s=%s", EnvGraylogWebHTTPPort, config.Graylog.WebPort))
+	}
+	if config.MongoDB.Port != MongoDBDefaultPort {
+		env = append(env, fmt.Sprintf("%s=%s", EnvMongoDBPort, config.MongoDB.Port))
+	}
+	if config.Elasticsearch.Port != ElasticsearchDefaultPort {
+		env = append(env, fmt.Sprintf("%s=%s", EnvElasticsearchPort, config.Elasticsearch.Port))
+	}
 
 	return env
 }
