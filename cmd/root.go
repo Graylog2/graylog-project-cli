@@ -20,7 +20,7 @@ var (
 var cfgFile string
 var repositoryRoot string
 var debug bool
-var verbose bool
+var verbose int
 var selectedModules string
 var loggerPrefix string
 var noUpdateCheck bool
@@ -90,7 +90,7 @@ func init() {
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file")
 	RootCmd.PersistentFlags().StringVar(&repositoryRoot, "repository-root", config.DefaultRepositoryRoot, "Git repository root")
 	RootCmd.PersistentFlags().BoolVarP(&debug, "debug", "D", false, "enable debug output (default: false)")
-	RootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "enable verbose output (default: false)")
+	RootCmd.PersistentFlags().CountVarP(&verbose, "verbose", "v", "enable verbose output - use multiple times to increase verbosity")
 	RootCmd.PersistentFlags().StringVarP(&selectedModules, "selected-modules", "M", "", "apply command to given modules (comma separated)")
 	RootCmd.PersistentFlags().StringVarP(&loggerPrefix, "logger-prefix", "", "", "output logger prefix")
 	RootCmd.PersistentFlags().BoolVarP(&noUpdateCheck, "disable-update-check", "U", false, "disable checking for graylog-project-cli updates")
