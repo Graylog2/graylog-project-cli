@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -91,11 +92,22 @@ func changelogRenderCommand(cmd *cobra.Command, args []string) {
 		logger.Fatal(err.Error())
 	}
 
+	// By convention, we use the version in the snippet path if it's a valid one and no version flag is given.
+	releaseVersion := changelogReleaseVersion
+	if releaseVersion == "0.0.0" {
+		versionPath := filepath.Base(snippetsPath)
+		if regexp.MustCompile("^\\d+\\.\\d+\\.\\d+$").MatchString(versionPath) {
+			releaseVersion = versionPath
+		} else {
+			logger.Fatal("Missing --version flag and snippets directory doesn't contain a valid version")
+		}
+	}
+
 	config := changelog.Config{
 		RenderFormat:   changelogRenderFormat,
 		SnippetsPath:   snippetsPath,
 		ReleaseDate:    changelogReleaseDate,
-		ReleaseVersion: changelogReleaseVersion,
+		ReleaseVersion: releaseVersion,
 		Product:        changelogProduct,
 	}
 
