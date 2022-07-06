@@ -51,20 +51,36 @@ Example:
 	ValidArgs: changelog.AvailableFormatters,
 }
 
+var changelogNewCmd = &cobra.Command{
+	Use:     "new",
+	Aliases: []string{"n"},
+	Short:   "Create new changelog entry.",
+	Long: `Create a new changelog entry based on a template.
+
+Example:
+    graylog-project changelog new path/to/unreleased/issue-123.toml
+`,
+	Run: changelogNewCommand,
+}
+
 var changelogRenderFormat string
 var changelogReleaseDate string
 var changelogReleaseVersion string
 var changelogProduct string
+var changelogEntryEdit bool
 
 func init() {
 	changelogCmd.AddCommand(changelogRenderCmd)
 	changelogCmd.AddCommand(changelogReleaseCmd)
+	changelogCmd.AddCommand(changelogNewCmd)
 	RootCmd.AddCommand(changelogCmd)
 
 	changelogRenderCmd.Flags().StringVarP(&changelogRenderFormat, "format", "f", changelog.FormatMD, "The render format. (e.g., \"md\", \"html\", or \"d360html\")")
 	changelogRenderCmd.Flags().StringVarP(&changelogReleaseDate, "date", "d", time.Now().Format("2006-01-02"), "The release date.")
 	changelogRenderCmd.Flags().StringVarP(&changelogReleaseVersion, "version", "V", "0.0.0", "The release version.")
 	changelogRenderCmd.Flags().StringVarP(&changelogProduct, "product", "p", "Graylog", "The product name. (e.g., \"Graylog\", \"Graylog Enterprise\")")
+
+	changelogNewCmd.Flags().BoolVarP(&changelogEntryEdit, "edit", "e", false, "start $EDITOR after creating new entry")
 }
 
 func changelogRenderCommand(cmd *cobra.Command, args []string) {
@@ -122,6 +138,21 @@ func changelogReleaseCommand(cmd *cobra.Command, args []string) {
 	project := p.New(config, manifestFiles)
 
 	if err := changelog.Release(project); err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+}
+
+func changelogNewCommand(cmd *cobra.Command, args []string) {
+	if len(args) != 1 {
+		logger.Error("Expecting a single argument")
+		if err := cmd.UsageFunc()(cmd); err != nil {
+			logger.Fatal(err.Error())
+		}
+		os.Exit(1)
+	}
+
+	if err := changelog.NewEntry(args[0], changelogEntryEdit); err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
 	}
