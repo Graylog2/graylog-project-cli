@@ -41,7 +41,7 @@ Example:
 var changelogReleaseCmd = &cobra.Command{
 	Use:   "release",
 	Short: "Prepare changelogs for release.",
-	Long: `Release .
+	Long: `Move unreleased changelog entries to a release.
 
 Example:
     graylog-project changelog release path/to/unreleased/changelog
