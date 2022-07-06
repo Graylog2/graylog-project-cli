@@ -10,10 +10,11 @@ import (
 )
 
 const FormatHTML = "html"
+const FormatD360HTML = "d360html"
 const FormatMarkdown = "markdown"
 const FormatMD = "md"
 
-var AvailableFormatters = []string{FormatHTML, FormatMD, FormatMarkdown}
+var AvailableFormatters = []string{FormatHTML, FormatD360HTML, FormatMD, FormatMarkdown}
 
 var renderers = map[string]Renderer{}
 
@@ -85,6 +86,46 @@ func (h HTMLFormatter) RenderSnippets(snippets []Snippet, buf *bytes.Buffer) err
 	return nil
 }
 
+type D360HTMLFormatter struct {
+	// This formatter is using our custom HTML formatting -- this can be deleted once we moved off of Document360
+}
+
+func (h D360HTMLFormatter) RenderHeader(config Config, buf *bytes.Buffer) error {
+	buf.WriteString(fmt.Sprintf("<h2>%s %s</h2>\n\n", config.Product, config.ReleaseVersion))
+	buf.WriteString(fmt.Sprintf("<p>Released: %s</p>\n\n", config.ReleaseDate))
+	return nil
+}
+
+func (h D360HTMLFormatter) RenderType(snippetType string, buf *bytes.Buffer) error {
+	buf.WriteString("<p><strong>")
+	buf.WriteString(titleCaser.String(snippetType))
+	buf.WriteString("</strong></p>\n")
+	return nil
+}
+
+func (h D360HTMLFormatter) RenderSnippets(snippets []Snippet, buf *bytes.Buffer) error {
+	buf.WriteString("<ul>\n")
+	for _, snippet := range snippets {
+		buf.WriteString("  <li>")
+		if err := mdMessageRenderer.Convert([]byte(snippet.Message), buf); err != nil {
+			return fmt.Errorf("couldn't convert message to HTML \"%s\": %w", snippet.Message, err)
+		}
+
+		err := iterateIssuesAndPulls(snippet, func(title, url string) error {
+			buf.WriteString(fmt.Sprintf(` <a href="%s">%s</a>`, url, title))
+			return nil
+		})
+		if err != nil {
+			return err
+		}
+
+		// TODO: Write details
+		buf.WriteString("</li>\n")
+	}
+	buf.WriteString("</ul>\n")
+	return nil
+}
+
 type MarkdownFormatter struct {
 }
 
@@ -121,6 +162,7 @@ func (m MarkdownFormatter) RenderSnippets(snippets []Snippet, buf *bytes.Buffer)
 
 func init() {
 	renderers[FormatHTML] = HTMLFormatter{}
+	renderers[FormatD360HTML] = D360HTMLFormatter{}
 	renderers[FormatMD] = MarkdownFormatter{}
 	renderers[FormatMarkdown] = MarkdownFormatter{}
 }
