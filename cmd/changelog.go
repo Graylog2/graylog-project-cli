@@ -64,6 +64,7 @@ Example:
 }
 
 var changelogRenderFormat string
+var changelogDisableGitHubLinks bool
 var changelogReleaseDate string
 var changelogReleaseVersion string
 var changelogProduct string
@@ -76,6 +77,7 @@ func init() {
 	RootCmd.AddCommand(changelogCmd)
 
 	changelogRenderCmd.Flags().StringVarP(&changelogRenderFormat, "format", "f", changelog.FormatMD, "The render format. (e.g., \"md\", \"html\", or \"d360html\")")
+	changelogRenderCmd.Flags().BoolVarP(&changelogDisableGitHubLinks, "no-links", "N", false, "Do not render issue or pull-request links for entries.")
 	changelogRenderCmd.Flags().StringVarP(&changelogReleaseDate, "date", "d", time.Now().Format("2006-01-02"), "The release date.")
 	changelogRenderCmd.Flags().StringVarP(&changelogReleaseVersion, "version", "V", "0.0.0", "The release version.")
 	changelogRenderCmd.Flags().StringVarP(&changelogProduct, "product", "p", "Graylog", "The product name. (e.g., \"Graylog\", \"Graylog Enterprise\")")
@@ -120,11 +122,12 @@ func changelogRenderCommand(cmd *cobra.Command, args []string) {
 	}
 
 	config := changelog.Config{
-		RenderFormat:   changelogRenderFormat,
-		SnippetsPath:   snippetsPath,
-		ReleaseDate:    changelogReleaseDate,
-		ReleaseVersion: releaseVersion,
-		Product:        changelogProduct,
+		RenderFormat:      changelogRenderFormat,
+		RenderGitHubLinks: !changelogDisableGitHubLinks,
+		SnippetsPath:      snippetsPath,
+		ReleaseDate:       changelogReleaseDate,
+		ReleaseVersion:    releaseVersion,
+		Product:           changelogProduct,
 	}
 
 	if err := changelog.Render(config); err != nil {

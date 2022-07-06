@@ -23,9 +23,9 @@ var titleCaser = cases.Title(language.English)
 type Renderer interface {
 	RenderHeader(config Config, buf *bytes.Buffer) error
 
-	RenderType(snippetType string, buf *bytes.Buffer) error
+	RenderType(config Config, snippetType string, buf *bytes.Buffer) error
 
-	RenderSnippets(snippets []Snippet, buf *bytes.Buffer) error
+	RenderSnippets(config Config, snippets []Snippet, buf *bytes.Buffer) error
 }
 
 func iterateIssuesAndPulls(snippet Snippet, callback func(string, string) error) error {
@@ -56,14 +56,14 @@ func (h HTMLFormatter) RenderHeader(config Config, buf *bytes.Buffer) error {
 	return nil
 }
 
-func (h HTMLFormatter) RenderType(snippetType string, buf *bytes.Buffer) error {
+func (h HTMLFormatter) RenderType(config Config, snippetType string, buf *bytes.Buffer) error {
 	buf.WriteString("<h2>")
 	buf.WriteString(titleCaser.String(snippetType))
 	buf.WriteString("</h2>\n")
 	return nil
 }
 
-func (h HTMLFormatter) RenderSnippets(snippets []Snippet, buf *bytes.Buffer) error {
+func (h HTMLFormatter) RenderSnippets(config Config, snippets []Snippet, buf *bytes.Buffer) error {
 	buf.WriteString("<ul>\n")
 	for _, snippet := range snippets {
 		buf.WriteString("  <li>")
@@ -71,12 +71,14 @@ func (h HTMLFormatter) RenderSnippets(snippets []Snippet, buf *bytes.Buffer) err
 			return fmt.Errorf("couldn't convert message to HTML \"%s\": %w", snippet.Message, err)
 		}
 
-		err := iterateIssuesAndPulls(snippet, func(title, url string) error {
-			buf.WriteString(fmt.Sprintf(` <a href="%s">%s</a>`, url, title))
-			return nil
-		})
-		if err != nil {
-			return err
+		if config.RenderGitHubLinks {
+			err := iterateIssuesAndPulls(snippet, func(title, url string) error {
+				buf.WriteString(fmt.Sprintf(` <a href="%s">%s</a>`, url, title))
+				return nil
+			})
+			if err != nil {
+				return err
+			}
 		}
 
 		// TODO: Write details
@@ -96,14 +98,14 @@ func (h D360HTMLFormatter) RenderHeader(config Config, buf *bytes.Buffer) error 
 	return nil
 }
 
-func (h D360HTMLFormatter) RenderType(snippetType string, buf *bytes.Buffer) error {
+func (h D360HTMLFormatter) RenderType(config Config, snippetType string, buf *bytes.Buffer) error {
 	buf.WriteString("<p><strong>")
 	buf.WriteString(titleCaser.String(snippetType))
 	buf.WriteString("</strong></p>\n")
 	return nil
 }
 
-func (h D360HTMLFormatter) RenderSnippets(snippets []Snippet, buf *bytes.Buffer) error {
+func (h D360HTMLFormatter) RenderSnippets(config Config, snippets []Snippet, buf *bytes.Buffer) error {
 	buf.WriteString("<ul>\n")
 	for _, snippet := range snippets {
 		buf.WriteString("  <li>")
@@ -111,12 +113,14 @@ func (h D360HTMLFormatter) RenderSnippets(snippets []Snippet, buf *bytes.Buffer)
 			return fmt.Errorf("couldn't convert message to HTML \"%s\": %w", snippet.Message, err)
 		}
 
-		err := iterateIssuesAndPulls(snippet, func(title, url string) error {
-			buf.WriteString(fmt.Sprintf(` <a href="%s">%s</a>`, url, title))
-			return nil
-		})
-		if err != nil {
-			return err
+		if config.RenderGitHubLinks {
+			err := iterateIssuesAndPulls(snippet, func(title, url string) error {
+				buf.WriteString(fmt.Sprintf(` <a href="%s">%s</a>`, url, title))
+				return nil
+			})
+			if err != nil {
+				return err
+			}
 		}
 
 		// TODO: Write details
@@ -135,24 +139,26 @@ func (m MarkdownFormatter) RenderHeader(config Config, buf *bytes.Buffer) error 
 	return nil
 }
 
-func (m MarkdownFormatter) RenderType(snippetType string, buf *bytes.Buffer) error {
+func (m MarkdownFormatter) RenderType(config Config, snippetType string, buf *bytes.Buffer) error {
 	buf.WriteString("## ")
 	buf.WriteString(titleCaser.String(snippetType))
 	buf.WriteString("\n\n")
 	return nil
 }
 
-func (m MarkdownFormatter) RenderSnippets(snippets []Snippet, buf *bytes.Buffer) error {
+func (m MarkdownFormatter) RenderSnippets(config Config, snippets []Snippet, buf *bytes.Buffer) error {
 	for _, snippet := range snippets {
 		buf.WriteString("- ")
 		buf.WriteString(snippet.Message)
 
-		err := iterateIssuesAndPulls(snippet, func(title, url string) error {
-			buf.WriteString(fmt.Sprintf(` [%s](%s)`, title, url))
-			return nil
-		})
-		if err != nil {
-			return err
+		if config.RenderGitHubLinks {
+			err := iterateIssuesAndPulls(snippet, func(title, url string) error {
+				buf.WriteString(fmt.Sprintf(` [%s](%s)`, title, url))
+				return nil
+			})
+			if err != nil {
+				return err
+			}
 		}
 
 		buf.WriteString("\n")

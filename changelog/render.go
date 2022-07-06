@@ -67,11 +67,11 @@ func Render(config Config) error {
 		if len(parsedSnippets[_type]) > 0 {
 			buf := bytes.Buffer{}
 
-			if err := renderer.RenderType(_type, &buf); err != nil {
+			if err := renderer.RenderType(config, _type, &buf); err != nil {
 				return fmt.Errorf("couldn't render type \"%s\": %w", _type, err)
 			}
 
-			if err := renderer.RenderSnippets(parsedSnippets[_type], &buf); err != nil {
+			if err := renderer.RenderSnippets(config, parsedSnippets[_type], &buf); err != nil {
 				return fmt.Errorf("couldn't render snippets \"%#v\": %w", parsedSnippets[_type], err)
 			}
 
