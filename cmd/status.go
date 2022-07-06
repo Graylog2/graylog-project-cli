@@ -51,33 +51,42 @@ func statusCommand(cmd *cobra.Command, args []string) {
 				// Don't display shortened commit IDs in CI environments to avoid future ambiguities regarding the
 				// shortened commit IDs
 				commitId = git.GitValue("rev-parse", "HEAD")
-			} else  {
+			} else {
 				commitId = git.GitValue("rev-parse", "--short", "HEAD")
 			}
 			revision := git.GitValue("rev-parse", "--abbrev-ref", "HEAD")
 			gitStatus := git.GitValue("status", "--porcelain")
 			filesModified, filesDeleted, filesAdded := 0, 0, 0
+			filesModifiedStaged, filesDeletedStaged, filesAddedStaged := 0, 0, 0
 
-			for _, l := range strings.Split(gitStatus, "\n") {
-				line := strings.TrimSpace(l)
+			for _, line := range strings.Split(gitStatus, "\n") {
 				if strings.HasPrefix(line, "M") {
+					filesModifiedStaged++
+				}
+				if strings.HasPrefix(line, " M") {
 					filesModified++
 				}
 				if strings.HasPrefix(line, "D") {
+					filesDeletedStaged++
+				}
+				if strings.HasPrefix(line, " D") {
 					filesDeleted++
 				}
 				if strings.HasPrefix(line, "A") {
+					filesAddedStaged++
+				}
+				if strings.HasPrefix(line, " A") {
 					filesAdded++
 				}
 			}
 
 			if !module.HasParent() {
 				logger.Info("    %-"+strconv.Itoa(int(maxNameLength))+"s  %s (branch: %s, commit: %s)", module.Name, module.Version(), revision, commitId)
-				if config.Verbose {
+				if config.Verbose > 1 {
 					logger.ColorInfo(color.FgYellow, "        <no parent>")
 				}
 			} else {
-				if config.Verbose {
+				if config.Verbose > 1 {
 					logger.Info("    %-"+strconv.Itoa(int(maxNameLength))+"s  %s (branch: %s, commit: %s)", module.Name, module.Version(), revision, commitId)
 					logger.ColorInfo(color.FgYellow, "        Parent groupId:      %s", module.ParentGroupId())
 					logger.ColorInfo(color.FgYellow, "        Parent artifactId:   %s", module.ParentArtifactId())
@@ -87,24 +96,43 @@ func statusCommand(cmd *cobra.Command, args []string) {
 					logger.Info("    %-"+strconv.Itoa(int(maxNameLength))+"s  %s (branch: %s, commit: %s, parent: %s)", module.Name, module.Version(), revision, commitId, module.ParentVersion())
 				}
 			}
-			if !config.Verbose && (filesModified > 0 || filesDeleted > 0 || filesAdded > 0) {
+			if config.Verbose == 0 &&
+				((filesModified > 0 || filesDeleted > 0 || filesAdded > 0) ||
+					(filesModifiedStaged > 0 || filesDeletedStaged > 0 || filesAddedStaged > 0)) {
 				logger.Printf("        Git status:")
-				if filesAdded > 0 {
-					logger.ColorPrintf(color.FgGreen, " %d added", filesAdded)
+				if filesAdded > 0 || filesAddedStaged > 0 {
+					logger.ColorPrintf(color.FgGreen, " %d added", filesAdded+filesAddedStaged)
 				}
-				if filesDeleted > 0 {
-
-					logger.ColorPrintf(color.FgRed, " %d deleted", filesDeleted)
+				if filesDeleted > 0 || filesDeletedStaged > 0 {
+					logger.ColorPrintf(color.FgRed, " %d deleted", filesDeleted+filesDeletedStaged)
 				}
-				if filesModified > 0 {
-					logger.ColorPrintf(color.FgYellow, " %d modified", filesModified)
+				if filesModified > 0 || filesModifiedStaged > 0 {
+					logger.ColorPrintf(color.FgYellow, " %d modified", filesModified+filesModifiedStaged)
 				}
 				logger.ColorPrintf(color.FgYellow, "\n")
+			}
+			if config.Verbose > 0 && config.Verbose < 2 {
+				statusValue := git.GitValue("status", "-s")
+				statusLines := strings.Split(strings.TrimSuffix(statusValue, "\n"), "\n")
+
+				if len(statusLines) > 0 && statusLines[0] != "" {
+					logger.Printf("        Git status:\n")
+					for _, line := range statusLines {
+						var lineColor color.Attribute
+						switch {
+						case strings.HasPrefix(line, "M") || strings.HasPrefix(line, "D") || strings.HasPrefix(line, "A"):
+							lineColor = color.FgGreen
+						default:
+							lineColor = color.FgRed
+						}
+						logger.ColorPrintf(lineColor, "          %s\n", line)
+					}
+				}
 			}
 		})
 	}
 
-	if !config.Verbose {
+	if config.Verbose <= 1 {
 		return
 	}
 

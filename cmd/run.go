@@ -49,10 +49,10 @@ func init() {
 	}
 
 	// Flags for all sub-commands
-	runCmd.PersistentFlags().StringVarP(&runApiPort, "api-port", "g", "9000", "Graylog HTTP API port")
-	runCmd.PersistentFlags().StringVarP(&runWebPort, "web-port", "w", "8080", "Graylog HTTP web port")
-	runCmd.PersistentFlags().StringVarP(&runElasticsearchPort, "es-port", "e", "9200", "Elasticsearch port")
-	runCmd.PersistentFlags().StringVarP(&runMongoDBPort, "mongodb-port", "m", "27017", "MongoDB port")
+	runCmd.PersistentFlags().StringVarP(&runApiPort, "api-port", "g", runner.GraylogAPIDefaultPort, "Graylog HTTP API port")
+	runCmd.PersistentFlags().StringVarP(&runWebPort, "web-port", "w", runner.GraylogWebDefaultPort, "Graylog HTTP web port")
+	runCmd.PersistentFlags().StringVarP(&runElasticsearchPort, "es-port", "e", runner.ElasticsearchDefaultPort, "Elasticsearch port")
+	runCmd.PersistentFlags().StringVarP(&runMongoDBPort, "mongodb-port", "m", runner.MongoDBDefaultPort, "MongoDB port")
 	runCmd.PersistentFlags().BoolVarP(&runBuildImages, "build-images", "B", false, "Rebuild Docker images")
 	runCmd.PersistentFlags().BoolVar(&runBuildClean, "clean", false, "Run clean server build")
 	runCmd.PersistentFlags().BoolVar(&runBuildWeb, "web", false, "Run server build including the web interface")

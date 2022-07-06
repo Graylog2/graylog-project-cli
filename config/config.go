@@ -34,7 +34,7 @@ type Config struct {
 	SelectedModules string        `mapstructure:"selected-modules"`
 	Checkout        Checkout      `mapstructure:"checkout"`
 	ApplyManifest   ApplyManifest `mapstructure:"apply-manifest"`
-	Verbose         bool          `mapstructure:"verbose"`
+	Verbose         int           `mapstructure:"verbose"`
 	NoUpdateCheck   bool          `mapstructure:"disable-update-check"`
 	ForceHttpsRepos bool          `mapstructure:"force-https-repos"`
 	Update          Update        `mapstructure:"update"`
