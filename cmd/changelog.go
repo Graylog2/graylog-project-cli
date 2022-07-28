@@ -69,6 +69,7 @@ var changelogReleaseDate string
 var changelogReleaseVersion string
 var changelogProduct string
 var changelogEntryEdit bool
+var changelogEntryMinimalTemplate bool
 
 func init() {
 	changelogCmd.AddCommand(changelogRenderCmd)
@@ -82,7 +83,8 @@ func init() {
 	changelogRenderCmd.Flags().StringVarP(&changelogReleaseVersion, "version", "V", "0.0.0", "The release version.")
 	changelogRenderCmd.Flags().StringVarP(&changelogProduct, "product", "p", "Graylog", "The product name. (e.g., \"Graylog\", \"Graylog Enterprise\")")
 
-	changelogNewCmd.Flags().BoolVarP(&changelogEntryEdit, "edit", "e", false, "start $EDITOR after creating new entry")
+	changelogNewCmd.Flags().BoolVarP(&changelogEntryEdit, "edit", "e", false, "Start $EDITOR after creating new entry")
+	changelogNewCmd.Flags().BoolVarP(&changelogEntryMinimalTemplate, "minimal-template", "m", false, "Use a minimal entry template")
 }
 
 func changelogRenderCommand(cmd *cobra.Command, args []string) {
@@ -155,7 +157,7 @@ func changelogNewCommand(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	if err := changelog.NewEntry(args[0], changelogEntryEdit); err != nil {
+	if err := changelog.NewEntry(args[0], changelogEntryEdit, changelogEntryMinimalTemplate); err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
 	}

@@ -19,7 +19,7 @@ const entryTemplate = `# PLEASE REMOVE COMMENTS AND OPTIONAL FIELDS! THANKS!
 # Entry type according to https://keepachangelog.com/en/1.0.0/
 # One of: a(dded), c(hanged), d(eprecated), r(emoved), f(ixed), s(ecurity)
 type = "fixed"
-message = "Fix ."
+message = "Fix [...] ."
 
 issues = ["{{ .IssueNumber }}"]
 pulls = ["{{ .PRNumber }}"]
@@ -41,9 +41,16 @@ other elements.
 """
 `
 
+const minimalEntryTemplate = `type = "fixed" # One of: a(dded), c(hanged), d(eprecated), r(emoved), f(ixed), s(ecurity)
+message = "Fix [...] ."
+
+issues = ["{{ .IssueNumber }}"]
+pulls = ["{{ .PRNumber }}"]
+`
+
 var filenamePattern = regexp.MustCompile("^(issue|pr)-(\\d+)\\.toml$")
 
-func NewEntry(path string, edit bool) error {
+func NewEntry(path string, edit bool, useMinimalTemplate bool) error {
 	file := filepath.Base(path)
 	directory := filepath.Dir(path)
 
@@ -69,7 +76,11 @@ func NewEntry(path string, edit bool) error {
 	}
 
 	if !utils.FileExists(path) {
-		tmpl, err := template.New(path).Parse(entryTemplate)
+		tmplString := entryTemplate
+		if useMinimalTemplate {
+			tmplString = minimalEntryTemplate
+		}
+		tmpl, err := template.New(path).Parse(tmplString)
 		if err != nil {
 			return fmt.Errorf("couldn't parse entry template: %w", err)
 		}
