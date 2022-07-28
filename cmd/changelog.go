@@ -40,8 +40,9 @@ Example:
 }
 
 var changelogReleaseCmd = &cobra.Command{
-	Use:   "release",
-	Short: "Prepare changelogs for release.",
+	Hidden: true, // TODO: Show command once it's fully implemented
+	Use:    "release",
+	Short:  "Prepare changelogs for release.",
 	Long: `Move unreleased changelog entries to a release.
 
 Example:
