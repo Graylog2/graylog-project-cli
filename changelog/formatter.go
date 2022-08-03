@@ -31,6 +31,9 @@ type Renderer interface {
 func iterateIssuesAndPulls(snippet Snippet, callback func(string, string) error) error {
 	for _, issuesOrPulls := range [][]string{snippet.Issues, snippet.PullRequests} {
 		for _, value := range issuesOrPulls {
+			if strings.TrimSpace(value) == "" {
+				continue
+			}
 			issueURL, err := utils.ResolveGitHubIssueURL(snippet.GitHubRepoURL, value)
 			if err != nil {
 				return err

@@ -193,6 +193,7 @@ func TestResolveGitHubIssueURL(t *testing.T) {
 		{"https://github.com/myorg/repo1.git", "abc123", "", true},
 		{"https://github.com/myorg/repo1.git", "https://github.com/myorg/repo1", "", true},
 		{"https://github.com/myorg/repo1.git", "https://github.com/myorg/repo1/yolo/123", "", true},
+		{"https://github.com/myorg/repo1.git", "", "", true},
 	}
 
 	for _, c := range cases {
