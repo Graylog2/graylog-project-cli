@@ -24,7 +24,7 @@ var runConfigurations = map[string]string{
     <option name="MAIN_CLASS_NAME" value="org.graylog2.bootstrap.Main" />
     <module name="runner" />
     <option name="PROGRAM_PARAMETERS" value="server -f graylog.conf -np --local" />
-    <option name="VM_PARAMETERS" value="-Djava.library.path=lib/sigar-1.6.4 -Xmx1g -XX:NewRatio=1 -server -XX:+ResizeTLAB -XX:+UseConcMarkSweepGC -XX:+CMSConcurrentMTEnabled -XX:+CMSClassUnloadingEnabled -XX:-OmitStackTraceInFastThrow -XX:+PreserveFramePointer -XX:+UnlockDiagnosticVMOptions -XX:+DebugNonSafepoints -Dio.netty.leakDetection.level=paranoid" />
+    <option name="VM_PARAMETERS" value="-Xmx1g -XX:NewRatio=1 -server -XX:+ResizeTLAB -XX:-OmitStackTraceInFastThrow -XX:+PreserveFramePointer -XX:+UnlockDiagnosticVMOptions -XX:+DebugNonSafepoints -Dio.netty.leakDetection.level=paranoid" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../graylog-project-repos/graylog2-server" />
     <method v="2">
       <option name="Make" enabled="true" />
