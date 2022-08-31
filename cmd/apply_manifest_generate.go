@@ -151,22 +151,10 @@ func amgCommandInteractive(newManifest *manifest.Manifest) string {
 
 	newManifest.DefaultApply = newApply
 
-	useDefaults := asker.AskYesNo("Do you want to use the default settings for all modules?", true)
-
 	var newModules []manifest.ManifestModule
 
 	for _, module := range newManifest.Modules {
-		var newModuleVersion string
-		var newModuleApply manifest.ManifestApply
-
-		if useDefaults || asker.AskYesNo("Do you want to use the defaults for module "+module.Repository+"?", true) {
-			newModuleVersion = newVersion
-		} else {
-			newModuleVersion, newModuleApply = applyManifestGenerateAskModule(&asker, module)
-		}
-
-		module.Revision = newModuleVersion
-		module.Apply = newModuleApply
+		module.Revision = newVersion
 
 		newModules = append(newModules, module)
 	}
