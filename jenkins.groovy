@@ -17,7 +17,7 @@ pipeline
 
    tools
    {
-     go 'Go'
+     go 'Go 1.19'
    }
 
    stages
@@ -25,8 +25,6 @@ pipeline
       stage('Build')
       {
          steps {
-            git 'https://github.com/Graylog2/graylog-project-cli.git'
-
             sh 'go version'
 
             sh "make"
@@ -72,5 +70,13 @@ pipeline
            }
          }
       }
+   }
+
+   post
+   {
+     cleanup
+     {
+       cleanWs()
+     }
    }
 }

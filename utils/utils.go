@@ -30,6 +30,23 @@ func GetCwd() string {
 	return dir
 }
 
+func GetCwdE() (string, error) {
+	currentDir, err := os.Getwd()
+
+	if err != nil {
+		return "", fmt.Errorf("couldn't get current directory: %w", err)
+	}
+
+	// Make sure to resolve any symlinks and get the real directory.
+	// Functions like filepath.Walk do not handle symlinks well...
+	resolvedDir, err := filepath.EvalSymlinks(currentDir)
+	if err != nil {
+		return "", fmt.Errorf("couldn't evaluate symlink for %s: %w", currentDir, err)
+	}
+
+	return resolvedDir, nil
+}
+
 func Chdir(path string) {
 	if err := os.Chdir(path); err != nil {
 		logger.Fatal("Unable to change into directory %v: %v", path, err)
@@ -131,6 +148,7 @@ func FileExists(path string) bool {
 }
 
 type DirectoryCallback func()
+type DirectoryCallbackWithError func() error
 
 func InDirectory(path string, callback DirectoryCallback) {
 	defer Chdir(GetCwd())
@@ -138,6 +156,20 @@ func InDirectory(path string, callback DirectoryCallback) {
 	Chdir(path)
 
 	callback()
+}
+
+func InDirectoryE(path string, callback DirectoryCallbackWithError) error {
+	currentPath, err := GetCwdE()
+	if err != nil {
+		return err
+	}
+	defer os.Chdir(currentPath)
+
+	if err := os.Chdir(path); err != nil {
+		return fmt.Errorf("couldn't change into directory %s: %w", path, err)
+	}
+
+	return callback()
 }
 
 func FilesIdentical(file1, file2 string) bool {

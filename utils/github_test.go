@@ -53,6 +53,12 @@ func TestParseGitHubURL(t *testing.T) {
 		t.Errorf("expected <%s> but got <%s>", expected, url.HTTPS())
 	}
 
+	url, _ = ParseGitHubURL("https://github.com/Graylog2/graylog2-server.git")
+	expected = "https://github.com/Graylog2/graylog2-server"
+	if url.BrowserURL() != expected {
+		t.Errorf("expected <%s> but got <%s>", expected, url.BrowserURL())
+	}
+
 	// Matches ok
 	url, _ = ParseGitHubURL("https://github.com/Graylog2/graylog2-server.git")
 	match := "Graylog2/graylog2-server"
@@ -163,6 +169,65 @@ func TestParseGitHubPRString(t *testing.T) {
 			}
 			if err != nil && !c.err {
 				t.Errorf("expected no error but got: %v", err)
+			}
+		})
+	}
+}
+
+func TestResolveGitHubIssueURL(t *testing.T) {
+	var cases = []struct {
+		baseRepo string
+		input    string
+		output   string
+		err      bool
+	}{
+		{"https://github.com/myorg/repo1.git", "123", "https://github.com/myorg/repo1/issues/123", false},
+		{"https://github.com/myorg/repo1.git", "#123", "https://github.com/myorg/repo1/issues/123", false},
+		{"https://github.com/myorg/repo1.git", "repo1#123", "https://github.com/myorg/repo1/issues/123", false},
+		{"https://github.com/myorg/repo1.git", "repo2#123", "https://github.com/myorg/repo2/issues/123", false},
+		{"https://github.com/myorg/repo1.git", "myorg/repo1#123", "https://github.com/myorg/repo1/issues/123", false},
+		{"https://github.com/myorg/repo1.git", "myorg/repo2#123", "https://github.com/myorg/repo2/issues/123", false},
+		{"https://github.com/myorg/repo1.git", "https://github.com/myorg/repo1/issues/123", "https://github.com/myorg/repo1/issues/123", false},
+		{"https://github.com/myorg/repo1.git", "https://github.com/myorg/repo1/pull/123", "https://github.com/myorg/repo1/pull/123", false},
+		{"https://github.com/myorg/repo1.git", "abc123", "", true},
+		{"https://github.com/myorg/repo1.git", "abc123", "", true},
+		{"https://github.com/myorg/repo1.git", "https://github.com/myorg/repo1", "", true},
+		{"https://github.com/myorg/repo1.git", "https://github.com/myorg/repo1/yolo/123", "", true},
+		{"https://github.com/myorg/repo1.git", "", "", true},
+	}
+
+	for _, c := range cases {
+		t.Run(c.input, func(t *testing.T) {
+			url, err := ResolveGitHubIssueURL(c.baseRepo, c.input)
+			if url != c.output {
+				t.Errorf("expected <%s> for input <%s>, got <%s>", c.output, c.input, url)
+			}
+			if err == nil && c.err {
+				t.Errorf("expected an error but got none")
+			}
+			if err != nil && !c.err {
+				t.Errorf("expected no error but got: %v", err)
+			}
+		})
+	}
+}
+
+func TestPrettifyGitHubIssueURL(t *testing.T) {
+	var cases = []struct {
+		input  string
+		mode   PrettyMode
+		output string
+	}{
+		{"https://github.com/myorg/repo1/issues/123", PrettyModeNum, "#123"},
+		{"https://github.com/myorg/repo1/issues/123", PrettyModeRepo, "repo1#123"},
+		{"https://github.com/myorg/repo1/issues/123", PrettyModeOrgRepo, "myorg/repo1#123"},
+	}
+
+	for _, c := range cases {
+		t.Run(c.input, func(t *testing.T) {
+			url := PrettifyGitHubIssueURL(c.input, c.mode)
+			if url != c.output {
+				t.Errorf("expected <%s> for input <%s>, got <%s>", c.output, c.input, url)
 			}
 		})
 	}
