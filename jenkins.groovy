@@ -25,8 +25,6 @@ pipeline
       stage('Build')
       {
          steps {
-            git 'https://github.com/Graylog2/graylog-project-cli.git'
-
             sh 'go version'
 
             sh "make"
