@@ -18,8 +18,6 @@ The CLI uses a manifest file to determine which repositories it should be managi
 
 Additionally, there is the apply-manifest file. This file is used during releases. It contains the new version that all managed repos should be set to after the release. It can also optionally contain the name of a new branch to create across all repos.
 
-
-
 ## Available Commands
 
 | command name            | description |
@@ -27,6 +25,7 @@ Additionally, there is the apply-manifest file. This file is used during release
 | apply-manifest          | Builds a version of Graylog using the components specified in the apply-manifest. Also increments the version after the build and optionally creates a new branch.|
 | apply-manifest-generate | Generate an apply-manifest from the given manifest |
 | bootstrap               | Clone and setup graylog-project repository |
+| changelog               | Changelog mangement |
 | checkout                | Update all repos for the given manifest |
 | exec                    | Execute arbitrary commands across all modules |
 | git                     | Run git commands across all modules |
@@ -38,14 +37,13 @@ Additionally, there is the apply-manifest file. This file is used during release
 | maven-property          | Gets or sets a maven property |
 | npm                     | Run npm commands across all modules |
 | npm-clean               | Cleanup npm/yarn related state |
+| npm-version             | Set package.json version |
 | regenerate              | Regenerate files for the current checkout |
 | run                     | Run Graylog server, MongoDB , Elasticsearch and other services |
 | status                  | Shows the current version and branch of each managed repo. |
 | update                  | Update all repositories for the current manifest |
 | version                 | Display version of the Graylog CLI tool |
 | yarn                    | Run yarn commands across all modules |
-
-
 
 ## Contributing
 
