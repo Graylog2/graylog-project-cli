@@ -41,8 +41,7 @@ func GetCwdE() (string, error) {
 	// Functions like filepath.Walk do not handle symlinks well...
 	resolvedDir, err := filepath.EvalSymlinks(currentDir)
 	if err != nil {
-		logger.Fatal("Unable to eval symlink for %v: %v", currentDir, err)
-		fmt.Errorf("couldn't evaluate symlink for %s: %w", currentDir, err)
+		return "", fmt.Errorf("couldn't evaluate symlink for %s: %w", currentDir, err)
 	}
 
 	return resolvedDir, nil
