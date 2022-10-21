@@ -10,7 +10,6 @@ import (
 	"github.com/samber/lo"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -111,7 +110,7 @@ func NewEntry(path string, edit bool, useMinimalTemplate bool, interactive bool)
 
 		data := TemplateData{
 			Type:         "fixed",
-			Message:      "Fix [...] .",
+			Message:      "Fix [...].",
 			Issues:       fmt.Sprintf("\"%s\"", issueNumber),
 			PullRequests: fmt.Sprintf("\"%s\"", prNumber),
 		}
@@ -131,9 +130,13 @@ func NewEntry(path string, edit bool, useMinimalTemplate bool, interactive bool)
 			return fmt.Errorf("couldn't generate entry: %w", err)
 		}
 
-		if err := ioutil.WriteFile(path, buf.Bytes(), 0644); err != nil {
+		if err := os.WriteFile(path, buf.Bytes(), 0644); err != nil {
 			return fmt.Errorf("couldn't write changelog entry %s: %w", path, err)
 		}
+
+		fmt.Println("Created changelog entry file:", path)
+	} else {
+		fmt.Println("Skipping existing changelog entry file:", path)
 	}
 
 	if edit && isatty.IsTerminal(os.Stdout.Fd()) {
@@ -160,12 +163,12 @@ func askForContent(data *TemplateData) error {
 	types := []string{"added", "changed", "deprecated", "removed", "fixed", "security"}
 	defaultType := 4 // Fixed should be the default choice
 	defaultMessages := map[string]string{
-		"added":      "Add [...] .",
-		"changed":    "Change [...] .",
-		"deprecated": "Deprecate [...] .",
-		"removed":    "Remove [...] .",
-		"fixed":      "Fix [...] .",
-		"security":   "Fix [...] .",
+		"added":      "Add [...].",
+		"changed":    "Change [...].",
+		"deprecated": "Deprecate [...].",
+		"removed":    "Remove [...].",
+		"fixed":      "Fix [...].",
+		"security":   "Fix [...].",
 	}
 
 	promptType := promptui.Select{
@@ -187,9 +190,6 @@ func askForContent(data *TemplateData) error {
 			cleanedInput := cleanupInput(input)
 			if len(cleanedInput) == 0 {
 				return errors.New("message must not be empty")
-			}
-			if !strings.HasSuffix(cleanedInput, ".") {
-				return errors.New("message should be a full sentence must end with a full stop (\".\")")
 			}
 			firstWord := strings.Split(input, " ")[0]
 			if firstWord != cases.Title(language.English).String(firstWord) {

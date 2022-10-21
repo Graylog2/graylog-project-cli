@@ -53,15 +53,15 @@ Example:
 }
 
 var changelogNewCmd = &cobra.Command{
-	Use:     "new",
+	Use:     "new [flags] changelog/unreleased/(issue|pr)-<num>.toml",
 	Aliases: []string{"n"},
-	Short:   "Create new changelog entry.",
-	Long: `Create a new changelog entry based on a template.
-
-Example:
-    graylog-project changelog new path/to/unreleased/issue-123.toml
-`,
-	Run: changelogNewCommand,
+	Example: `
+  graylog-project changelog new changelog/unreleased/issue-123.toml
+  graylog-project changelog new changelog/unreleased/pr-456.toml`,
+	Short: "Create new changelog entry.",
+	Args:  cobra.ExactArgs(1),
+	Long:  "Create a new changelog entry based on a template.",
+	Run:   changelogNewCommand,
 }
 
 var changelogRenderFormat string
@@ -152,14 +152,6 @@ func changelogReleaseCommand(cmd *cobra.Command, args []string) {
 }
 
 func changelogNewCommand(cmd *cobra.Command, args []string) {
-	if len(args) != 1 {
-		logger.Error("Expecting a single argument")
-		if err := cmd.UsageFunc()(cmd); err != nil {
-			logger.Fatal(err.Error())
-		}
-		os.Exit(1)
-	}
-
 	if err := changelog.NewEntry(args[0], changelogEntryEdit, changelogEntryMinimalTemplate, changelogEntryInteractive); err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
