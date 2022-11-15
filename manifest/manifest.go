@@ -13,9 +13,10 @@ import (
 const DownloadedManifestPrefix = "downloaded-manifest"
 
 type Manifest struct {
-	Modules      []ManifestModule `json:"modules"`
-	Includes     []string         `json:"includes,omitempty"`
-	DefaultApply ManifestApply    `json:"default_apply,omitempty"`
+	Modules           []ManifestModule `json:"modules"`
+	Includes          []string         `json:"includes,omitempty"`
+	DefaultApply      ManifestApply    `json:"default_apply,omitempty"`
+	AssemblyPlatforms []string         `json:"assembly_platforms,omitempty"`
 }
 
 type ManifestModule struct {

@@ -15,9 +15,10 @@ import (
 )
 
 type Project struct {
-	config  config.Config
-	Server  Module
-	Modules []Module
+	config            config.Config
+	Server            Module
+	Modules           []Module
+	AssemblyPlatforms []string
 }
 
 type Apply struct {
@@ -265,9 +266,10 @@ func New(config config.Config, manifestFiles []string, options ...projectOption)
 	}
 
 	project := Project{
-		config:  config,
-		Server:  server,
-		Modules: projectModules,
+		config:            config,
+		Server:            server,
+		Modules:           projectModules,
+		AssemblyPlatforms: readManifest.AssemblyPlatforms,
 	}
 
 	return project

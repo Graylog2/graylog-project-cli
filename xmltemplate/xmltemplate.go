@@ -11,10 +11,11 @@ import (
 )
 
 type TemplateInventory struct {
-	Server       p.Module
-	Modules      []p.Module
-	Dependencies []p.Module
-	Assemblies   map[string][]Assembly
+	Server            p.Module
+	Modules           []p.Module
+	Dependencies      []p.Module
+	Assemblies        map[string][]Assembly
+	AssemblyPlatforms []string
 }
 
 type Assembly struct {
@@ -59,10 +60,11 @@ func WriteXmlFile(config config.Config, project p.Project, templateFile string, 
 	}
 
 	inventory := TemplateInventory{
-		Server:       project.Server,
-		Modules:      project.Modules,
-		Dependencies: p.MavenDependencies(project),
-		Assemblies:   mavenAssemblies(project),
+		Server:            project.Server,
+		Modules:           project.Modules,
+		Dependencies:      p.MavenDependencies(project),
+		Assemblies:        mavenAssemblies(project),
+		AssemblyPlatforms: project.AssemblyPlatforms,
 	}
 
 	var buf bytes.Buffer
