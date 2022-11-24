@@ -6,6 +6,7 @@ import (
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/Graylog2/graylog-project-cli/manifest"
 	p "github.com/Graylog2/graylog-project-cli/project"
+	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
@@ -110,15 +111,18 @@ func changelogRenderCommand(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	snippetsPath, err := filepath.Abs(args[0])
-	if err != nil {
-		logger.Fatal(err.Error())
-	}
+	snippetsPaths := lo.Map[string, string](args, func(arg string, _ int) string {
+		path, err := filepath.Abs(arg)
+		if err != nil {
+			logger.Fatal("couldn't get absolute path for %s", arg)
+		}
+		return path
+	})
 
-	// By convention, we use the version in the snippet path if it's a valid one and no version flag is given.
+	// By convention, we use the version in the first snippet path if it's a valid one and no version flag is given.
 	releaseVersion := changelogReleaseVersion
 	if releaseVersion == "0.0.0" {
-		versionPath := filepath.Base(snippetsPath)
+		versionPath := filepath.Base(snippetsPaths[0])
 		if regexp.MustCompile("^\\d+\\.\\d+\\.\\d+$").MatchString(versionPath) {
 			releaseVersion = versionPath
 		} else {
@@ -129,7 +133,7 @@ func changelogRenderCommand(cmd *cobra.Command, args []string) {
 	config := changelog.Config{
 		RenderFormat:      changelogRenderFormat,
 		RenderGitHubLinks: !changelogDisableGitHubLinks,
-		SnippetsPath:      snippetsPath,
+		SnippetsPaths:     snippetsPaths,
 		ReleaseDate:       changelogReleaseDate,
 		ReleaseVersion:    releaseVersion,
 		Product:           changelogProduct,

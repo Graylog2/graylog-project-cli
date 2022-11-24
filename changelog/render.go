@@ -8,7 +8,6 @@ import (
 	"github.com/Graylog2/graylog-project-cli/utils"
 	"github.com/pelletier/go-toml/v2"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -48,7 +47,7 @@ type Snippet struct {
 }
 
 func Render(config Config) error {
-	parsedSnippets, err := parseSnippets(config.SnippetsPath)
+	parsedSnippets, err := parseSnippets(config.SnippetsPaths)
 	if err != nil {
 		return err
 	}
@@ -107,55 +106,58 @@ func getGitHubURL(path string) (string, error) {
 	return githubURL.BrowserURL(), nil
 }
 
-func parseSnippets(path string) (map[string][]Snippet, error) {
-	snippetFiles := make([]string, 0)
+func parseSnippets(paths []string) (map[string][]Snippet, error) {
 	parsedSnippets := make(map[string][]Snippet)
 
-	err := filepath.Walk(path, func(path string, info fs.FileInfo, err error) error {
-		if err != nil {
-			return nil
-		}
+	for _, path := range paths {
+		snippetFiles := make([]string, 0)
 
-		if info.IsDir() || !strings.HasSuffix(strings.ToLower(path), ".toml") {
-			return nil
-		}
-
-		logger.Debug("Adding snippetFile: %s", path)
-		snippetFiles = append(snippetFiles, path)
-
-		return nil
-	})
-
-	if err != nil {
-		return parsedSnippets, fmt.Errorf("couldn't traverse path %s: %w", path, err)
-	}
-
-	githubURL, err := getGitHubURL(path)
-	if err != nil {
-		return parsedSnippets, err
-	}
-
-	for _, snippetFile := range snippetFiles {
-		snippetBytes, err := ioutil.ReadFile(snippetFile)
-		if err != nil {
-			return parsedSnippets, fmt.Errorf("couldn't read %s: %w", snippetFile, err)
-		}
-
-		var snippetData Snippet
-		if err := toml.Unmarshal(snippetBytes, &snippetData); err != nil {
-			return parsedSnippets, fmt.Errorf("couldn't parse snippet %s: %w", snippetFile, err)
-		}
-
-		snippetData.GitHubRepoURL = githubURL
-		snippetData.Filename = snippetFile
-
-		for prefix, value := range typePrefixMap {
-			if strings.HasPrefix(strings.ToLower(snippetData.Type), prefix) {
-				snippetData.Type = value
+		err := filepath.Walk(path, func(path string, info fs.FileInfo, err error) error {
+			if err != nil {
+				return nil
 			}
+
+			if info.IsDir() || !strings.HasSuffix(strings.ToLower(path), ".toml") {
+				return nil
+			}
+
+			logger.Debug("Adding snippetFile: %s", path)
+			snippetFiles = append(snippetFiles, path)
+
+			return nil
+		})
+
+		if err != nil {
+			return parsedSnippets, fmt.Errorf("couldn't traverse path %s: %w", path, err)
 		}
 
-		parsedSnippets[snippetData.Type] = append(parsedSnippets[snippetData.Type], snippetData)
+		githubURL, err := getGitHubURL(path)
+		if err != nil {
+			return parsedSnippets, err
+		}
+
+		for _, snippetFile := range snippetFiles {
+			snippetBytes, err := os.ReadFile(snippetFile)
+			if err != nil {
+				return parsedSnippets, fmt.Errorf("couldn't read %s: %w", snippetFile, err)
+			}
+
+			var snippetData Snippet
+			if err := toml.Unmarshal(snippetBytes, &snippetData); err != nil {
+				return parsedSnippets, fmt.Errorf("couldn't parse snippet %s: %w", snippetFile, err)
+			}
+
+			snippetData.GitHubRepoURL = githubURL
+			snippetData.Filename = snippetFile
+
+			for prefix, value := range typePrefixMap {
+				if strings.HasPrefix(strings.ToLower(snippetData.Type), prefix) {
+					snippetData.Type = value
+				}
+			}
+
+			parsedSnippets[snippetData.Type] = append(parsedSnippets[snippetData.Type], snippetData)
+		}
 	}
 
 	return parsedSnippets, nil
