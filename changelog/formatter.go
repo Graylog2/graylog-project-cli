@@ -28,6 +28,15 @@ type Renderer interface {
 	RenderSnippets(config Config, snippets []Snippet, buf *bytes.Buffer) error
 }
 
+type SnippetRenderError struct {
+	snippet Snippet
+	err     error
+}
+
+func (e SnippetRenderError) Error() string {
+	return fmt.Errorf("error for snippet %s: %w", e.snippet.Filename, e.err).Error()
+}
+
 func iterateIssuesAndPulls(snippet Snippet, callback func(string, string) error) error {
 	for _, issuesOrPulls := range [][]string{snippet.Issues, snippet.PullRequests} {
 		for _, value := range issuesOrPulls {
@@ -36,13 +45,13 @@ func iterateIssuesAndPulls(snippet Snippet, callback func(string, string) error)
 			}
 			issueURL, err := utils.ResolveGitHubIssueURL(snippet.GitHubRepoURL, value)
 			if err != nil {
-				return err
+				return &SnippetRenderError{snippet, err}
 			}
 
 			title := utils.PrettifyGitHubIssueURL(issueURL, utils.PrettyModeRepo)
 
 			if err := callback(title, issueURL); err != nil {
-				return err
+				return &SnippetRenderError{snippet, err}
 			}
 		}
 	}

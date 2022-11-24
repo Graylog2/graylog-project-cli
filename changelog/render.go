@@ -44,6 +44,7 @@ type Snippet struct {
 	Contributors  []string       `toml:"contributors"`
 	Details       SnippetDetails `toml:"details"`
 	GitHubRepoURL string
+	Filename      string
 }
 
 func Render(config Config) error {
@@ -72,7 +73,7 @@ func Render(config Config) error {
 			}
 
 			if err := renderer.RenderSnippets(config, parsedSnippets[_type], &buf); err != nil {
-				return fmt.Errorf("couldn't render snippets \"%#v\": %w", parsedSnippets[_type], err)
+				return fmt.Errorf("couldn't render snippets: %w", err)
 			}
 
 			fmt.Println(buf.String())
@@ -146,6 +147,7 @@ func parseSnippets(path string) (map[string][]Snippet, error) {
 		}
 
 		snippetData.GitHubRepoURL = githubURL
+		snippetData.Filename = snippetFile
 
 		for prefix, value := range typePrefixMap {
 			if strings.HasPrefix(strings.ToLower(snippetData.Type), prefix) {
