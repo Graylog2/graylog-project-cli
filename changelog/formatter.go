@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/Graylog2/graylog-project-cli/utils"
+	"github.com/samber/lo"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"strings"
@@ -59,6 +60,29 @@ func iterateIssuesAndPulls(snippet Snippet, callback func(string, string) error)
 	return nil
 }
 
+func mdFormatContributors(snippet Snippet) []string {
+	if len(snippet.Contributors) == 0 {
+		return nil
+	}
+
+	names := lo.Filter[string](snippet.Contributors, func(name string, _ int) bool {
+		return strings.TrimSpace(name) != ""
+	})
+
+	if len(names) == 0 {
+		return nil
+	}
+
+	return lo.Map[string, string](snippet.Contributors, func(name string, _ int) string {
+		if strings.HasPrefix(strings.TrimSpace(name), "@") {
+			nameWithoutPrefix := strings.TrimPrefix(name, "@")
+			return fmt.Sprintf(`[%s](https://github.com/%s)`, name, nameWithoutPrefix)
+		} else {
+			return name
+		}
+	})
+}
+
 type HTMLFormatter struct {
 }
 
@@ -91,6 +115,20 @@ func (h HTMLFormatter) RenderSnippets(config Config, snippets []Snippet, buf *by
 			if err != nil {
 				return err
 			}
+		}
+
+		contributors := mdFormatContributors(snippet)
+		if len(contributors) > 0 {
+			formattedContributors := make([]string, 0, len(contributors))
+			for _, name := range contributors {
+				var nameBuf bytes.Buffer
+				if err := mdMessageRenderer.Convert([]byte(name), &nameBuf); err != nil {
+					return fmt.Errorf("couldn't convert message to HTML \"%s\": %w", snippet.Message, err)
+				}
+				formattedContributors = append(formattedContributors, nameBuf.String())
+			}
+
+			buf.WriteString(fmt.Sprintf(` (Thanks: %s)`, strings.Join(formattedContributors, ", ")))
 		}
 
 		// TODO: Write details
@@ -135,6 +173,20 @@ func (h D360HTMLFormatter) RenderSnippets(config Config, snippets []Snippet, buf
 			}
 		}
 
+		contributors := mdFormatContributors(snippet)
+		if len(contributors) > 0 {
+			formattedContributors := make([]string, 0, len(contributors))
+			for _, name := range contributors {
+				var nameBuf bytes.Buffer
+				if err := mdMessageRenderer.Convert([]byte(name), &nameBuf); err != nil {
+					return fmt.Errorf("couldn't convert message to HTML \"%s\": %w", snippet.Message, err)
+				}
+				formattedContributors = append(formattedContributors, nameBuf.String())
+			}
+
+			buf.WriteString(fmt.Sprintf(` (Thanks: %s)`, strings.Join(formattedContributors, ", ")))
+		}
+
 		// TODO: Write details
 		buf.WriteString("</li>\n")
 	}
@@ -171,6 +223,11 @@ func (m MarkdownFormatter) RenderSnippets(config Config, snippets []Snippet, buf
 			if err != nil {
 				return err
 			}
+		}
+
+		contributors := mdFormatContributors(snippet)
+		if len(contributors) > 0 {
+			buf.WriteString(fmt.Sprintf(` (Thanks: %s)`, strings.Join(contributors, ", ")))
 		}
 
 		buf.WriteString("\n")
