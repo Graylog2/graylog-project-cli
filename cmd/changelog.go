@@ -65,6 +65,18 @@ var changelogNewCmd = &cobra.Command{
 	Run:   changelogNewCommand,
 }
 
+var changelogLintCmd = &cobra.Command{
+	Use:     "lint [flags] changelog/unreleased[/(issue|pr)-<num>.toml]",
+	Aliases: []string{"l"},
+	Example: `
+  graylog-project changelog lint changelog/unreleased
+  graylog-project changelog lint changelog/unreleased/pr-456.toml`,
+	Short: "Check changelog entry for syntax and content errors.",
+	Args:  cobra.MinimumNArgs(1),
+	Long:  "Checks a changelog entry for syntax and content errors.",
+	Run:   changelogLintCommand,
+}
+
 var changelogRenderFormat string
 var changelogDisableGitHubLinks bool
 var changelogReleaseDate string
@@ -78,6 +90,7 @@ func init() {
 	changelogCmd.AddCommand(changelogRenderCmd)
 	changelogCmd.AddCommand(changelogReleaseCmd)
 	changelogCmd.AddCommand(changelogNewCmd)
+	changelogCmd.AddCommand(changelogLintCmd)
 	RootCmd.AddCommand(changelogCmd)
 
 	changelogRenderCmd.Flags().StringVarP(&changelogRenderFormat, "format", "f", changelog.FormatMD, "The render format. (e.g., \"md\", \"html\", or \"d360html\")")
@@ -157,6 +170,12 @@ func changelogReleaseCommand(cmd *cobra.Command, args []string) {
 
 func changelogNewCommand(cmd *cobra.Command, args []string) {
 	if err := changelog.NewEntry(args[0], changelogEntryEdit, changelogEntryMinimalTemplate, changelogEntryInteractive); err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+}
+func changelogLintCommand(cmd *cobra.Command, args []string) {
+	if err := changelog.LintPaths(args); err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
 	}
