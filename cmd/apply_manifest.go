@@ -153,6 +153,15 @@ func applyManifestCommand(cmd *cobra.Command, args []string) {
 		applier.MavenRun("clean", "package")
 	}
 
+	msg("Rotate changelogs for release")
+	apply.ForEachModule(proj, false, func(module project.Module) {
+		applyManifestInDirectory(module.Path, func() {
+			if err := applier.ChangelogRelease(module.Path, module.Revision); err != nil {
+				logger.Fatal("ERROR: %s", err)
+			}
+		})
+	})
+
 	// Committing new version in web modules
 	// Run this before the maven scm checkin is pushing to GitHub
 	msg("Committing new version in web modules")

@@ -13,6 +13,9 @@ func NewNoopApplier(profiles []string) Applier {
 	return applier
 }
 
+// Check that noopApplier implements the Applier interface
+var _ Applier = (*noopApplier)(nil)
+
 // A no-op implementation of the apply.Applier interface which just prints the commands.
 type noopApplier struct {
 	CommonMaven
@@ -36,4 +39,9 @@ func (noop noopApplier) NpmVersionSet(module project.Module, newVersion string) 
 
 func (noop noopApplier) NpmVersionCommit(module project.Module, newVersion string) {
 	fmt.Println("commit web module version: " + newVersion)
+}
+
+func (noop noopApplier) ChangelogRelease(path string, revision string) error {
+	fmt.Println("rotating changelog: ", path, revision)
+	return nil
 }

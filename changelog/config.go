@@ -1,5 +1,9 @@
 package changelog
 
+import "regexp"
+
+var SemverVersionPattern = regexp.MustCompile("^\\d+\\.\\d+\\.\\d+$")
+
 type Config struct {
 	RenderFormat      string
 	RenderGitHubLinks bool

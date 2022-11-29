@@ -2,6 +2,7 @@ package apply
 
 import (
 	"fmt"
+	"github.com/Graylog2/graylog-project-cli/changelog"
 	"github.com/Graylog2/graylog-project-cli/git"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/Graylog2/graylog-project-cli/pom"
@@ -28,6 +29,9 @@ func NewExecuteApplier(profiles []string) Applier {
 
 	return applier
 }
+
+// Check that executeApplier implements the Applier interface
+var _ Applier = (*executeApplier)(nil)
 
 // An apply.Applier implementation that actually executes the commands.
 type executeApplier struct {
@@ -124,4 +128,8 @@ func (execute executeApplier) NpmVersionCommit(module project.Module, version st
 
 		git.Git("commit", "-m", commitMsg, "package.json")
 	})
+}
+
+func (execute executeApplier) ChangelogRelease(path string, revision string) error {
+	return changelog.ReleaseInPath(path, revision, changelog.SemverVersionPattern)
 }

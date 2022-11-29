@@ -20,6 +20,8 @@ type applierCommon interface {
 	MavenScmBranch(moduleBranch string)
 
 	MavenDependencyVersionSet(module project.Module, groupId string, artifactId string, newVersion string)
+
+	ChangelogRelease(path string, revision string) error
 }
 
 type Applier interface {

@@ -81,6 +81,7 @@ var changelogRenderFormat string
 var changelogDisableGitHubLinks bool
 var changelogReleaseDate string
 var changelogReleaseVersion string
+var changelogReleaseVersionPattern string
 var changelogProduct string
 var changelogEntryEdit bool
 var changelogEntryMinimalTemplate bool
@@ -97,11 +98,14 @@ func init() {
 	changelogRenderCmd.Flags().BoolVarP(&changelogDisableGitHubLinks, "no-links", "N", false, "Do not render issue or pull-request links for entries.")
 	changelogRenderCmd.Flags().StringVarP(&changelogReleaseDate, "date", "d", time.Now().Format("2006-01-02"), "The release date.")
 	changelogRenderCmd.Flags().StringVarP(&changelogReleaseVersion, "version", "V", "0.0.0", "The release version.")
+	changelogRenderCmd.Flags().StringVarP(&changelogReleaseVersionPattern, "version-pattern", "P", changelog.SemverVersionPattern.String(), "version number pattern")
 	changelogRenderCmd.Flags().StringVarP(&changelogProduct, "product", "p", "Graylog", "The product name. (e.g., \"Graylog\", \"Graylog Enterprise\")")
 
 	changelogNewCmd.Flags().BoolVarP(&changelogEntryEdit, "edit", "e", false, "Start $EDITOR after creating new entry")
 	changelogNewCmd.Flags().BoolVarP(&changelogEntryMinimalTemplate, "minimal-template", "m", false, "Use a minimal entry template")
 	changelogNewCmd.Flags().BoolVarP(&changelogEntryInteractive, "interactive", "i", false, "Fill template values interactively")
+
+	changelogReleaseCmd.Flags().StringVarP(&changelogReleaseVersionPattern, "version-pattern", "P", changelog.SemverVersionPattern.String(), "version number pattern")
 }
 
 func changelogRenderCommand(cmd *cobra.Command, args []string) {
@@ -132,15 +136,24 @@ func changelogRenderCommand(cmd *cobra.Command, args []string) {
 		return path
 	})
 
+	versionPattern, err := regexp.Compile(changelogReleaseVersionPattern)
+	if err != nil {
+		logger.Fatal("Invalid version pattern: %s", changelogReleaseVersionPattern)
+	}
+
 	// By convention, we use the version in the first snippet path if it's a valid one and no version flag is given.
 	releaseVersion := changelogReleaseVersion
 	if releaseVersion == "0.0.0" {
 		versionPath := filepath.Base(snippetsPaths[0])
-		if regexp.MustCompile("^\\d+\\.\\d+\\.\\d+$").MatchString(versionPath) {
+		if versionPattern.MatchString(versionPath) {
 			releaseVersion = versionPath
 		} else {
 			logger.Fatal("Missing --version flag and snippets directory doesn't contain a valid version")
 		}
+	}
+
+	if !versionPattern.MatchString(releaseVersion) {
+		logger.Fatal("Invalid version: %s", releaseVersion)
 	}
 
 	config := changelog.Config{
@@ -162,9 +175,13 @@ func changelogReleaseCommand(cmd *cobra.Command, args []string) {
 	manifestFiles := manifest.ReadState().Files()
 	project := p.New(config, manifestFiles)
 
-	if err := changelog.Release(project); err != nil {
-		logger.Error(err.Error())
-		os.Exit(1)
+	versionPattern, err := regexp.Compile(changelogReleaseVersionPattern)
+	if err != nil {
+		logger.Fatal("Invalid version pattern: %s", changelogReleaseVersionPattern)
+	}
+
+	if err := changelog.Release(project, versionPattern); err != nil {
+		logger.Fatal(err.Error())
 	}
 }
 
