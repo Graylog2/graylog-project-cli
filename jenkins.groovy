@@ -37,6 +37,7 @@ pipeline
                archiveArtifacts '*.linux'
                archiveArtifacts '*.darwin-amd64'
                archiveArtifacts '*.darwin-arm64'
+               archiveArtifacts '*.exe'
             }
          }
       }
@@ -67,6 +68,7 @@ pipeline
              sh 'curl -H "Authorization: token $GITHUB_CREDS" -H "Content-Type: application/octet-stream" --data-binary @graylog-project.linux https://uploads.github.com/repos/Graylog2/graylog-project-cli/releases/$RELEASE_ID/assets?name=graylog-project.linux'
              sh 'curl -H "Authorization: token $GITHUB_CREDS" -H "Content-Type: application/octet-stream" --data-binary @graylog-project.darwin-amd64 https://uploads.github.com/repos/Graylog2/graylog-project-cli/releases/$RELEASE_ID/assets?name=graylog-project.darwin-amd64'
              sh 'curl -H "Authorization: token $GITHUB_CREDS" -H "Content-Type: application/octet-stream" --data-binary @graylog-project.darwin-arm64 https://uploads.github.com/repos/Graylog2/graylog-project-cli/releases/$RELEASE_ID/assets?name=graylog-project.darwin-arm64'
+             sh 'curl -H "Authorization: token $GITHUB_CREDS" -H "Content-Type: application/octet-stream" --data-binary @graylog-project.windows-amd64.exe https://uploads.github.com/repos/Graylog2/graylog-project-cli/releases/$RELEASE_ID/assets?name=graylog-project.windows-amd64.exe'
            }
          }
       }

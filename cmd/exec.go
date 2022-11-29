@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -66,7 +67,12 @@ func execForPath(module p.Module, args []string) {
 
 	utils.Chdir(module.Path)
 
-	command := exec.Command("sh", "-c", strings.Join(args, " "))
+	var command *exec.Cmd
+	if runtime.GOOS == "windows" {
+		command = exec.Command("cmd.exe", "/c", strings.Join(args, " "))
+	} else {
+		command = exec.Command("sh", "-c", strings.Join(args, " "))
+	}
 
 	command.Stdout = os.Stdout
 	command.Stderr = os.Stderr

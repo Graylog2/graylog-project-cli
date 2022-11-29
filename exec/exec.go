@@ -6,6 +6,7 @@ import (
 	"github.com/Graylog2/graylog-project-cli/utils"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -21,7 +22,12 @@ func ExecCommandInPath(path string, args ...string) (ExecCommandOutput, error) {
 
 	utils.Chdir(path)
 
-	command := exec.Command("sh", "-c", strings.Join(args, " "))
+	var command *exec.Cmd
+	if runtime.GOOS == "windows" {
+		command = exec.Command("cmd.exe", "/c", strings.Join(args, " "))
+	} else {
+		command = exec.Command("sh", "-c", strings.Join(args, " "))
+	}
 
 	var output ExecCommandOutput
 
