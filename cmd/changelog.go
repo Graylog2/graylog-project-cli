@@ -3,9 +3,11 @@ package cmd
 import (
 	"github.com/Graylog2/graylog-project-cli/changelog"
 	c "github.com/Graylog2/graylog-project-cli/config"
+	"github.com/Graylog2/graylog-project-cli/git"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/Graylog2/graylog-project-cli/manifest"
 	p "github.com/Graylog2/graylog-project-cli/project"
+	"github.com/hashicorp/go-version"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 	"os"
@@ -41,16 +43,28 @@ Example:
 }
 
 var changelogReleaseCmd = &cobra.Command{
-	Hidden: true, // TODO: Show command once it's fully implemented
-	Use:    "release",
-	Short:  "Prepare changelogs for release.",
+	Use:   "release",
+	Short: "Prepare changelogs for release.",
 	Long: `Move unreleased changelog entries to a release.
 
 Example:
     graylog-project changelog release path/to/unreleased/changelog
 `,
-	Run:       changelogReleaseCommand,
-	ValidArgs: changelog.AvailableFormatters,
+	Run: changelogReleaseCommand,
+}
+
+var changelogReleasePathCmd = &cobra.Command{
+	Use:   "release:path",
+	Short: "Prepare changelogs for release outside a project setup.",
+	Long: `Move unreleased changelog entries to a release folder.
+
+To be used when you need to move changelogs of a single repository outside a project setup.
+
+Example:
+    graylog-project changelog release:path path/to/unreleased/changelog
+`,
+	Args: cobra.ExactArgs(1),
+	Run:  changelogReleasePathCommand,
 }
 
 var changelogNewCmd = &cobra.Command{
@@ -90,6 +104,7 @@ var changelogEntryInteractive bool
 func init() {
 	changelogCmd.AddCommand(changelogRenderCmd)
 	changelogCmd.AddCommand(changelogReleaseCmd)
+	changelogCmd.AddCommand(changelogReleasePathCmd)
 	changelogCmd.AddCommand(changelogNewCmd)
 	changelogCmd.AddCommand(changelogLintCmd)
 	RootCmd.AddCommand(changelogCmd)
@@ -106,6 +121,7 @@ func init() {
 	changelogNewCmd.Flags().BoolVarP(&changelogEntryInteractive, "interactive", "i", false, "Fill template values interactively")
 
 	changelogReleaseCmd.Flags().StringVarP(&changelogReleaseVersionPattern, "version-pattern", "P", changelog.SemverVersionPattern.String(), "version number pattern")
+	changelogReleasePathCmd.Flags().StringVarP(&changelogReleaseVersionPattern, "version-pattern", "P", changelog.SemverVersionPattern.String(), "version number pattern")
 }
 
 func changelogRenderCommand(cmd *cobra.Command, args []string) {
@@ -169,6 +185,7 @@ func changelogRenderCommand(cmd *cobra.Command, args []string) {
 		logger.Fatal(err.Error())
 	}
 }
+
 func changelogReleaseCommand(cmd *cobra.Command, args []string) {
 	// TODO: We might have to take the manifest as argument
 	config := c.Get()
@@ -181,6 +198,32 @@ func changelogReleaseCommand(cmd *cobra.Command, args []string) {
 	}
 
 	if err := changelog.Release(project, versionPattern); err != nil {
+		logger.Fatal(err.Error())
+	}
+}
+
+func changelogReleasePathCommand(cmd *cobra.Command, args []string) {
+	v := args[0]
+	semver, err := version.NewSemver(v)
+	if err != nil {
+		logger.Fatal("Invalid version: %s: %s", v, err)
+	}
+
+	if semver.Prerelease() != "" {
+		logger.Fatal("Not allowing changelog rotation for pre-releases!")
+	}
+
+	versionPattern, err := regexp.Compile(changelogReleaseVersionPattern)
+	if err != nil {
+		logger.Fatal("Invalid version pattern: %s", changelogReleaseVersionPattern)
+	}
+
+	path, err := git.ToplevelPath()
+	if err != nil {
+		logger.Fatal("%s", err)
+	}
+
+	if err := changelog.ReleaseInPath(path, v, versionPattern); err != nil {
 		logger.Fatal(err.Error())
 	}
 }
