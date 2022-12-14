@@ -33,7 +33,9 @@ func ReleaseInPath(path string, version string, versionPattern *regexp.Regexp) e
 		versionChangelogPath := filepath.Join("changelog", version)
 
 		if !utils.FileExists(unreleasedChangelogPath) {
-			return fmt.Errorf("couldn't find unreleased changelog path: %s", filepath.Join(path, unreleasedChangelogPath))
+			logger.Info("Couldn't find unreleased changelog path - skipping changelog release (%s)",
+				filepath.Join(path, unreleasedChangelogPath))
+			return nil
 		}
 
 		if utils.FileExists(versionChangelogPath) {
