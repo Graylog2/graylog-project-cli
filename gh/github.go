@@ -48,7 +48,7 @@ func (c Client) EnableBranchProtection(owner string, repo string, branch string)
 func (c Client) DisableBranchProtection(owner string, repo string, branch string) error {
 	response, err := c.client.Repositories.RemoveBranchProtection(c.ctx, owner, repo, branch)
 
-	if response.StatusCode == 404 {
+	if response != nil && response.StatusCode == 404 {
 		return nil
 	}
 
