@@ -6,7 +6,7 @@ BIN_WINDOWS_AMD64 = $(BIN).windows-amd64.exe
 
 GIT_REV=$(shell git rev-parse HEAD)
 BUILD_DATE=$(shell date -u +%Y-%m-%dT%H:%M:%S%z)
-GIT_TAG=$(shell git describe --tags --abbrev=0 --dirty)
+GIT_TAG=$(shell git describe --tags --abbrev=0 --dirty 2>/dev/null || echo "0.0.0+dev")
 BUILD_OPTS = -mod=vendor -ldflags "-s -X github.com/Graylog2/graylog-project-cli/cmd.gitRevision=$(GIT_REV) -X github.com/Graylog2/graylog-project-cli/cmd.buildDate=$(BUILD_DATE) -X github.com/Graylog2/graylog-project-cli/cmd.gitTag=$(GIT_TAG)"
 
 all: test build
