@@ -37,7 +37,7 @@ func npmVersionCommand(cmd *cobra.Command, args []string) {
 	shouldCommit := viper.GetBool("npm-version.commit")
 
 	if version == "" {
-		logger.Fatal("Missing --set argument")
+		logger.Error("Missing --set argument")
 		cmd.UsageFunc()(cmd)
 		os.Exit(1)
 	}
