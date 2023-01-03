@@ -114,7 +114,7 @@ var templateFileSuffixes = map[string]string{
 }
 
 func WriteTemplates(config c.Config, project p.Project) {
-	// Scan project directory for all .xml.tmpl templates and generate the actual files
+	// Scan project directory for all supported templates and generate the actual files
 	err := filepath.Walk(utils.GetCwd(), func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
