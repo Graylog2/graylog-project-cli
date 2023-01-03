@@ -108,6 +108,11 @@ func SetDependencyVersion(module p.Module, groupId string, artifactId string, ne
 	}
 }
 
+var templateFileSuffixes = map[string]string{
+	".xml.tmpl": ".xml",
+	".xml-tmpl": ".xml",
+}
+
 func WriteTemplates(config c.Config, project p.Project) {
 	// Scan project directory for all .xml.tmpl templates and generate the actual files
 	err := filepath.Walk(utils.GetCwd(), func(path string, info os.FileInfo, err error) error {
@@ -115,11 +120,14 @@ func WriteTemplates(config c.Config, project p.Project) {
 			return err
 		}
 
-		if strings.HasSuffix(path, ".xml.tmpl") {
-			templateFile := utils.GetRelativePath(path)
-			outputFile := strings.TrimSuffix(templateFile, filepath.Ext(templateFile))
-			xmltemplate.WriteXmlFile(config, project, templateFile, outputFile)
+		for templateSuffix, outputSuffix := range templateFileSuffixes {
+			if strings.HasSuffix(path, templateSuffix) {
+				templateFile := utils.GetRelativePath(path)
+				outputFile := strings.TrimSuffix(templateFile, templateSuffix) + outputSuffix
+				xmltemplate.WriteXmlFile(config, project, templateFile, outputFile)
+			}
 		}
+
 		return nil
 	})
 
