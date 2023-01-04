@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/fatih/color v1.13.0
+	github.com/golang-jwt/jwt/v4 v4.4.3
 	github.com/google/go-github/v27 v27.0.6
 	github.com/hashicorp/go-version v1.6.0
 	github.com/imdario/mergo v0.3.13
