@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"errors"
+	"fmt"
 	"github.com/Graylog2/graylog-project-cli/changelog"
 	c "github.com/Graylog2/graylog-project-cli/config"
 	"github.com/Graylog2/graylog-project-cli/git"
@@ -38,8 +40,7 @@ var changelogRenderCmd = &cobra.Command{
 Example:
     graylog-project changelog render path/to/snippets
 `,
-	Run:       changelogRenderCommand,
-	ValidArgs: changelog.AvailableFormatters,
+	Run: changelogRenderCommand,
 }
 
 var changelogReleaseCmd = &cobra.Command{
@@ -109,12 +110,7 @@ func init() {
 	changelogCmd.AddCommand(changelogLintCmd)
 	RootCmd.AddCommand(changelogCmd)
 
-	changelogRenderCmd.Flags().StringVarP(&changelogRenderFormat, "format", "f", changelog.FormatMD, "The render format. (e.g., \"md\", \"html\", or \"d360html\")")
-	changelogRenderCmd.Flags().BoolVarP(&changelogDisableGitHubLinks, "no-links", "N", false, "Do not render issue or pull-request links for entries.")
-	changelogRenderCmd.Flags().StringVarP(&changelogReleaseDate, "date", "d", time.Now().Format("2006-01-02"), "The release date.")
-	changelogRenderCmd.Flags().StringVarP(&changelogReleaseVersion, "version", "V", "0.0.0", "The release version.")
-	changelogRenderCmd.Flags().StringVarP(&changelogReleaseVersionPattern, "version-pattern", "P", changelog.SemverVersionPattern.String(), "version number pattern")
-	changelogRenderCmd.Flags().StringVarP(&changelogProduct, "product", "p", "Graylog", "The product name. (e.g., \"Graylog\", \"Graylog Enterprise\")")
+	applyChangelogRenderFlags(changelogRenderCmd)
 
 	changelogNewCmd.Flags().BoolVarP(&changelogEntryEdit, "edit", "e", false, "Start $EDITOR after creating new entry")
 	changelogNewCmd.Flags().BoolVarP(&changelogEntryMinimalTemplate, "minimal-template", "m", false, "Use a minimal entry template")
@@ -124,27 +120,25 @@ func init() {
 	changelogReleasePathCmd.Flags().StringVarP(&changelogReleaseVersionPattern, "version-pattern", "P", changelog.SemverVersionPattern.String(), "version number pattern")
 }
 
-func changelogRenderCommand(cmd *cobra.Command, args []string) {
-	validFormat := false
-	for _, v := range cmd.ValidArgs {
-		if changelogRenderFormat == v {
-			validFormat = true
-			break
-		}
-	}
-	if !validFormat {
-		logger.Fatal("Invalid render format: %s (available: %s)", changelogRenderFormat, strings.Join(cmd.ValidArgs, ", "))
-	}
+func applyChangelogRenderFlags(cmd *cobra.Command) {
+	cmd.Flags().StringVarP(&changelogRenderFormat, "format", "f", changelog.FormatMD, "The render format. (e.g., \"md\", \"html\", or \"d360html\")")
+	cmd.Flags().BoolVarP(&changelogDisableGitHubLinks, "no-links", "N", false, "Do not render issue or pull-request links for entries.")
+	cmd.Flags().StringVarP(&changelogReleaseDate, "date", "d", time.Now().Format("2006-01-02"), "The release date.")
+	cmd.Flags().StringVarP(&changelogReleaseVersion, "version", "V", "0.0.0", "The release version.")
+	cmd.Flags().StringVarP(&changelogReleaseVersionPattern, "version-pattern", "P", changelog.SemverVersionPattern.String(), "version number pattern")
+	cmd.Flags().StringVarP(&changelogProduct, "product", "p", "Graylog", "The product name. (e.g., \"Graylog\", \"Graylog Enterprise\")")
+}
 
+func changelogRenderCommand(cmd *cobra.Command, args []string) {
 	if len(args) == 0 {
-		logger.Error("Missing snippets directory")
+		logger.Error("Missing snippet directories")
 		if err := cmd.UsageFunc()(cmd); err != nil {
 			logger.Fatal(err.Error())
 		}
 		os.Exit(1)
 	}
 
-	snippetsPaths := lo.Map[string, string](args, func(arg string, _ int) string {
+	snippetsPaths := lo.Map(args, func(arg string, _ int) string {
 		path, err := filepath.Abs(arg)
 		if err != nil {
 			logger.Fatal("couldn't get absolute path for %s", arg)
@@ -152,9 +146,27 @@ func changelogRenderCommand(cmd *cobra.Command, args []string) {
 		return path
 	})
 
+	if err := execChangelogRenderCommand(snippetsPaths); err != nil {
+		logger.Error(err.Error())
+		if err := cmd.UsageFunc()(cmd); err != nil {
+			logger.Fatal(err.Error())
+		}
+		os.Exit(1)
+	}
+}
+
+func execChangelogRenderCommand(snippetsPaths []string) error {
+	if !lo.Contains(changelog.AvailableFormatters, changelogRenderFormat) {
+		return fmt.Errorf("invalid render format: %s (available: %s)", changelogRenderFormat, strings.Join(changelog.AvailableFormatters, ", "))
+	}
+
+	if len(snippetsPaths) == 0 {
+		return errors.New("missing snippet directories")
+	}
+
 	versionPattern, err := regexp.Compile(changelogReleaseVersionPattern)
 	if err != nil {
-		logger.Fatal("Invalid version pattern: %s", changelogReleaseVersionPattern)
+		return fmt.Errorf("invalid version pattern: %s", changelogReleaseVersionPattern)
 	}
 
 	// By convention, we use the version in the first snippet path if it's a valid one and no version flag is given.
@@ -164,12 +176,12 @@ func changelogRenderCommand(cmd *cobra.Command, args []string) {
 		if versionPattern.MatchString(versionPath) {
 			releaseVersion = versionPath
 		} else {
-			logger.Fatal("Missing --version flag and snippets directory doesn't contain a valid version")
+			return errors.New("missing --version flag and snippets directory doesn't contain a valid version")
 		}
 	}
 
 	if !versionPattern.MatchString(releaseVersion) {
-		logger.Fatal("Invalid version: %s", releaseVersion)
+		return fmt.Errorf("invalid version: %s", releaseVersion)
 	}
 
 	config := changelog.Config{
@@ -182,8 +194,10 @@ func changelogRenderCommand(cmd *cobra.Command, args []string) {
 	}
 
 	if err := changelog.Render(config); err != nil {
-		logger.Fatal(err.Error())
+		return err
 	}
+
+	return nil
 }
 
 func changelogReleaseCommand(cmd *cobra.Command, args []string) {
