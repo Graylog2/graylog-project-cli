@@ -128,3 +128,11 @@ func initConfig() {
 		logger.Debug("Error reading config file: %v", err)
 	}
 }
+
+func exitWithUsage(cmd *cobra.Command, format string, args ...any) {
+	logger.Error(format, args...)
+	if err := cmd.UsageFunc()(cmd); err != nil {
+		logger.Error(err.Error())
+	}
+	os.Exit(1)
+}

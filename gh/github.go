@@ -24,37 +24,6 @@ func NewGitHubClient(accessToken string) Client {
 	}
 }
 
-func (c Client) EnableBranchProtection(owner string, repo string, branch string) error {
-	request := &github.ProtectionRequest{
-		RequiredStatusChecks: nil,
-		RequiredPullRequestReviews: &github.PullRequestReviewsEnforcementRequest{
-			DismissalRestrictionsRequest: &github.DismissalRestrictionsRequest{
-				Users: &[]string{},
-				Teams: &[]string{},
-			},
-			DismissStaleReviews:          false,
-			RequireCodeOwnerReviews:      false,
-			RequiredApprovingReviewCount: 1,
-		},
-		EnforceAdmins: true,
-		Restrictions:  nil,
-	}
-
-	_, _, err := c.client.Repositories.UpdateBranchProtection(c.ctx, owner, repo, branch, request)
-
-	return err
-}
-
-func (c Client) DisableBranchProtection(owner string, repo string, branch string) error {
-	response, err := c.client.Repositories.RemoveBranchProtection(c.ctx, owner, repo, branch)
-
-	if response != nil && response.StatusCode == 404 {
-		return nil
-	}
-
-	return err
-}
-
 func SplitRepoString(repository string) (string, string, error) {
 	tokens := strings.Split(repository, "/")
 
