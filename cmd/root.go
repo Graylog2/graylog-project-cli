@@ -22,6 +22,7 @@ var repositoryRoot string
 var debug bool
 var verbose int
 var selectedModules string
+var selectedAssemblies string
 var loggerPrefix string
 var noUpdateCheck bool
 var forceHttpsRepos bool
@@ -92,6 +93,7 @@ func init() {
 	RootCmd.PersistentFlags().BoolVarP(&debug, "debug", "D", false, "enable debug output (default: false)")
 	RootCmd.PersistentFlags().CountVarP(&verbose, "verbose", "v", "enable verbose output - use multiple times to increase verbosity")
 	RootCmd.PersistentFlags().StringVarP(&selectedModules, "selected-modules", "M", "", "apply command to given modules (comma separated)")
+	RootCmd.PersistentFlags().StringVarP(&selectedAssemblies, "selected-assemblies", "Y", "", "apply command to modules that match the given assembly filter (comma separated - use \"-\" prefix to negate selection)")
 	RootCmd.PersistentFlags().StringVarP(&loggerPrefix, "logger-prefix", "", "", "output logger prefix")
 	RootCmd.PersistentFlags().BoolVarP(&noUpdateCheck, "disable-update-check", "U", false, "disable checking for graylog-project-cli updates")
 	RootCmd.PersistentFlags().BoolVarP(&forceHttpsRepos, "force-https-repos", "", false, "convert all git@github.com:... repository URLs to https://github.com/...")
@@ -100,6 +102,7 @@ func init() {
 	viper.BindPFlag("debug", RootCmd.PersistentFlags().Lookup("debug"))
 	viper.BindPFlag("verbose", RootCmd.PersistentFlags().Lookup("verbose"))
 	viper.BindPFlag("selected-modules", RootCmd.PersistentFlags().Lookup("selected-modules"))
+	viper.BindPFlag("selected-assemblies", RootCmd.PersistentFlags().Lookup("selected-assemblies"))
 	viper.BindPFlag("logger-prefix", RootCmd.PersistentFlags().Lookup("logger-prefix"))
 	viper.BindPFlag("disable-update-check", RootCmd.PersistentFlags().Lookup("disable-update-check"))
 	viper.BindPFlag("force-https-repos", RootCmd.PersistentFlags().Lookup("force-https-repos"))

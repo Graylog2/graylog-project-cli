@@ -30,14 +30,15 @@ type Update struct {
 }
 
 type Config struct {
-	RepositoryRoot  string        `mapstructure:"repository-root"`
-	SelectedModules string        `mapstructure:"selected-modules"`
-	Checkout        Checkout      `mapstructure:"checkout"`
-	ApplyManifest   ApplyManifest `mapstructure:"apply-manifest"`
-	Verbose         int           `mapstructure:"verbose"`
-	NoUpdateCheck   bool          `mapstructure:"disable-update-check"`
-	ForceHttpsRepos bool          `mapstructure:"force-https-repos"`
-	Update          Update        `mapstructure:"update"`
+	RepositoryRoot     string        `mapstructure:"repository-root"`
+	SelectedModules    string        `mapstructure:"selected-modules"`
+	SelectedAssemblies string        `mapstructure:"selected-assemblies"`
+	Checkout           Checkout      `mapstructure:"checkout"`
+	ApplyManifest      ApplyManifest `mapstructure:"apply-manifest"`
+	Verbose            int           `mapstructure:"verbose"`
+	NoUpdateCheck      bool          `mapstructure:"disable-update-check"`
+	ForceHttpsRepos    bool          `mapstructure:"force-https-repos"`
+	Update             Update        `mapstructure:"update"`
 }
 
 // Returns true if running a CI environment. Detected environments: Jenkins, TravisCI

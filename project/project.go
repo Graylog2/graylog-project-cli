@@ -2,6 +2,7 @@ package project
 
 import (
 	"fmt"
+	"github.com/samber/lo"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -455,8 +456,28 @@ func ForEachSelectedModuleAndSubmodules(project Project, callback func(Module)) 
 func SelectedModules(project Project) []Module {
 	var selectedModules []Module
 
-	if project.config.SelectedModules == "" {
+	if project.config.SelectedModules == "" && project.config.SelectedAssemblies == "" {
 		return project.Modules
+	}
+
+	if project.config.SelectedModules == "" && project.config.SelectedAssemblies != "" {
+		return lo.Filter(project.Modules, func(module Module, _ int) bool {
+			moduleAssemblies := lo.Union(module.Assemblies, lo.FlatMap(module.Submodules, func(submodule Module, _ int) []string {
+				return submodule.Assemblies
+			}))
+
+			selected := false
+
+			for _, assembly := range strings.Split(project.config.SelectedAssemblies, ",") {
+				if strings.HasPrefix(assembly, "-") {
+					selected = !lo.Contains(moduleAssemblies, strings.TrimPrefix(assembly, "-"))
+				} else {
+					selected = lo.Contains(moduleAssemblies, assembly)
+				}
+			}
+
+			return selected
+		})
 	}
 
 	substrings := strings.Split(project.config.SelectedModules, ",")
