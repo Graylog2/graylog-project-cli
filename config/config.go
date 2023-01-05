@@ -2,7 +2,7 @@ package config
 
 import (
 	"github.com/Graylog2/graylog-project-cli/logger"
-	"github.com/davecgh/go-spew/spew"
+	"github.com/k0kubun/pp/v3"
 	"github.com/spf13/viper"
 	"os"
 )
@@ -61,7 +61,7 @@ func get(config Config) Config {
 		logger.Fatal("Unable to unmarshal config: %v", err)
 	}
 
-	logger.Debug("Active configuration:\n%v", spew.Sdump(config))
+	logger.Debug("Active configuration:\n%v", pp.Sprint(config))
 
 	return config
 }

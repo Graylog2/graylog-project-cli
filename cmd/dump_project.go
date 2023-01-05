@@ -5,7 +5,7 @@ import (
 	"github.com/Graylog2/graylog-project-cli/config"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/Graylog2/graylog-project-cli/project"
-	"github.com/davecgh/go-spew/spew"
+	"github.com/k0kubun/pp/v3"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -27,13 +27,13 @@ var parseManifestCmd = &cobra.Command{
 		projectData := project.New(cfg, cfg.Checkout.ManifestFiles)
 
 		logger.Println("#### Project ####")
-		logger.Println(spew.Sdump(projectData))
+		logger.Println(pp.Sprint(projectData))
 		logger.Println("")
 		logger.Println("#### Maven Dependencies ####")
-		logger.Println(spew.Sdump(project.MavenDependencies(projectData)))
+		logger.Println(pp.Sprint(project.MavenDependencies(projectData)))
 		logger.Println("")
 		logger.Println("#### Maven Assemblies ####")
-		logger.Println(spew.Sdump(dumpMavenAssemblies(projectData)))
+		logger.Println(pp.Sprint(dumpMavenAssemblies(projectData)))
 		logger.Println("")
 	},
 }

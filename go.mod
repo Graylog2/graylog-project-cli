@@ -3,12 +3,12 @@ module github.com/Graylog2/graylog-project-cli
 go 1.18
 
 require (
-	github.com/davecgh/go-spew v1.1.1
 	github.com/fatih/color v1.13.0
 	github.com/golang-jwt/jwt/v4 v4.4.3
 	github.com/google/go-github/v27 v27.0.6
 	github.com/hashicorp/go-version v1.6.0
 	github.com/imdario/mergo v0.3.13
+	github.com/k0kubun/pp/v3 v3.2.0
 	github.com/manifoldco/promptui v0.9.0
 	github.com/mattn/go-isatty v0.0.17
 	github.com/pelletier/go-toml/v2 v2.0.6
@@ -19,7 +19,7 @@ require (
 	github.com/yuin/goldmark v1.5.3
 	golang.org/x/exp v0.0.0-20221230185412-738e83a70c30
 	golang.org/x/oauth2 v0.3.0
-	golang.org/x/text v0.5.0
+	golang.org/x/text v0.6.0
 )
 
 require (
@@ -40,7 +40,7 @@ require (
 	github.com/subosito/gotenv v1.4.1 // indirect
 	golang.org/x/crypto v0.4.0 // indirect
 	golang.org/x/net v0.4.0 // indirect
-	golang.org/x/sys v0.3.0 // indirect
+	golang.org/x/sys v0.4.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
