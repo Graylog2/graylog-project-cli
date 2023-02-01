@@ -39,7 +39,9 @@ func ReleaseInPath(path string, version string, versionPattern *regexp.Regexp) e
 		}
 
 		if utils.FileExists(versionChangelogPath) {
-			return fmt.Errorf("target path already exists: %s", filepath.Join(path, versionChangelogPath))
+			logger.Info("Target path already exists - skipping changelog release (%s)",
+				filepath.Join(path, versionChangelogPath))
+			return nil
 		}
 
 		out, err := git.GitE("mv", "-v", unreleasedChangelogPath, versionChangelogPath)
