@@ -101,6 +101,8 @@ var changelogProduct string
 var changelogEntryEdit bool
 var changelogEntryMinimalTemplate bool
 var changelogEntryInteractive bool
+var changelogSkipHeader bool
+var changelogReadStdin bool
 
 func init() {
 	changelogCmd.AddCommand(changelogRenderCmd)
@@ -127,10 +129,12 @@ func applyChangelogRenderFlags(cmd *cobra.Command) {
 	cmd.Flags().StringVarP(&changelogReleaseVersion, "version", "V", "0.0.0", "The release version.")
 	cmd.Flags().StringVarP(&changelogReleaseVersionPattern, "version-pattern", "P", changelog.SemverVersionPattern.String(), "version number pattern")
 	cmd.Flags().StringVarP(&changelogProduct, "product", "p", "Graylog", "The product name. (e.g., \"Graylog\", \"Graylog Enterprise\")")
+	cmd.Flags().BoolVar(&changelogSkipHeader, "skip-header", false, "Don't render the header")
+	cmd.Flags().BoolVar(&changelogReadStdin, "stdin", false, "Read paths from STDIN")
 }
 
 func changelogRenderCommand(cmd *cobra.Command, args []string) {
-	if len(args) == 0 {
+	if len(args) == 0 && !changelogReadStdin {
 		logger.Error("Missing snippet directories")
 		if err := cmd.UsageFunc()(cmd); err != nil {
 			logger.Fatal(err.Error())
@@ -160,7 +164,7 @@ func execChangelogRenderCommand(snippetsPaths []string) error {
 		return fmt.Errorf("invalid render format: %s (available: %s)", changelogRenderFormat, strings.Join(changelog.AvailableFormatters, ", "))
 	}
 
-	if len(snippetsPaths) == 0 {
+	if len(snippetsPaths) == 0 && !changelogReadStdin {
 		return errors.New("missing snippet directories")
 	}
 
@@ -171,7 +175,7 @@ func execChangelogRenderCommand(snippetsPaths []string) error {
 
 	// By convention, we use the version in the first snippet path if it's a valid one and no version flag is given.
 	releaseVersion := changelogReleaseVersion
-	if releaseVersion == "0.0.0" {
+	if releaseVersion == "0.0.0" && !changelogReadStdin {
 		versionPath := filepath.Base(snippetsPaths[0])
 		if versionPattern.MatchString(versionPath) {
 			releaseVersion = versionPath
@@ -191,6 +195,7 @@ func execChangelogRenderCommand(snippetsPaths []string) error {
 		ReleaseDate:       changelogReleaseDate,
 		ReleaseVersion:    releaseVersion,
 		Product:           changelogProduct,
+		ReadStdin:         changelogReadStdin,
 	}
 
 	if err := changelog.Render(config); err != nil {

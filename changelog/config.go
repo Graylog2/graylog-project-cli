@@ -11,4 +11,6 @@ type Config struct {
 	ReleaseDate       string
 	ReleaseVersion    string
 	Product           string
+	SkipHeader        bool
+	ReadStdin         bool
 }
