@@ -20,6 +20,7 @@ var (
 var cfgFile string
 var repositoryRoot string
 var debug bool
+var quiet bool
 var verbose int
 var selectedModules string
 var selectedAssemblies string
@@ -66,6 +67,7 @@ Example usage:
 ` + fmt.Sprintf("\n\nVersion:      %v\n", gitTag) + fmt.Sprintf("Build date:   %v\n", buildDate) + fmt.Sprintf("Git revision: %v\n\n", gitRevision),
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		logger.SetDebug(viper.GetBool("debug"))
+		logger.SetQuiet(viper.GetBool("quiet"))
 		logger.SetPrefix(viper.GetString("logger-prefix"))
 
 		// We use a special repository root if running in a CI environment and the default hasn't been changed.
@@ -91,6 +93,7 @@ func init() {
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file")
 	RootCmd.PersistentFlags().StringVar(&repositoryRoot, "repository-root", config.DefaultRepositoryRoot, "Git repository root")
 	RootCmd.PersistentFlags().BoolVarP(&debug, "debug", "D", false, "enable debug output (default: false)")
+	RootCmd.PersistentFlags().BoolVar(&quiet, "quiet", false, "enable quiet mode (default: false)")
 	RootCmd.PersistentFlags().CountVarP(&verbose, "verbose", "v", "enable verbose output - use multiple times to increase verbosity")
 	RootCmd.PersistentFlags().StringVarP(&selectedModules, "selected-modules", "M", "", "apply command to given modules (comma separated)")
 	RootCmd.PersistentFlags().StringVarP(&selectedAssemblies, "selected-assemblies", "Y", "", "apply command to modules that match the given assembly filter (comma separated - use \"-\" prefix to negate selection)")
@@ -100,6 +103,7 @@ func init() {
 
 	viper.BindPFlag("repository-root", RootCmd.PersistentFlags().Lookup("repository-root"))
 	viper.BindPFlag("debug", RootCmd.PersistentFlags().Lookup("debug"))
+	viper.BindPFlag("quiet", RootCmd.PersistentFlags().Lookup("quiet"))
 	viper.BindPFlag("verbose", RootCmd.PersistentFlags().Lookup("verbose"))
 	viper.BindPFlag("selected-modules", RootCmd.PersistentFlags().Lookup("selected-modules"))
 	viper.BindPFlag("selected-assemblies", RootCmd.PersistentFlags().Lookup("selected-assemblies"))
