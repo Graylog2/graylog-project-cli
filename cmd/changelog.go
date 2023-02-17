@@ -196,6 +196,7 @@ func execChangelogRenderCommand(snippetsPaths []string) error {
 		ReleaseVersion:    releaseVersion,
 		Product:           changelogProduct,
 		ReadStdin:         changelogReadStdin,
+		SkipHeader:        changelogSkipHeader,
 	}
 
 	if err := changelog.Render(config); err != nil {
