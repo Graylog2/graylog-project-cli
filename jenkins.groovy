@@ -29,17 +29,35 @@ pipeline
 
             sh "make"
          }
+      }
 
-         post
-         {
-            success
-            {
-               archiveArtifacts '*.linux'
-               archiveArtifacts '*.darwin-amd64'
-               archiveArtifacts '*.darwin-arm64'
-               archiveArtifacts '*.exe'
-            }
-         }
+      stage('Sign Windows Binaries')
+      {
+        agent
+        {
+          docker
+          {
+            image 'graylog/internal-codesigntool:latest'
+            args '-u jenkins:jenkins'
+            registryCredentialsId 'docker-hub'
+            alwaysPull true
+            reuseNode true
+          }
+        }
+
+        environment
+        {
+          CODESIGN_USER = credentials('codesign-user')
+          CODESIGN_PASS = credentials('codesign-pass')
+          CODESIGN_TOTP_SECRET = credentials('codesign-totp-secret')
+          CODESIGN_CREDENTIAL_ID = credentials('codesign-credential-id')
+        }
+
+        steps
+        {
+          sh 'make sign-binaries'
+        }
+
       }
 
       stage('Release')
@@ -76,6 +94,14 @@ pipeline
 
    post
    {
+     success
+     {
+        archiveArtifacts '*.linux'
+        archiveArtifacts '*.darwin-amd64'
+        archiveArtifacts '*.darwin-arm64'
+        archiveArtifacts '*.exe'
+     }
+
      cleanup
      {
        cleanWs()
