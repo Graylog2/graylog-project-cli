@@ -198,13 +198,13 @@ type MarkdownFormatter struct {
 }
 
 func (m MarkdownFormatter) RenderHeader(config Config, buf *bytes.Buffer) error {
-	buf.WriteString(fmt.Sprintf("# %s %s\n\n", config.Product, config.ReleaseVersion))
+	buf.WriteString(fmt.Sprintf("%s %s %s\n\n", strings.Repeat("#", config.MarkdownHeaderBaseLevel), config.Product, config.ReleaseVersion))
 	buf.WriteString(fmt.Sprintf("Released: %s\n\n", config.ReleaseDate))
 	return nil
 }
 
 func (m MarkdownFormatter) RenderType(config Config, snippetType string, buf *bytes.Buffer) error {
-	buf.WriteString("## ")
+	buf.WriteString(fmt.Sprintf("%s ", strings.Repeat("#", config.MarkdownHeaderBaseLevel+1)))
 	buf.WriteString(titleCaser.String(snippetType))
 	buf.WriteString("\n\n")
 	return nil

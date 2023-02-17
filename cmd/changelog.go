@@ -103,6 +103,7 @@ var changelogEntryMinimalTemplate bool
 var changelogEntryInteractive bool
 var changelogSkipHeader bool
 var changelogReadStdin bool
+var changelogMarkdownHeaderBaseLevel int
 
 func init() {
 	changelogCmd.AddCommand(changelogRenderCmd)
@@ -131,6 +132,7 @@ func applyChangelogRenderFlags(cmd *cobra.Command) {
 	cmd.Flags().StringVarP(&changelogProduct, "product", "p", "Graylog", "The product name. (e.g., \"Graylog\", \"Graylog Enterprise\")")
 	cmd.Flags().BoolVar(&changelogSkipHeader, "skip-header", false, "Don't render the header")
 	cmd.Flags().BoolVar(&changelogReadStdin, "stdin", false, "Read paths from STDIN")
+	cmd.Flags().IntVar(&changelogMarkdownHeaderBaseLevel, "md-header-base-level", 1, "The Markdown header base level")
 }
 
 func changelogRenderCommand(cmd *cobra.Command, args []string) {
@@ -189,14 +191,15 @@ func execChangelogRenderCommand(snippetsPaths []string) error {
 	}
 
 	config := changelog.Config{
-		RenderFormat:      changelogRenderFormat,
-		RenderGitHubLinks: !changelogDisableGitHubLinks,
-		SnippetsPaths:     snippetsPaths,
-		ReleaseDate:       changelogReleaseDate,
-		ReleaseVersion:    releaseVersion,
-		Product:           changelogProduct,
-		ReadStdin:         changelogReadStdin,
-		SkipHeader:        changelogSkipHeader,
+		RenderFormat:            changelogRenderFormat,
+		RenderGitHubLinks:       !changelogDisableGitHubLinks,
+		SnippetsPaths:           snippetsPaths,
+		ReleaseDate:             changelogReleaseDate,
+		ReleaseVersion:          releaseVersion,
+		Product:                 changelogProduct,
+		ReadStdin:               changelogReadStdin,
+		SkipHeader:              changelogSkipHeader,
+		MarkdownHeaderBaseLevel: changelogMarkdownHeaderBaseLevel,
 	}
 
 	if err := changelog.Render(config); err != nil {
