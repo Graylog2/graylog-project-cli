@@ -33,6 +33,23 @@ var runConfigurations = map[string]string{
 </component>
 `,
 
+	"DataNode.xml": `<component name="ProjectRunConfigurationManager">
+<configuration default="false" name="Graylog DataNode" type="Application" factoryName="Application" singleton="true">
+  <envs>
+	<env name="DEVELOPMENT" value="true" />
+  </envs>
+  <option name="MAIN_CLASS_NAME" value="org.graylog.datanode.bootstrap.Main" />
+  <module name="data-node" />
+  <option name="PROGRAM_PARAMETERS" value="datanode -f datanode.conf -np --local" />
+  <option name="VM_PARAMETERS" value="-Xmx1g -XX:NewRatio=1 -server -XX:+ResizeTLAB -XX:-OmitStackTraceInFastThrow -XX:+PreserveFramePointer -XX:+UnlockDiagnosticVMOptions -XX:+DebugNonSafepoints -Dio.netty.leakDetection.level=paranoid" />
+  <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../graylog-project-repos/graylog2-server" />
+  <method v="2">
+	<option name="Make" enabled="true" />
+  </method>
+</configuration>
+</component>
+`,
+
 	"Web_Devserver.xml": `<component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Web Devserver" type="js.build_tools.npm">
     <package-json value="$PROJECT_DIR$/../graylog-project-repos/graylog2-server/graylog2-web-interface/package.json" />
