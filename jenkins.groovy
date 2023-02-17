@@ -29,17 +29,6 @@ pipeline
 
             sh "make"
          }
-
-         post
-         {
-            success
-            {
-               archiveArtifacts '*.linux'
-               archiveArtifacts '*.darwin-amd64'
-               archiveArtifacts '*.darwin-arm64'
-               archiveArtifacts '*.exe'
-            }
-         }
       }
 
       stage('Sign Windows Binaries')
@@ -68,6 +57,7 @@ pipeline
         {
           sh 'make sign-binaries'
         }
+
       }
 
       stage('Release')
@@ -104,6 +94,14 @@ pipeline
 
    post
    {
+     success
+     {
+        archiveArtifacts '*.linux'
+        archiveArtifacts '*.darwin-amd64'
+        archiveArtifacts '*.darwin-arm64'
+        archiveArtifacts '*.exe'
+     }
+
      cleanup
      {
        cleanWs()
