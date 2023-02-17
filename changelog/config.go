@@ -5,10 +5,13 @@ import "regexp"
 var SemverVersionPattern = regexp.MustCompile("^\\d+\\.\\d+\\.\\d+$")
 
 type Config struct {
-	RenderFormat      string
-	RenderGitHubLinks bool
-	SnippetsPaths     []string
-	ReleaseDate       string
-	ReleaseVersion    string
-	Product           string
+	RenderFormat            string
+	RenderGitHubLinks       bool
+	SnippetsPaths           []string
+	ReleaseDate             string
+	ReleaseVersion          string
+	Product                 string
+	SkipHeader              bool
+	ReadStdin               bool
+	MarkdownHeaderBaseLevel int
 }

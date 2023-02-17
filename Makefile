@@ -25,6 +25,12 @@ build-darwin-arm64:
 build-windows-amd64:
 	GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build $(BUILD_OPTS) -o $(BIN_WINDOWS_AMD64) main.go
 
+sign-binaries: sign-binary-windows-amd64
+	# This needs to run in a Docker container with the graylog/internal-codesigntool image
+	codesigntool sign $(BIN_WINDOWS_AMD64)
+
+sign-binary-windows-amd64:
+
 install: install-linux install-darwin-amd64
 
 install-darwin-amd64: build-darwin-amd64

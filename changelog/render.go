@@ -1,13 +1,15 @@
 package changelog
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"github.com/Graylog2/graylog-project-cli/logger"
+	"os"
 )
 
 func Render(config Config) error {
-	parsedSnippets, err := parseSnippets(config.SnippetsPaths)
+	parsedSnippets, err := parseSnippets(config.SnippetsPaths, config.ReadStdin)
 	if err != nil {
 		return err
 	}
@@ -17,11 +19,13 @@ func Render(config Config) error {
 		return err
 	}
 
-	headBuf := bytes.Buffer{}
-	if err := renderer.RenderHeader(config, &headBuf); err != nil {
-		return fmt.Errorf("couldn't render header: %w", err)
+	if !config.SkipHeader {
+		headBuf := bytes.Buffer{}
+		if err := renderer.RenderHeader(config, &headBuf); err != nil {
+			return fmt.Errorf("couldn't render header: %w", err)
+		}
+		fmt.Print(headBuf.String())
 	}
-	fmt.Print(headBuf.String())
 
 	for _, _type := range sortedTypes {
 		if len(parsedSnippets[_type]) > 0 {
@@ -42,8 +46,19 @@ func Render(config Config) error {
 	return nil
 }
 
-func parseSnippets(paths []string) (map[string][]Snippet, error) {
+func parseSnippets(paths []string, stdin bool) (map[string][]Snippet, error) {
 	parsedSnippets := make(map[string][]Snippet)
+
+	if stdin {
+		paths = make([]string, 0)
+		scanner := bufio.NewScanner(os.Stdin)
+		for scanner.Scan() {
+			paths = append(paths, scanner.Text())
+		}
+		if err := scanner.Err(); err != nil {
+			return nil, fmt.Errorf("couldn't read snippet files from STDIN: %w", err)
+		}
+	}
 
 	for _, path := range paths {
 		snippetFiles, err := listSnippets(path)
