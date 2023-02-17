@@ -33,7 +33,7 @@ var runConfigurations = map[string]string{
 </component>
 `,
 
-"DataNode.xml": `<component name="ProjectRunConfigurationManager">
+	"DataNode.xml": `<component name="ProjectRunConfigurationManager">
 <configuration default="false" name="Graylog DataNode" type="Application" factoryName="Application" singleton="true">
   <envs>
 	<env name="DEVELOPMENT" value="true" />
