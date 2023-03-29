@@ -3,7 +3,7 @@ package utils
 import (
 	"fmt"
 	"github.com/pkg/errors"
-	"net/url"
+	neturl "net/url"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -11,24 +11,23 @@ import (
 )
 
 func ParseGitHubURL(url string) (GitHubURL, error) {
-	gitHubURL := GitHubURL{URL: url}
-
 	if !strings.HasSuffix(url, ".git") {
-		return gitHubURL, errors.Errorf("GitHub URL is missing .git suffix: %s", url)
+		return GitHubURL{}, errors.Errorf("GitHub URL is missing .git suffix: %s", url)
 	}
 
+	var repository string
 	switch {
 	case strings.HasPrefix(url, "github://"):
-		gitHubURL.Repository = strings.Split(url, "//")[1]
+		repository = strings.Split(url, "//")[1]
 	case strings.HasPrefix(url, "git@github"):
-		gitHubURL.Repository = strings.Split(url, ":")[1]
-	case strings.HasPrefix(url, "https://github"):
-		gitHubURL.Repository = strings.Split(url, "github.com/")[1]
+		repository = strings.Split(url, ":")[1]
+	case strings.HasPrefix(url, "https://"):
+		repository = strings.Split(url, "github.com/")[1]
 	default:
 		return GitHubURL{}, errors.Errorf("unknown GitHub URL: %s", url)
 	}
 
-	return gitHubURL, nil
+	return CreateGitHubURL(url, repository)
 }
 
 func ParseGitHubPRString(prString string) (string, int, error) {
@@ -38,7 +37,7 @@ func ParseGitHubPRString(prString string) (string, int, error) {
 
 	if strings.HasPrefix(strings.ToLower(prString), "https://github.com/") && strings.Contains(prString, "/pull/") {
 		// Input is a PR URL like this: https://github.com/Graylog2/graylog2-server/pull/9692
-		u, err := url.Parse(prString)
+		u, err := neturl.Parse(prString)
 		if err != nil {
 			return "", 0, errors.Wrapf(err, "couldn't parse GitHub pull request URL <%s>", prString)
 		}
@@ -129,40 +128,63 @@ func ReplaceGitHubURL(url string, repoName string) (string, error) {
 	}
 }
 
+func CreateGitHubURL(url string, repository string) (GitHubURL, error) {
+	if url == "" || repository == "" {
+		return GitHubURL{}, fmt.Errorf("url and repository cannot be empty")
+	}
+	if strings.HasPrefix(url, "https://") {
+		u, err := neturl.Parse(url)
+		if err != nil {
+			return GitHubURL{}, fmt.Errorf("couldn't parse URL: %s", err)
+		}
+		u.User = nil
+		return GitHubURL{url: u.Redacted(), repository: repository}, nil
+	}
+	return GitHubURL{url: url, repository: repository}, nil
+}
+
 type GitHubURL struct {
-	URL        string
-	Repository string
+	url        string
+	repository string
+}
+
+func (url GitHubURL) URL() string {
+	return url.url
+}
+
+func (url GitHubURL) Repository() string {
+	return url.repository
 }
 
 func (url GitHubURL) IsHTTPS() bool {
-	return strings.HasPrefix(url.URL, "https://")
+	return strings.HasPrefix(url.url, "https://")
 }
 
 func (url GitHubURL) IsSSH() bool {
-	return strings.HasPrefix(url.URL, "git@")
+	return strings.HasPrefix(url.url, "git@")
 }
 
 func (url GitHubURL) SSH() string {
-	return "git@github.com:" + url.Repository
+	return "git@github.com:" + url.repository
 }
 
 func (url GitHubURL) HTTPS() string {
-	return "https://github.com/" + url.Repository
+	return "https://github.com/" + url.repository
 }
 
 func (url GitHubURL) Directory() string {
-	return strings.TrimSuffix(filepath.Base(url.Repository), filepath.Ext(url.Repository))
+	return strings.TrimSuffix(filepath.Base(url.repository), filepath.Ext(url.repository))
 }
 
 func (url GitHubURL) BrowserURL() string {
-	return strings.TrimSuffix(url.HTTPS(), filepath.Ext(url.Repository))
+	return strings.TrimSuffix(url.HTTPS(), filepath.Ext(url.repository))
 }
 
 func (url GitHubURL) Matches(match string) bool {
-	repoName := strings.TrimSuffix(url.Repository, filepath.Ext(url.Repository))
+	repoName := strings.TrimSuffix(url.repository, filepath.Ext(url.repository))
 	return strings.Compare(strings.ToLower(repoName), strings.ToLower(match)) == 0
 }
 
 func (url GitHubURL) String() string {
-	return "github://" + url.Repository
+	return "github://" + url.repository
 }

@@ -57,8 +57,12 @@ func graylogVersionCommand(cmd *cobra.Command, args []string) {
 				if graylogVersionShort {
 					fmt.Println(version)
 				} else {
-					url, _ := utils.ParseGitHubURL(module.Repository)
-					logger.Info("%-50s %s", strings.TrimSuffix(url.Repository, ".git"), version)
+					url, err := utils.ParseGitHubURL(module.Repository)
+					if err != nil {
+						logger.Error("Couldn't parse repository URL: %s", err)
+						return
+					}
+					logger.Info("%-50s %s", strings.TrimSuffix(url.Repository(), ".git"), version)
 				}
 			})
 		})

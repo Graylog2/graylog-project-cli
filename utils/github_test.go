@@ -1,6 +1,8 @@
 package utils
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestParseGitHubURL(t *testing.T) {
 	var url GitHubURL
@@ -84,6 +86,16 @@ func TestParseGitHubURL(t *testing.T) {
 	_, err = ParseGitHubURL("https://github.com/Graylog2/graylog2-server")
 	if err == nil {
 		t.Error("expected URL without .git suffix to fail")
+	}
+
+	// With authentication
+	url, err = ParseGitHubURL("https://user:password@github.com/Graylog2/graylog2-server.git")
+	match = "https://github.com/Graylog2/graylog2-server.git"
+	if err != nil {
+		t.Errorf("expected URL with user:password not to fail: %s", err)
+	}
+	if url.URL() != match {
+		t.Errorf("expected <%s> to be <%s>", url.URL(), match)
 	}
 
 	// Unknown URL format
