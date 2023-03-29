@@ -1,15 +1,17 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/Graylog2/graylog-project-cli/apply"
 	"github.com/Graylog2/graylog-project-cli/config"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/Graylog2/graylog-project-cli/manifest"
 	"github.com/Graylog2/graylog-project-cli/project"
 	"github.com/Graylog2/graylog-project-cli/projectstate"
+	"github.com/Graylog2/graylog-project-cli/utils"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	"os"
+	"strings"
 )
 
 var graylogVersionCmd = &cobra.Command{
@@ -29,23 +31,39 @@ Examples:
 }
 
 var graylogVersion string
+var graylogVersionShort bool
+var graylogVersionTruncate bool
 
 func init() {
 	RootCmd.AddCommand(graylogVersionCmd)
 
-	graylogVersionCmd.Flags().StringVarP(&graylogVersion, "set", "", "", "Set Graylog version")
+	graylogVersionCmd.Flags().StringVar(&graylogVersion, "set", "", "Set Graylog version")
+	graylogVersionCmd.Flags().BoolVarP(&graylogVersionShort, "short", "s", false, "Only show the version number(s)")
+	graylogVersionCmd.Flags().BoolVarP(&graylogVersionTruncate, "truncate", "t", false, "Truncate any -SNAPSHOT suffix from the version")
 }
 
 func graylogVersionCommand(cmd *cobra.Command, args []string) {
-	if graylogVersion == "" {
-		logger.Info("Missing version option for --set")
-		cmd.UsageFunc()(cmd)
-		os.Exit(1)
-	}
-
 	cfg := config.Get()
 	manifestFiles := manifest.ReadState().Files()
 	proj := project.New(cfg, manifestFiles)
+
+	if graylogVersion == "" {
+		project.ForEachSelectedModule(proj, func(module project.Module) {
+			utils.InDirectory(module.Path, func() {
+				version := module.Version()
+				if graylogVersionTruncate {
+					version = strings.TrimSuffix(module.Version(), "-SNAPSHOT")
+				}
+				if graylogVersionShort {
+					fmt.Println(version)
+				} else {
+					url, _ := utils.ParseGitHubURL(module.Repository)
+					logger.Info("%-50s %s", strings.TrimSuffix(url.Repository, ".git"), version)
+				}
+			})
+		})
+		return
+	}
 
 	msg := func(message string) {
 		logger.ColorInfo(color.FgYellow, "===> %s", message)
