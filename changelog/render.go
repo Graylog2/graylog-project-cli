@@ -9,7 +9,7 @@ import (
 )
 
 func Render(config Config) error {
-	parsedSnippets, err := parseSnippets(config.SnippetsPaths, config.ReadStdin)
+	parsedSnippets, err := parseSnippets(config)
 	if err != nil {
 		return err
 	}
@@ -46,8 +46,10 @@ func Render(config Config) error {
 	return nil
 }
 
-func parseSnippets(paths []string, stdin bool) (map[string][]Snippet, error) {
+func parseSnippets(config Config) (map[string][]Snippet, error) {
 	parsedSnippets := make(map[string][]Snippet)
+	paths := config.SnippetsPaths
+	stdin := config.ReadStdin
 
 	if stdin {
 		paths = make([]string, 0)
@@ -71,6 +73,10 @@ func parseSnippets(paths []string, stdin bool) (map[string][]Snippet, error) {
 
 			snippetData, err := parseSnippet(snippetFile)
 			if err != nil {
+				if config.SkipInvalidSnippets {
+					logger.Info("Skipping invalid snippet file: %s", err)
+					continue
+				}
 				return parsedSnippets, err
 			}
 

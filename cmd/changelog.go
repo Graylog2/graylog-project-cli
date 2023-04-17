@@ -102,6 +102,7 @@ var changelogEntryEdit bool
 var changelogEntryMinimalTemplate bool
 var changelogEntryInteractive bool
 var changelogSkipHeader bool
+var changelogSkipInvalidSnippets bool
 var changelogReadStdin bool
 var changelogMarkdownHeaderBaseLevel int
 
@@ -131,6 +132,7 @@ func applyChangelogRenderFlags(cmd *cobra.Command) {
 	cmd.Flags().StringVarP(&changelogReleaseVersionPattern, "version-pattern", "P", changelog.SemverVersionPattern.String(), "version number pattern")
 	cmd.Flags().StringVarP(&changelogProduct, "product", "p", "Graylog", "The product name. (e.g., \"Graylog\", \"Graylog Enterprise\")")
 	cmd.Flags().BoolVar(&changelogSkipHeader, "skip-header", false, "Don't render the header")
+	cmd.Flags().BoolVar(&changelogSkipInvalidSnippets, "skip-invalid-snippets", false, "Skip invalid snippet files")
 	cmd.Flags().BoolVar(&changelogReadStdin, "stdin", false, "Read paths from STDIN")
 	cmd.Flags().IntVar(&changelogMarkdownHeaderBaseLevel, "md-header-base-level", 1, "The Markdown header base level")
 }
@@ -199,6 +201,7 @@ func execChangelogRenderCommand(snippetsPaths []string) error {
 		Product:                 changelogProduct,
 		ReadStdin:               changelogReadStdin,
 		SkipHeader:              changelogSkipHeader,
+		SkipInvalidSnippets:     changelogSkipInvalidSnippets,
 		MarkdownHeaderBaseLevel: changelogMarkdownHeaderBaseLevel,
 	}
 
