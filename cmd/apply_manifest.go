@@ -10,6 +10,7 @@ import (
 	"github.com/Graylog2/graylog-project-cli/projectstate"
 	"github.com/Graylog2/graylog-project-cli/utils"
 	"github.com/fatih/color"
+	"github.com/hashicorp/go-version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
@@ -156,8 +157,17 @@ func applyManifestCommand(cmd *cobra.Command, args []string) {
 	msg("Rotate changelogs for release")
 	apply.ForEachModule(proj, false, func(module project.Module) {
 		applyManifestInDirectory(module.Path, func() {
-			if err := applier.ChangelogRelease(module.Path, module.Revision); err != nil {
-				logger.Fatal("ERROR: %s", err)
+			v, err := version.NewSemver(module.Revision)
+			if err != nil {
+				logger.Fatal("Couldn't create new semver for %s: %s", module.Revision, err)
+			}
+			// We don't want different changelog folders for each pre-release but one folder for each GA release.
+			if v.Prerelease() == "" {
+				if err := applier.ChangelogRelease(module.Path, module.Revision); err != nil {
+					logger.Fatal("ERROR: %s", err)
+				}
+			} else {
+				logger.Info("Skipping changelog release for pre-release version: %s", v)
 			}
 		})
 	})
@@ -232,6 +242,38 @@ func applyManifestCommand(cmd *cobra.Command, args []string) {
 		applyManifestInDirectory(module.Path, func() {
 			if module.ApplyNewBranch() != "" {
 				applier.MavenScmBranch(module.ApplyNewBranch())
+			}
+		})
+	})
+
+	msg("Rotate changelogs in source branch when creating new branch")
+	apply.ForEachModule(proj, false, func(module project.Module) {
+		applyManifestInDirectory(module.Path, func() {
+			// If we create a new branch during the release process, we want to move the "unreleased" changelogs in
+			// the source branch to a versioned folder.
+			//
+			// Example: Release 5.1.0-rc.1 and create a "5.1" branch from the "main" branch in that process.
+			// 1. Create "5.1" branch, keeping the "changelog/unreleased" folder for the branch
+			// 2. In the "main" branch move "changelog/unreleased" to "changelog/5.1.0-rc.1"
+			// Result:
+			// branch "main": changelog/5.1.0-rc.1 (and a new empty changelog/unreleased folder)
+			// branch "5.1":  changelog/unreleased
+			//
+			// The drawback here is that the "main" branch only contains the 5.1 changelogs up until the 5.1.0-rc.1
+			// release. All newer 5.1 changelogs will only be in the "5.1" branch. There doesn't seem to be a better
+			// way without merging changelogs between the branches, so we live with that drawback for now since
+			// it doesn't affect changelog generation. For the 5.1.0 GA release the final changelog is generated
+			// from the "5.1" branch which has all the changelogs. (changelogs in the "unreleased" folder of the "main"
+			// branch moved on to the next feature release already, e.g., 5.2)
+			if module.ApplyNewBranch() != "" {
+				// We might have done the renaming in the first ChangelogRelease call above when the version is not
+				// a pre-release AND we are creating a new branch. In that case this call is a no-op because the
+				// changelog rotation code checks if the version changelog folder already exists.
+				if err := applier.ChangelogRelease(module.Path, module.Revision); err != nil {
+					logger.Fatal("ERROR: %s", err)
+				}
+			} else {
+				logger.Info("Skipping changelog rotation for module: %s (no branch creation requested)", module.Path)
 			}
 		})
 	})

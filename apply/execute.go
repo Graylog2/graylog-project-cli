@@ -10,7 +10,6 @@ import (
 	"github.com/Graylog2/graylog-project-cli/project"
 	"github.com/Graylog2/graylog-project-cli/utils"
 	"github.com/fatih/color"
-	"github.com/hashicorp/go-version"
 	"os"
 	e "os/exec"
 	"path/filepath"
@@ -132,13 +131,5 @@ func (execute executeApplier) NpmVersionCommit(module project.Module, version st
 }
 
 func (execute executeApplier) ChangelogRelease(path string, revision string) error {
-	v, err := version.NewSemver(revision)
-	if err != nil {
-		return fmt.Errorf("couldn't create new semver for %s: %w", revision, err)
-	}
-	if v.Prerelease() != "" {
-		logger.Info("Skipping changelog release for pre-release version: %s", v)
-		return nil
-	}
 	return changelog.ReleaseInPath(path, revision, changelog.SemverVersionPattern)
 }
