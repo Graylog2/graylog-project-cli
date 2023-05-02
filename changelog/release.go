@@ -25,7 +25,7 @@ func Release(project p.Project, versionPattern *regexp.Regexp) error {
 
 func ReleaseInPath(path string, version string, versionPattern *regexp.Regexp) error {
 	if !versionPattern.MatchString(version) {
-		return fmt.Errorf("invalid release version: %s (pattern: %s)", version, SemverVersionPattern)
+		return fmt.Errorf("invalid release version: %s (pattern: %s)", version, versionPattern)
 	}
 
 	return utils.InDirectoryE(path, func() error {
