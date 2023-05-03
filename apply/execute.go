@@ -131,5 +131,7 @@ func (execute executeApplier) NpmVersionCommit(module project.Module, version st
 }
 
 func (execute executeApplier) ChangelogRelease(path string, revision string) error {
-	return changelog.ReleaseInPath(path, revision, changelog.SemverVersionPattern)
+	// Allow pre-release pattern here to handle the case where we need to rename the changelogs in the "main" branch
+	// to a pre-release version during an RC build where we create a new stable branch.
+	return changelog.ReleaseInPath(path, revision, changelog.SemverVersionPatternWithPreRelease)
 }
