@@ -62,7 +62,7 @@ var changelogReleasePathCmd = &cobra.Command{
 To be used when you need to move changelogs of a single repository outside a project setup.
 
 Example:
-    graylog-project changelog release:path path/to/unreleased/changelog
+    graylog-project changelog release:path 5.1.0
 `,
 	Args: cobra.ExactArgs(1),
 	Run:  changelogReleasePathCommand,
@@ -97,6 +97,7 @@ var changelogDisableGitHubLinks bool
 var changelogReleaseDate string
 var changelogReleaseVersion string
 var changelogReleaseVersionPattern string
+var changelogReleaseAllowPreRelease bool
 var changelogProduct string
 var changelogEntryEdit bool
 var changelogEntryMinimalTemplate bool
@@ -122,6 +123,7 @@ func init() {
 
 	changelogReleaseCmd.Flags().StringVarP(&changelogReleaseVersionPattern, "version-pattern", "P", changelog.SemverVersionPattern.String(), "version number pattern")
 	changelogReleasePathCmd.Flags().StringVarP(&changelogReleaseVersionPattern, "version-pattern", "P", changelog.SemverVersionPattern.String(), "version number pattern")
+	changelogReleasePathCmd.Flags().BoolVar(&changelogReleaseAllowPreRelease, "allow-pre-release", false, "allow pre-release")
 }
 
 func applyChangelogRenderFlags(cmd *cobra.Command) {
@@ -235,13 +237,18 @@ func changelogReleasePathCommand(cmd *cobra.Command, args []string) {
 		logger.Fatal("Invalid version: %s: %s", v, err)
 	}
 
-	if semver.Prerelease() != "" {
+	if semver.Prerelease() != "" && !changelogReleaseAllowPreRelease {
 		logger.Fatal("Not allowing changelog rotation for pre-releases!")
 	}
 
-	versionPattern, err := regexp.Compile(changelogReleaseVersionPattern)
+	versionPatternString := changelogReleaseVersionPattern
+	if versionPatternString == changelog.SemverVersionPattern.String() && changelogReleaseAllowPreRelease {
+		versionPatternString = changelog.SemverVersionPatternWithPreRelease.String()
+	}
+
+	versionPattern, err := regexp.Compile(versionPatternString)
 	if err != nil {
-		logger.Fatal("Invalid version pattern: %s", changelogReleaseVersionPattern)
+		logger.Fatal("Invalid version pattern: %s", versionPattern)
 	}
 
 	path, err := git.ToplevelPath()
