@@ -13,6 +13,7 @@ type Config struct {
 	ReleaseVersion          string
 	Product                 string
 	SkipHeader              bool
+	RenderNoChanges         bool
 	SkipInvalidSnippets     bool
 	ReadStdin               bool
 	MarkdownHeaderBaseLevel int

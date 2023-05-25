@@ -32,7 +32,7 @@ func Render(config Config) error {
 		return len(item)
 	}))
 
-	if numSnippets < 1 {
+	if numSnippets < 1 && config.RenderNoChanges {
 		noChangeBuf := bytes.Buffer{}
 		if err := renderer.RenderNoChanges(config, &noChangeBuf); err != nil {
 			return fmt.Errorf("couldn't render no-changes paragraph: %w", err)
