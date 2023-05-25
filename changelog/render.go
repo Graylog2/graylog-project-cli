@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/Graylog2/graylog-project-cli/logger"
+	"github.com/samber/lo"
 	"os"
 )
 
@@ -25,6 +26,19 @@ func Render(config Config) error {
 			return fmt.Errorf("couldn't render header: %w", err)
 		}
 		fmt.Print(headBuf.String())
+	}
+
+	numSnippets := lo.Sum(lo.Map(lo.Values(parsedSnippets), func(item []Snippet, index int) int {
+		return len(item)
+	}))
+
+	if numSnippets < 1 {
+		noChangeBuf := bytes.Buffer{}
+		if err := renderer.RenderNoChanges(config, &noChangeBuf); err != nil {
+			return fmt.Errorf("couldn't render no-changes paragraph: %w", err)
+		}
+		fmt.Print(noChangeBuf.String())
+		return nil
 	}
 
 	for _, _type := range sortedTypes {

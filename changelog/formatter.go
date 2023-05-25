@@ -27,6 +27,8 @@ type Renderer interface {
 	RenderType(config Config, snippetType string, buf *bytes.Buffer) error
 
 	RenderSnippets(config Config, snippets []Snippet, buf *bytes.Buffer) error
+
+	RenderNoChanges(config Config, buf *bytes.Buffer) error
 }
 
 type SnippetRenderError struct {
@@ -138,6 +140,12 @@ func (h HTMLFormatter) RenderSnippets(config Config, snippets []Snippet, buf *by
 	return nil
 }
 
+func (h HTMLFormatter) RenderNoChanges(_ Config, buf *bytes.Buffer) error {
+	buf.WriteString(`<p><em>No changes since last release.</em></p>`)
+	buf.WriteString("\n")
+	return nil
+}
+
 type D360HTMLFormatter struct {
 	// This formatter is using our custom HTML formatting -- this can be deleted once we moved off of Document360
 }
@@ -194,6 +202,12 @@ func (h D360HTMLFormatter) RenderSnippets(config Config, snippets []Snippet, buf
 	return nil
 }
 
+func (h D360HTMLFormatter) RenderNoChanges(_ Config, buf *bytes.Buffer) error {
+	buf.WriteString(`<p><em>No changes since last release.</em></p>`)
+	buf.WriteString("\n")
+	return nil
+}
+
 type MarkdownFormatter struct {
 }
 
@@ -232,6 +246,12 @@ func (m MarkdownFormatter) RenderSnippets(config Config, snippets []Snippet, buf
 
 		buf.WriteString("\n")
 	}
+	return nil
+}
+
+func (m MarkdownFormatter) RenderNoChanges(_ Config, buf *bytes.Buffer) error {
+	buf.WriteString(`*No changes since last release.*`)
+	buf.WriteString("\n")
 	return nil
 }
 
