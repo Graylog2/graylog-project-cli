@@ -1,10 +1,12 @@
 package changelog
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/Graylog2/graylog-project-cli/utils"
 	"strings"
+	"time"
 )
 
 func LintPaths(paths []string) error {
@@ -52,6 +54,26 @@ func LintPaths(paths []string) error {
 				errors = append(errors, fmt.Errorf("linter error in file %s: at least one issue or pull request number needs to be present", file))
 				continue
 			}
+
+			logger.Debug("Rendering %s", file)
+			renderConfig := Config{
+				RenderFormat:            FormatMD,
+				RenderGitHubLinks:       true,
+				SnippetsPaths:           []string{file},
+				ReleaseDate:             time.Now().Format(time.DateOnly),
+				ReleaseVersion:          "1.0.0",
+				Product:                 "Render Test",
+				SkipHeader:              false,
+				RenderNoChanges:         false,
+				SkipInvalidSnippets:     false,
+				ReadStdin:               false,
+				MarkdownHeaderBaseLevel: 1,
+			}
+			var output bytes.Buffer
+			if err := Render(renderConfig, &output); err != nil {
+				errors = append(errors, fmt.Errorf("linter error in file: %s: %w", file, err))
+			}
+			logger.Debug("Render output for file %s:\n%s", file, output.String())
 
 			okCnt += 1
 		}

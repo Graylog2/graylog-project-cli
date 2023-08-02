@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/samber/lo"
+	"io"
 	"os"
 )
 
-func Render(config Config) error {
+func Render(config Config, writer io.Writer) error {
 	parsedSnippets, err := parseSnippets(config)
 	if err != nil {
 		return err
@@ -25,7 +26,9 @@ func Render(config Config) error {
 		if err := renderer.RenderHeader(config, &headBuf); err != nil {
 			return fmt.Errorf("couldn't render header: %w", err)
 		}
-		fmt.Print(headBuf.String())
+		if _, err := writer.Write(headBuf.Bytes()); err != nil {
+			return fmt.Errorf("couldn't write header: %w", err)
+		}
 	}
 
 	numSnippets := lo.Sum(lo.Map(lo.Values(parsedSnippets), func(item []Snippet, index int) int {
@@ -37,7 +40,9 @@ func Render(config Config) error {
 		if err := renderer.RenderNoChanges(config, &noChangeBuf); err != nil {
 			return fmt.Errorf("couldn't render no-changes paragraph: %w", err)
 		}
-		fmt.Print(noChangeBuf.String())
+		if _, err := writer.Write(noChangeBuf.Bytes()); err != nil {
+			return fmt.Errorf("couldn't write no-changes paragraph: %w", err)
+		}
 		return nil
 	}
 
@@ -53,7 +58,10 @@ func Render(config Config) error {
 				return fmt.Errorf("couldn't render snippets: %w", err)
 			}
 
-			fmt.Println(buf.String())
+			buf.WriteString("\n")
+			if _, err := writer.Write(buf.Bytes()); err != nil {
+				return fmt.Errorf("couldn't write snippets: %w", err)
+			}
 		}
 	}
 

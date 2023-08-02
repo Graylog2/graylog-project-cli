@@ -210,7 +210,7 @@ func execChangelogRenderCommand(snippetsPaths []string) error {
 		MarkdownHeaderBaseLevel: changelogMarkdownHeaderBaseLevel,
 	}
 
-	if err := changelog.Render(config); err != nil {
+	if err := changelog.Render(config, os.Stdout); err != nil {
 		return err
 	}
 
