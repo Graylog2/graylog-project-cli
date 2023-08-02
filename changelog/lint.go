@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/Graylog2/graylog-project-cli/utils"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -50,7 +51,9 @@ func LintPaths(paths []string, strict bool) error {
 				}
 			}
 
-			if len(urlList) == 0 {
+			// The GitHub security advisories (GHSA) might not have linked issues or pulls because the PRs might be
+			// created in private forks as part of the security advisory process.
+			if len(urlList) == 0 && !strings.HasPrefix(strings.ToLower(filepath.Base(file)), "ghsa-") {
 				errors = append(errors, fmt.Errorf("linter error in file %s: at least one issue or pull request number needs to be present", file))
 				continue
 			}
