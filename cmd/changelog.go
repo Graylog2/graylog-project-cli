@@ -107,6 +107,7 @@ var changelogRenderNoChanges bool
 var changelogSkipInvalidSnippets bool
 var changelogReadStdin bool
 var changelogMarkdownHeaderBaseLevel int
+var changelogLintStrict bool
 
 func init() {
 	changelogCmd.AddCommand(changelogRenderCmd)
@@ -125,6 +126,8 @@ func init() {
 	changelogReleaseCmd.Flags().StringVarP(&changelogReleaseVersionPattern, "version-pattern", "P", changelog.SemverVersionPattern.String(), "version number pattern")
 	changelogReleasePathCmd.Flags().StringVarP(&changelogReleaseVersionPattern, "version-pattern", "P", changelog.SemverVersionPattern.String(), "version number pattern")
 	changelogReleasePathCmd.Flags().BoolVar(&changelogReleaseAllowPreRelease, "allow-pre-release", false, "allow pre-release")
+
+	changelogLintCmd.Flags().BoolVarP(&changelogLintStrict, "strict", "s", false, "Exit with an error if no files got linted")
 }
 
 func applyChangelogRenderFlags(cmd *cobra.Command) {
@@ -271,7 +274,7 @@ func changelogNewCommand(cmd *cobra.Command, args []string) {
 	}
 }
 func changelogLintCommand(cmd *cobra.Command, args []string) {
-	if err := changelog.LintPaths(args); err != nil {
+	if err := changelog.LintPaths(args, changelogLintStrict); err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
 	}

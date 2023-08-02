@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func LintPaths(paths []string) error {
+func LintPaths(paths []string, strict bool) error {
 	errors := make([]error, 0)
 	fileCnt := 0
 	okCnt := 0
@@ -87,6 +87,10 @@ func LintPaths(paths []string) error {
 		}
 
 		return fmt.Errorf("detected errors in %d file(s)", len(errors))
+	}
+
+	if okCnt == 0 && len(errors) == 0 && strict {
+		return fmt.Errorf("no files found for path(s): %s", strings.Join(paths, ", "))
 	}
 
 	return nil
