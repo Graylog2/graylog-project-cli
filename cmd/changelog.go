@@ -163,9 +163,6 @@ func changelogRenderCommand(cmd *cobra.Command, args []string) {
 
 	if err := execChangelogRenderCommand(snippetsPaths); err != nil {
 		logger.Error(err.Error())
-		if err := cmd.UsageFunc()(cmd); err != nil {
-			logger.Fatal(err.Error())
-		}
 		os.Exit(1)
 	}
 }
