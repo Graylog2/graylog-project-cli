@@ -87,15 +87,17 @@ func listSnippets(path string) ([]string, error) {
 	return snippetFiles, nil
 }
 
-func parseSnippet(snippetFile string) (*Snippet, error) {
+func parseSnippet(snippetFile string, githubURL string) (*Snippet, error) {
 	snippetBytes, err := os.ReadFile(snippetFile)
 	if err != nil {
 		return nil, fmt.Errorf("couldn't read %s: %w", snippetFile, err)
 	}
 
-	githubURL, err := getGitHubURL(filepath.Dir(snippetFile))
-	if err != nil {
-		return nil, err
+	if strings.TrimSpace(githubURL) == "" {
+		githubURL, err = getGitHubURL(filepath.Dir(snippetFile))
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	var snippetData Snippet
@@ -120,6 +122,7 @@ func parseSnippet(snippetFile string) (*Snippet, error) {
 	return &snippetData, nil
 }
 
+// Calls the Git binary to get the current repository URL.
 func getGitHubURL(path string) (string, error) {
 	cwd, err := os.Getwd()
 	if err != nil {

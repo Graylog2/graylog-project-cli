@@ -17,4 +17,5 @@ type Config struct {
 	SkipInvalidSnippets     bool
 	ReadStdin               bool
 	MarkdownHeaderBaseLevel int
+	GitHubRepoURL           string
 }

@@ -24,7 +24,7 @@ func LintPaths(paths []string, strict bool) error {
 			fileCnt += 1
 
 			logger.Debug("Linting %s", file)
-			snippet, err := parseSnippet(file)
+			snippet, err := parseSnippet(file, "https://github.com/Graylog2/___linter-test___.git")
 			if err != nil {
 				errors = append(errors, fmt.Errorf("linter error in file %s: %w", file, err))
 				continue
@@ -68,6 +68,7 @@ func LintPaths(paths []string, strict bool) error {
 				SkipInvalidSnippets:     false,
 				ReadStdin:               false,
 				MarkdownHeaderBaseLevel: 1,
+				GitHubRepoURL:           "https://github.com/Graylog2/___linter-test___.git",
 			}
 			var output bytes.Buffer
 			if err := Render(renderConfig, &output); err != nil {

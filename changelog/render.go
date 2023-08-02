@@ -93,7 +93,7 @@ func parseSnippets(config Config) (map[string][]Snippet, error) {
 		for _, snippetFile := range snippetFiles {
 			logger.Debug("Parsing file %s", snippetFile)
 
-			snippetData, err := parseSnippet(snippetFile)
+			snippetData, err := parseSnippet(snippetFile, config.GitHubRepoURL)
 			if err != nil {
 				if config.SkipInvalidSnippets {
 					logger.Info("Skipping invalid snippet file: %s", err)
