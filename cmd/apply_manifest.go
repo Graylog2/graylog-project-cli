@@ -272,6 +272,8 @@ func applyManifestCommand(cmd *cobra.Command, args []string) {
 				if err := applier.ChangelogRelease(module.Path, module.Revision); err != nil {
 					logger.Fatal("ERROR: %s", err)
 				}
+
+				// TODO: We need to push the new commits upstream!
 			} else {
 				logger.Info("Skipping changelog rotation for module: %s (no branch creation requested)", module.Path)
 			}
