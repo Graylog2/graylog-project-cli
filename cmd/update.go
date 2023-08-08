@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	c "github.com/Graylog2/graylog-project-cli/config"
 	"github.com/Graylog2/graylog-project-cli/git"
 	"github.com/Graylog2/graylog-project-cli/logger"
@@ -65,10 +66,26 @@ func updateCommand(cmd *cobra.Command, args []string) {
 		git.Git(args...)
 	})
 
+	var updateErrors []error
+
 	p.ForEachSelectedModule(project, func(module p.Module) {
 		logger.Info("Updating %v", module.Path)
-		repoMgr.UpdateRepository(module)
+		if e := repoMgr.UpdateRepository(module); len(e) > 0 {
+			updateErrors = append(updateErrors, e...)
+		}
 	})
 
 	projectstate.Sync(project, config)
+
+	for _, err := range updateErrors {
+		var loggableErr *logger.LoggableError
+		if errors.As(err, &loggableErr) {
+			logger.Error("ERROR: %s", loggableErr)
+			for _, msg := range loggableErr.Messages {
+				logger.Error("  %s", msg)
+			}
+		} else {
+			logger.Error("ERROR: %s", err)
+		}
+	}
 }

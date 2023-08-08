@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/Graylog2/graylog-project-cli/logger"
+	"github.com/Graylog2/graylog-project-cli/utils"
 	"github.com/fatih/color"
 	"github.com/pkg/errors"
 	"os/exec"
@@ -104,21 +105,30 @@ func ToplevelPath() (string, error) {
 	return path, nil
 }
 
-func GitErrOk(commands ...string) {
-	var stderr bytes.Buffer
+func Exec(commands ...string) error {
+	var output bytes.Buffer
 
 	logger.ColorInfo(color.FgGreen, "    git %v", strings.Join(commands, " "))
 	command := exec.Command("git", commands...)
-	command.Stderr = &stderr
-	out, err := command.Output()
-	if err != nil {
-		logOutputBufferWithColor(stderr.Bytes(), color.FgRed)
-		logOutputBufferWithColor(out, color.FgRed)
-		return
+	command.Stderr = &output
+	command.Stdout = &output
+
+	if err := command.Run(); err != nil {
+		logOutputBufferWithColor(output.Bytes(), color.FgRed)
+		return logger.NewLoggableError(
+			err,
+			fmt.Sprintf(
+				`couldn't execute "%s" in "%s"`,
+				fmt.Sprintf("git %s", strings.Join(commands, " ")),
+				utils.GetCwd(),
+			),
+			strings.Split(output.String(), "\n"),
+		)
 	}
 
-	logOutputBuffer(stderr.Bytes())
-	logOutputBuffer(out)
+	logOutputBuffer(output.Bytes())
+
+	return nil
 }
 
 func logOutputBuffer(buf []byte) {

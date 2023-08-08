@@ -142,22 +142,33 @@ func (manager *RepoManager) CheckoutRevision(repoPath string, revision string, f
 	}
 }
 
-func (manager *RepoManager) UpdateRepository(module p.Module) {
+func (manager *RepoManager) UpdateRepository(module p.Module) []error {
+	var execErrors []error
 	if !manager.HasRepository(module.Path) {
 		logger.Info("Skipping module %v because it does not exist yet", module.Name)
-		return
+		return execErrors
 	}
 	utils.InDirectory(module.Path, func() {
+		fetchArgs := []string{"fetch", "--all", "--tags"}
 		if manager.Config.Update.Prune {
-			git.GitErrOk("fetch", "--all", "--tags", "--prune")
-		} else {
-			git.GitErrOk("fetch", "--all", "--tags")
+			fetchArgs = append(fetchArgs, "--prune")
+		}
+		if err := git.Exec(fetchArgs...); err != nil {
+			execErrors = append(execErrors, err)
 		}
 
+		mergeArgs := []string{"merge"}
 		if manager.Config.Update.Relaxed {
-			git.GitErrOk("merge", "--ff", "origin/"+module.Revision)
+			mergeArgs = append(mergeArgs, "--ff")
 		} else {
-			git.GitErrOk("merge", "--ff-only", "origin/"+module.Revision)
+			mergeArgs = append(mergeArgs, "--ff-only")
+		}
+		mergeArgs = append(mergeArgs, "origin/"+module.Revision)
+
+		if err := git.Exec(mergeArgs...); err != nil {
+			execErrors = append(execErrors, err)
 		}
 	})
+
+	return execErrors
 }
