@@ -273,7 +273,11 @@ func applyManifestCommand(cmd *cobra.Command, args []string) {
 					logger.Fatal("ERROR: %s", err)
 				}
 
-				// TODO: We need to push the new commits upstream!
+				if output, err := git.GitE("push", "origin", module.ApplyFromRevision()); err != nil {
+					logger.Fatal("ERROR: %s\n%s", err, output)
+				} else {
+					logger.Info("%s", output)
+				}
 			} else {
 				logger.Info("Skipping changelog rotation for module: %s (no branch creation requested)", module.Path)
 			}
