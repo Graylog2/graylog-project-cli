@@ -6,6 +6,7 @@ import (
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"os"
 )
 
 var githubCmd = &cobra.Command{
@@ -39,11 +40,11 @@ var githubBranchProtectionCmd = &cobra.Command{
 
 func init() {
 	githubAppAccessTokenGenerateCmd.Flags().StringP("app-id", "a", "", "the GitHub app ID (env: GPC_GITHUB_APP_ID)")
-	githubAppAccessTokenGenerateCmd.Flags().StringP("key", "k", "", "path to the private key to use for token generation (env: GPC_GITHUB_APP_KEY)")
+	githubAppAccessTokenGenerateCmd.Flags().StringP("key-file", "k", "", "path to the private key to use for token generation (or key from env: GPC_GITHUB_APP_KEY)")
 	githubAppAccessTokenGenerateCmd.Flags().StringP("org", "o", "", "GitHub org for the generated token (app needs to be installed in the org) (env: GPC_GITHUB_ORG)")
 
 	viper.BindPFlag("github.app-id", githubAppAccessTokenGenerateCmd.Flags().Lookup("app-id"))
-	viper.BindPFlag("github.app-key", githubAppAccessTokenGenerateCmd.Flags().Lookup("key"))
+	viper.BindPFlag("github.app-key-file", githubAppAccessTokenGenerateCmd.Flags().Lookup("key-file"))
 	viper.BindPFlag("github.org", githubAppAccessTokenGenerateCmd.Flags().Lookup("org"))
 
 	viper.MustBindEnv("github.app-id", "GPC_GITHUB_APP_ID")
@@ -57,9 +58,10 @@ func init() {
 
 type gitHubCmdConfig struct {
 	GitHub struct {
-		AppID  string `mapstructure:"app-id"`
-		AppKey string `mapstructure:"app-key"`
-		Org    string `mapstructure:"org"`
+		AppID      string `mapstructure:"app-id"`
+		AppKeyFile string `mapstructure:"app-key-file"`
+		AppKey     string `mapstructure:"app-key"`
+		Org        string `mapstructure:"org"`
 	} `mapstructure:"github"`
 }
 
@@ -72,14 +74,23 @@ func githubAppAccessTokenGenerateCommand(cmd *cobra.Command, args []string) {
 	if cfg.GitHub.AppID == "" {
 		exitWithUsage(cmd, "Missing app ID flag")
 	}
-	if cfg.GitHub.AppKey == "" {
-		exitWithUsage(cmd, "Missing app key flag")
+	if cfg.GitHub.AppKey == "" && cfg.GitHub.AppKeyFile == "" {
+		exitWithUsage(cmd, "Missing app key GPC_GITHUB_APP_KEY or key file flag")
 	}
 	if cfg.GitHub.Org == "" {
 		exitWithUsage(cmd, "Missing GitHub org flag")
 	}
 
-	token, err := gh.GenerateAppToken(cfg.GitHub.Org, cfg.GitHub.AppID, cfg.GitHub.AppKey)
+	appKey := cfg.GitHub.AppKey
+	if cfg.GitHub.AppKeyFile != "" {
+		buf, err := os.ReadFile(cfg.GitHub.AppKeyFile)
+		appKey = string(buf)
+		if err != nil {
+			logger.Fatal("ERROR: couldn't read key file: %w", err)
+		}
+	}
+
+	token, err := gh.GenerateAppToken(cfg.GitHub.Org, cfg.GitHub.AppID, appKey)
 	if err != nil {
 		logger.Fatal("ERROR: %s", err)
 	}

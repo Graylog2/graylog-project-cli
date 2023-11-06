@@ -4,20 +4,14 @@ import (
 	"context"
 	"fmt"
 	"github.com/golang-jwt/jwt/v4"
-	"os"
 	"time"
 )
 
 // GenerateAppToken creates an access token for the given GitHub app in the given GitHub org. The app must be installed
 // in the org. The returned access token is valid for one hour.
 // (for details see: https://docs.github.com/en/rest/apps/apps#create-an-installation-access-token-for-an-app)
-func GenerateAppToken(org string, appId string, keyFile string) (string, error) {
-	buf, err := os.ReadFile(keyFile)
-	if err != nil {
-		return "", fmt.Errorf("couldn't read key file: %w", err)
-	}
-
-	key, err := jwt.ParseRSAPrivateKeyFromPEM(buf)
+func GenerateAppToken(org string, appId string, appKey string) (string, error) {
+	key, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(appKey))
 	if err != nil {
 		return "", fmt.Errorf("couldn't parse key: %w", err)
 	}
