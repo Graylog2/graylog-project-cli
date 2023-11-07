@@ -86,7 +86,7 @@ func githubAppAccessTokenGenerateCommand(cmd *cobra.Command, args []string) {
 		buf, err := os.ReadFile(cfg.GitHub.AppKeyFile)
 		appKey = string(buf)
 		if err != nil {
-			logger.Fatal("ERROR: couldn't read key file: %w", err)
+			logger.Fatal("ERROR: couldn't read key file: %s", err)
 		}
 	}
 
