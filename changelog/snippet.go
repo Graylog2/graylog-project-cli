@@ -42,8 +42,13 @@ var availableTypesMap = map[string]int{
 var sortedTypes = lo.Keys[string, int](availableTypesMap)
 
 func init() {
-	slices.SortFunc[string](sortedTypes, func(a, b string) bool {
-		return availableTypesMap[a] < availableTypesMap[b]
+	slices.SortFunc(sortedTypes, func(a string, b string) int {
+		if availableTypesMap[a] < availableTypesMap[b] {
+			return -1
+		} else if availableTypesMap[a] > availableTypesMap[b] {
+			return 1
+		}
+		return 0
 	})
 }
 
