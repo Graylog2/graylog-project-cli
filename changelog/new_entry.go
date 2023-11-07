@@ -240,7 +240,7 @@ func cleanupInput(input string) string {
 }
 
 func cleanInputList(input string, quote bool) []string {
-	return lo.Map[string, string](strings.Split(input, ","), func(issue string, _ int) string {
+	return lo.Map(strings.Split(input, ","), func(issue string, _ int) string {
 		if quote {
 			return fmt.Sprintf("\"%s\"", cleanupInput(issue))
 		} else {

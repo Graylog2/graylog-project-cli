@@ -39,7 +39,7 @@ var availableTypesMap = map[string]int{
 	TypeSecurity:   6,
 }
 
-var sortedTypes = lo.Keys[string, int](availableTypesMap)
+var sortedTypes = lo.Keys(availableTypesMap)
 
 func init() {
 	slices.SortFunc(sortedTypes, func(a string, b string) int {

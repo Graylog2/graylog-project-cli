@@ -67,7 +67,7 @@ func mdFormatContributors(snippet Snippet) []string {
 		return nil
 	}
 
-	names := lo.Filter[string](snippet.Contributors, func(name string, _ int) bool {
+	names := lo.Filter(snippet.Contributors, func(name string, _ int) bool {
 		return strings.TrimSpace(name) != ""
 	})
 
@@ -75,7 +75,7 @@ func mdFormatContributors(snippet Snippet) []string {
 		return nil
 	}
 
-	return lo.Map[string, string](snippet.Contributors, func(name string, _ int) string {
+	return lo.Map(snippet.Contributors, func(name string, _ int) string {
 		if strings.HasPrefix(strings.TrimSpace(name), "@") {
 			nameWithoutPrefix := strings.TrimPrefix(name, "@")
 			return fmt.Sprintf(`[%s](https://github.com/%s)`, name, nameWithoutPrefix)
