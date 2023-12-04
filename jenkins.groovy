@@ -7,6 +7,7 @@ if (currentBuild.buildCauses.toString().contains('BranchIndexingCause'))
 
 pipeline
 {
+
    agent { label 'linux' }
 
    options
