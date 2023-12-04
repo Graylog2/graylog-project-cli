@@ -141,7 +141,7 @@ func (manager *RepoManager) CheckoutRevision(repoPath string, revision string, b
 		git.Git("merge", "--ff-only", "origin/"+trimmedRevision)
 	}
 
-	if manager.Config.Checkout.MergeInBase {
+	if manager.Config.Checkout.MergeInBase && trimmedRevision != baseRevision {
 		git.Git("merge", "--no-edit", "origin/"+baseRevision)
 	}
 }
