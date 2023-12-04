@@ -33,6 +33,7 @@ type Module struct {
 	Path               string
 	Repository         string
 	Revision           string
+	BaseRevision       string
 	FetchRevision      string
 	Assemblies         []string
 	AssemblyAttachment string
@@ -230,6 +231,7 @@ func New(config config.Config, manifestFiles []string, options ...projectOption)
 			Path:               path,
 			Repository:         moduleRepository,
 			Revision:           module.Revision,
+			BaseRevision:       module.Revision,
 			Assemblies:         module.Assemblies,
 			AssemblyAttachment: module.AssemblyAttachment,
 			Server:             module.Server,

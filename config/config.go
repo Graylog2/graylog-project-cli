@@ -11,6 +11,7 @@ const DefaultRepositoryRoot = "../graylog-project-repos"
 const CIRepositoryRoot = ".repos"
 
 type Checkout struct {
+	MergeInBase    bool     `mapstructure:"merge-in-base"`
 	UpdateRepos    bool     `mapstructure:"update-repos"`
 	ShallowClone   bool     `mapstructure:"shallow-clone"`
 	ManifestFiles  []string `mapstructure:"manifest-files"`

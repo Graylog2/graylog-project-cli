@@ -77,9 +77,9 @@ modules:
 		}
 
 		if withApply {
-			manager.CheckoutRevision(module.Path, module.ApplyFromRevision(), module.FetchRevision)
+			manager.CheckoutRevision(module.Path, module.ApplyFromRevision(), module.BaseRevision, module.FetchRevision)
 		} else {
-			manager.CheckoutRevision(module.Path, module.Revision, module.FetchRevision)
+			manager.CheckoutRevision(module.Path, module.Revision, module.BaseRevision, module.FetchRevision)
 		}
 	}
 }
@@ -114,7 +114,7 @@ func (manager *RepoManager) HasRepository(path string) bool {
 	return true
 }
 
-func (manager *RepoManager) CheckoutRevision(repoPath string, revision string, fetchRevision string) {
+func (manager *RepoManager) CheckoutRevision(repoPath string, revision string, baseRevision string, fetchRevision string) {
 	trimmedRevision := strings.TrimSpace(revision)
 
 	if trimmedRevision == "" {
@@ -139,6 +139,10 @@ func (manager *RepoManager) CheckoutRevision(repoPath string, revision string, f
 
 	if manager.Config.Checkout.UpdateRepos {
 		git.Git("merge", "--ff-only", "origin/"+trimmedRevision)
+	}
+
+	if manager.Config.Checkout.MergeInBase {
+		git.Git("merge", "--no-edit", "origin/"+baseRevision)
 	}
 }
 
