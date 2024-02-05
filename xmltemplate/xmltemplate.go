@@ -6,7 +6,8 @@ import (
 	"github.com/Graylog2/graylog-project-cli/config"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	p "github.com/Graylog2/graylog-project-cli/project"
-	"io/ioutil"
+	"github.com/hashicorp/go-version"
+	"os"
 	"text/template"
 )
 
@@ -49,12 +50,17 @@ func mavenAssemblies(project p.Project) map[string][]Assembly {
 
 func WriteXmlFile(config config.Config, project p.Project, templateFile string, outputFile string) {
 	logger.Info("Generating %v", outputFile)
-	bts, err := ioutil.ReadFile(templateFile)
+	bts, err := os.ReadFile(templateFile)
 	if err != nil {
 		logger.Fatal("Error reading %v: %v", templateFile, err)
 	}
 
-	tmpl, err := template.New(templateFile).Parse(string(bts))
+	serverVersion, err := version.NewVersion(project.Server.Version())
+	if err != nil {
+		logger.Fatal("Error parsing server version %q: %v", project.Server.Version(), err)
+	}
+
+	tmpl, err := template.New(templateFile).Funcs(versionTemplateFuncs(serverVersion)).Parse(string(bts))
 	if err != nil {
 		logger.Fatal("Error parsing template: %v", err)
 	}
@@ -73,7 +79,26 @@ func WriteXmlFile(config config.Config, project p.Project, templateFile string, 
 		logger.Fatal("Unable to execute template: %v", err)
 	}
 
-	if err := ioutil.WriteFile(outputFile, buf.Bytes(), 0644); err != nil {
+	if err := os.WriteFile(outputFile, buf.Bytes(), 0644); err != nil {
 		logger.Fatal("Unable to write file %v: %v", outputFile, err)
+	}
+}
+
+func versionTemplateFuncs(serverVersion *version.Version) template.FuncMap {
+	compare := func(compareFunc func(*version.Version) bool) func(any) (bool, error) {
+		return func(versionValue any) (bool, error) {
+			givenVersion, err := version.NewVersion(fmt.Sprintf("%s", versionValue))
+			if err != nil {
+				return false, fmt.Errorf("couldn't parse version %q: %w", versionValue, err)
+			}
+			return compareFunc(givenVersion), nil
+		}
+	}
+
+	return template.FuncMap{
+		"versionGt":  compare(serverVersion.GreaterThan),
+		"versionGte": compare(serverVersion.GreaterThanOrEqual),
+		"versionLt":  compare(serverVersion.LessThan),
+		"versionLte": compare(serverVersion.LessThanOrEqual),
 	}
 }
