@@ -37,7 +37,7 @@ func GenerateAppToken(org string, appId string, appKey string) (string, error) {
 		return "", fmt.Errorf("couldn't find app installation for org: %w", err)
 	}
 
-	accessToken, _, err := github.client.Apps.CreateInstallationToken(ctx, *installation.ID)
+	accessToken, _, err := github.client.Apps.CreateInstallationToken(ctx, *installation.ID, nil)
 	if err != nil {
 		return "", fmt.Errorf("couldn't create access token: %w", err)
 	}

@@ -2,7 +2,7 @@ package gh
 
 import (
 	"context"
-	"github.com/google/go-github/v27/github"
+	"github.com/google/go-github/v60/github"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
 	"strings"
