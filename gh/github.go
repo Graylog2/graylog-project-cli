@@ -96,5 +96,5 @@ func SplitRepoString(repository string) (string, string, error) {
 		return "", "", errors.Errorf("Unable to split repository string into owner and repo name: %s", repository)
 	}
 
-	return tokens[0], tokens[1], nil
+	return tokens[0], strings.TrimSuffix(tokens[1], ".git"), nil
 }
