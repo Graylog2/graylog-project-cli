@@ -3,10 +3,13 @@ package cmd
 import (
 	"fmt"
 	"github.com/Graylog2/graylog-project-cli/gh"
+	"github.com/Graylog2/graylog-project-cli/git"
 	"github.com/Graylog2/graylog-project-cli/logger"
+	"github.com/Graylog2/graylog-project-cli/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
+	"strings"
 )
 
 var githubCmd = &cobra.Command{
@@ -28,6 +31,26 @@ var githubAppAccessTokenGenerateCmd = &cobra.Command{
 	Run:     githubAppAccessTokenGenerateCommand,
 }
 
+var githubRulesetsCmd = &cobra.Command{
+	Use:     "rulesets",
+	Aliases: []string{"rs"},
+	Short:   "Manage repository rulesets",
+}
+
+var githubRulesetsEnableCmd = &cobra.Command{
+	Use:     "enable [flags] OWNER/REPO RULESET",
+	Short:   "Enable repository ruleset",
+	RunE:    githubEnableRuleset,
+	Example: "graylog-project github rulesets enable myorg/myrepo custom-ruleset-name",
+}
+
+var githubRulesetsDisableCmd = &cobra.Command{
+	Use:     "disable [flags] OWNER/REPO RULESET",
+	Short:   "Disable repository ruleset",
+	RunE:    githubDisableRuleset,
+	Example: "graylog-project github rulesets disable myorg/myrepo custom-ruleset-name",
+}
+
 var githubBranchProtectionCmd = &cobra.Command{
 	Use:     "branch-protection",
 	Aliases: []string{"bp"},
@@ -42,26 +65,35 @@ func init() {
 	githubAppAccessTokenGenerateCmd.Flags().StringP("app-id", "a", "", "the GitHub app ID (env: GPC_GITHUB_APP_ID)")
 	githubAppAccessTokenGenerateCmd.Flags().StringP("key-file", "k", "", "path to the private key to use for token generation (or key from env: GPC_GITHUB_APP_KEY)")
 	githubAppAccessTokenGenerateCmd.Flags().StringP("org", "o", "", "GitHub org for the generated token (app needs to be installed in the org) (env: GPC_GITHUB_ORG)")
+	githubRulesetsCmd.PersistentFlags().Bool("detect-repo", false, "Auto detect the repository")
 
 	viper.BindPFlag("github.app-id", githubAppAccessTokenGenerateCmd.Flags().Lookup("app-id"))
 	viper.BindPFlag("github.app-key-file", githubAppAccessTokenGenerateCmd.Flags().Lookup("key-file"))
 	viper.BindPFlag("github.org", githubAppAccessTokenGenerateCmd.Flags().Lookup("org"))
+	viper.BindPFlag("github.detect-repo", githubRulesetsCmd.PersistentFlags().Lookup("detect-repo"))
 
 	viper.MustBindEnv("github.app-id", "GPC_GITHUB_APP_ID")
 	viper.MustBindEnv("github.app-key", "GPC_GITHUB_APP_KEY")
 	viper.MustBindEnv("github.org", "GPC_GITHUB_ORG")
+	viper.MustBindEnv("github.access-token", "GPC_GITHUB_TOKEN", "GITHUB_ACCESS_TOKEN")
+
+	githubRulesetsCmd.AddCommand(githubRulesetsEnableCmd)
+	githubRulesetsCmd.AddCommand(githubRulesetsDisableCmd)
 
 	githubCmd.AddCommand(githubAppAccessTokenGenerateCmd)
+	githubCmd.AddCommand(githubRulesetsCmd)
 	githubCmd.AddCommand(githubBranchProtectionCmd)
 	RootCmd.AddCommand(githubCmd)
 }
 
 type gitHubCmdConfig struct {
 	GitHub struct {
-		AppID      string `mapstructure:"app-id"`
-		AppKeyFile string `mapstructure:"app-key-file"`
-		AppKey     string `mapstructure:"app-key"`
-		Org        string `mapstructure:"org"`
+		AppID       string `mapstructure:"app-id"`
+		AppKeyFile  string `mapstructure:"app-key-file"`
+		AppKey      string `mapstructure:"app-key"`
+		Org         string `mapstructure:"org"`
+		AccessToken string `mapstructure:"access-token"`
+		DetectRepo  bool   `mapstructure:"detect-repo"`
 	} `mapstructure:"github"`
 }
 
@@ -96,4 +128,76 @@ func githubAppAccessTokenGenerateCommand(cmd *cobra.Command, args []string) {
 	}
 
 	fmt.Println(token)
+}
+
+func githubToggleRuleset(_ *cobra.Command, args []string, cb func(client *gh.Client, owner, repo, ruleset string) (*gh.Ruleset, error)) error {
+	var cfg gitHubCmdConfig
+	if err := viper.Unmarshal(&cfg); err != nil {
+		return fmt.Errorf("couldn't deserialize config: %w", err)
+	}
+
+	var repoString string
+	var rulesetName string
+
+	if cfg.GitHub.DetectRepo {
+		if len(args) != 1 {
+			return fmt.Errorf("expected one argument")
+		}
+		cwd, err := os.Getwd()
+		if err != nil {
+			return fmt.Errorf("couldn't get current working directory: %w", err)
+		}
+		urlString, err := git.GetRemoteUrl(cwd, "origin")
+		if err != nil {
+			return err
+		}
+		url, err := utils.ParseGitHubURL(urlString)
+		if err != nil {
+			return err
+		}
+		repoString = url.Repository()
+		rulesetName = args[0]
+	} else {
+		if len(args) != 2 {
+			return fmt.Errorf("expected two arguments")
+		}
+		repoString = args[0]
+		rulesetName = args[1]
+	}
+
+	owner, repo, err := gh.SplitRepoString(repoString)
+	if err != nil {
+		return err
+	}
+
+	ruleset := strings.TrimSpace(rulesetName)
+
+	if ruleset == "" {
+		return fmt.Errorf("ruleset can't be blank")
+	}
+
+	if cfg.GitHub.AccessToken == "" {
+		return fmt.Errorf("missing GitHub access token (GITHUB_ACCESS_TOKEN)")
+	}
+
+	client := gh.NewGitHubClient(cfg.GitHub.AccessToken)
+
+	if ruleset, err := cb(client, owner, repo, ruleset); err != nil {
+		return err
+	} else {
+		logger.Info("Ruleset enforcement for %s/%s: %s (ID: %d)", ruleset.Owner, ruleset.Repo, ruleset.Enforcement, ruleset.ID)
+		return nil
+	}
+}
+
+func githubEnableRuleset(cmd *cobra.Command, args []string) error {
+	return githubToggleRuleset(cmd, args, func(client *gh.Client, owner, repo, ruleset string) (*gh.Ruleset, error) {
+		return client.EnableRulesetByName(owner, repo, ruleset)
+	})
+}
+
+func githubDisableRuleset(cmd *cobra.Command, args []string) error {
+	return githubToggleRuleset(cmd, args, func(client *gh.Client, owner, repo, ruleset string) (*gh.Ruleset, error) {
+		return client.DisableRulesetByName(owner, repo, ruleset)
+	})
 }

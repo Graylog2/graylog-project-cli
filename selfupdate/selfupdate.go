@@ -6,7 +6,7 @@ import (
 	"github.com/Graylog2/graylog-project-cli/ask"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/fatih/color"
-	"github.com/google/go-github/v27/github"
+	"github.com/google/go-github/v60/github"
 	"github.com/hashicorp/go-version"
 	"github.com/mattn/go-isatty"
 	"github.com/samber/lo"
@@ -81,7 +81,7 @@ func SelfUpdate(runningVersion *version.Version, requestedVersion string, force 
 
 	logger.ColorInfo(color.FgGreen, "Updating to %s", latestVersion)
 
-	osAssets := lo.Filter(release.Assets, func(item github.ReleaseAsset, index int) bool {
+	osAssets := lo.Filter(release.Assets, func(item *github.ReleaseAsset, index int) bool {
 		if item.Name == nil {
 			panic(fmt.Errorf("GitHub asset name cannot be nil"))
 		}
@@ -91,7 +91,7 @@ func SelfUpdate(runningVersion *version.Version, requestedVersion string, force 
 	})
 
 	if len(osAssets) > 1 {
-		names := strings.Join(lo.Map(osAssets, func(item github.ReleaseAsset, index int) string {
+		names := strings.Join(lo.Map(osAssets, func(item *github.ReleaseAsset, index int) string {
 			return item.GetName()
 		}), ", ")
 		return fmt.Errorf("found more than one asset for %s/%s: %v", runtime.GOOS, runtime.GOARCH, names)
