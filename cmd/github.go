@@ -125,7 +125,7 @@ func githubAppAccessTokenGenerateCommand(cmd *cobra.Command, args []string) {
 	fmt.Println(token)
 }
 
-func githubToggleRuleset(_ *cobra.Command, args []string, cb func(client gh.Client, owner, repo, ruleset string) (*gh.Ruleset, error)) error {
+func githubToggleRuleset(_ *cobra.Command, args []string, cb func(client *gh.Client, owner, repo, ruleset string) (*gh.Ruleset, error)) error {
 	if len(args) != 2 {
 		return fmt.Errorf("expected two arguments")
 	}
@@ -160,13 +160,13 @@ func githubToggleRuleset(_ *cobra.Command, args []string, cb func(client gh.Clie
 }
 
 func githubEnableRuleset(cmd *cobra.Command, args []string) error {
-	return githubToggleRuleset(cmd, args, func(client gh.Client, owner, repo, ruleset string) (*gh.Ruleset, error) {
+	return githubToggleRuleset(cmd, args, func(client *gh.Client, owner, repo, ruleset string) (*gh.Ruleset, error) {
 		return client.EnableRulesetByName(owner, repo, ruleset)
 	})
 }
 
 func githubDisableRuleset(cmd *cobra.Command, args []string) error {
-	return githubToggleRuleset(cmd, args, func(client gh.Client, owner, repo, ruleset string) (*gh.Ruleset, error) {
+	return githubToggleRuleset(cmd, args, func(client *gh.Client, owner, repo, ruleset string) (*gh.Ruleset, error) {
 		return client.DisableRulesetByName(owner, repo, ruleset)
 	})
 }

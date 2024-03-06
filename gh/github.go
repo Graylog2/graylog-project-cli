@@ -78,12 +78,12 @@ func (gh *Client) DisableRulesetByName(owner string, repo string, rulesetName st
 	return gh.updateRulesetEnforcementByName(owner, repo, rulesetName, "disabled")
 }
 
-func NewGitHubClient(accessToken string) Client {
+func NewGitHubClient(accessToken string) *Client {
 	tokenSource := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: accessToken})
 	ctx := context.Background()
 	client := github.NewClient(oauth2.NewClient(ctx, tokenSource))
 
-	return Client{
+	return &Client{
 		client: client,
 		ctx:    ctx,
 	}
