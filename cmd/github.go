@@ -185,7 +185,7 @@ func githubToggleRuleset(_ *cobra.Command, args []string, cb func(client *gh.Cli
 	if ruleset, err := cb(client, owner, repo, ruleset); err != nil {
 		return err
 	} else {
-		logger.Info("Ruleset enforcement for %s/%s: %s (ID: %d)", ruleset.Owner, ruleset.Repo, ruleset.Enforcement, ruleset.ID)
+		logger.Info("Ruleset enforcement for ruleset %q in %s/%s: %s (ID: %d)", rulesetName, ruleset.Owner, ruleset.Repo, ruleset.Enforcement, ruleset.ID)
 		return nil
 	}
 }
