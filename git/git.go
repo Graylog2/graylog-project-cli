@@ -105,6 +105,12 @@ func ToplevelPath() (string, error) {
 	return path, nil
 }
 
+func ExecInPath(path string, commands ...string) error {
+	return utils.InDirectoryE(path, func() error {
+		return Exec(commands...)
+	})
+}
+
 func Exec(commands ...string) error {
 	var output bytes.Buffer
 
