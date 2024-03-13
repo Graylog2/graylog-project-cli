@@ -33,10 +33,23 @@ func SelfUpdate(runningVersion *version.Version, requestedVersion string, force 
 		return fmt.Errorf("couldn't find binary path for %q: %w", os.Args[0], err)
 	}
 
-	binFileInfo, err := os.Stat(binPath)
+	binFileInfo, err := os.Lstat(binPath)
 	if err != nil {
 		return fmt.Errorf("couldn't get file info for current binary %q: %w", binPath, err)
 	}
+
+	if binFileInfo.Mode() & os.ModeSymlink == os.ModeSymlink {
+		linkTarget, err := os.Readlink(binPath)
+		if err != nil {
+			return fmt.Errorf("couldn't resolve symlink for current binary %q: %w", binPath, err)
+		}
+
+		binPath, err = filepath.Abs(linkTarget)
+		if err != nil {
+			return fmt.Errorf("couldn't resolve absolute path for current binary %q: %w", linkTarget, err)
+		}
+	}
+
 
 	client := github.NewClient(&http.Client{
 		Timeout: 30 * time.Second,
