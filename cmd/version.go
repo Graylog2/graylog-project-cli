@@ -45,7 +45,7 @@ func printState(latestRelease GithubRelease, onlyOutdated bool) {
 	ourVersion, _ := version.NewVersion(gitTag)
 	publicVersion, _ := version.NewVersion(latestRelease.TagName)
 	if ourVersion.LessThan(publicVersion) {
-		logger.ColorInfo(color.FgRed, "\nYou are running an outdated version!\n")
+		logger.ColorInfo(color.FgRed, "\nYou are running an outdated version! (use the \"self-update\" command to update)\n")
 		logger.Info("Current release version is: %v (released on %v) available at %v", latestRelease.TagName, latestRelease.PublishedAt, latestRelease.HtmlUrl)
 	} else if !onlyOutdated {
 		logger.ColorInfo(color.FgGreen, "You are running the latest version.")
