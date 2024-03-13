@@ -21,6 +21,11 @@ import (
 	"time"
 )
 
+const (
+	repoOwner = "Graylog2"
+	repoName  = "graylog-project-cli"
+)
+
 func SelfUpdate(runningVersion *version.Version, requestedVersion string, force bool, interactive bool) error {
 	// Find the current binary first
 	binPath, err := exec.LookPath(os.Args[0])
@@ -46,11 +51,14 @@ func SelfUpdate(runningVersion *version.Version, requestedVersion string, force 
 	var response *github.Response
 
 	if requestedVersion != "latest" {
-		release, response, err = client.Repositories.GetReleaseByTag(ctx, "Graylog2", "graylog-project-cli", requestedVersion)
+		release, response, err = client.Repositories.GetReleaseByTag(ctx, repoOwner, repoName, requestedVersion)
 	} else {
-		release, response, err = client.Repositories.GetLatestRelease(ctx, "Graylog2", "graylog-project-cli")
+		release, response, err = client.Repositories.GetLatestRelease(ctx, repoOwner, repoName)
 	}
 	if err != nil {
+		if response.StatusCode == 404 {
+			return fmt.Errorf("version %s doesn't exist", requestedVersion)
+		}
 		return fmt.Errorf("couldn't get release: %w", err)
 	}
 
