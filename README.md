@@ -12,6 +12,11 @@ This is a CLI tool for managing a [graylog-project](https://github.com/Graylog2/
 * Copy the downloaded binary to a directory in your `PATH` (i.e. `cp graylog-project.linux $HOME/bin/graylog-project`
 * See [graylog-project instructions](https://github.com/Graylog2/graylog-project/blob/master/README.md) on how to use it
 
+## Update
+
+The CLI tool provides a `self-update` command to download and install the
+latest version from GitHub Releases.
+
 ## Configuration
 
 The CLI uses a manifest file to determine which repositories it should be managing. These manifests can be found in the `manifests/` directory. When you run the `checkout` command, for example, the cli will checkout all the repos mentioned in the config at the versions specified.
