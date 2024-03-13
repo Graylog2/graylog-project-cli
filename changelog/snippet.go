@@ -129,19 +129,9 @@ func parseSnippet(snippetFile string, githubURL string) (*Snippet, error) {
 
 // Calls the Git binary to get the current repository URL.
 func getGitHubURL(path string) (string, error) {
-	cwd, err := os.Getwd()
+	urlString, err := git.GetRemoteUrl(path, "origin")
 	if err != nil {
-		return "", fmt.Errorf("couldn't get Git repository URL: %w", err)
-	}
-	defer os.Chdir(cwd)
-
-	if err := os.Chdir(path); err != nil {
-		return "", fmt.Errorf("couldn't get Git repository URL: %w", err)
-	}
-
-	urlString, err := git.GitValueE("remote", "get-url", "--push", "origin")
-	if err != nil {
-		return "", fmt.Errorf("couldn't get Git repository URL: %w", err)
+		return "", err
 	}
 
 	githubURL, err := utils.ParseGitHubURL(urlString)
