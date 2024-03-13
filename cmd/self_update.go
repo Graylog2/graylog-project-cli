@@ -9,9 +9,19 @@ import (
 )
 
 var selfUpdateCmd = &cobra.Command{
-	Use:   "self-update [version]",
+	Use:   "self-update [flags] [version]",
 	Short: "Update the CLI command",
-	RunE:  selfUpdateCommand,
+	Example: `
+  # Update to the latest version
+  graylog-project self-update
+
+  # Update to a specific version
+  graylog-project self-update 0.42.0
+
+  # Force update to a specific version to allow downgrades
+  graylog-project self-update -F 0.30.0
+`,
+	RunE: selfUpdateCommand,
 }
 
 var selfUpdateForce bool

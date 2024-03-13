@@ -72,6 +72,8 @@ func SelfUpdate(runningVersion *version.Version, requestedVersion string, force 
 		return nil
 	}
 
+	logger.Info("Updating: %s", binPath)
+
 	if interactive && isatty.IsTerminal(os.Stdout.Fd()) {
 		asker := ask.NewAsker(os.Stdin)
 		if !asker.AskYesNo(color.YellowString("Changelog: %s\nUpdate to version %s?", *release.HTMLURL, latestVersion), true) {
