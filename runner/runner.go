@@ -122,7 +122,9 @@ func CheckSetup() error {
 		return errors.Wrapf(err, "docker check failed - make sure it's installed and works properly (e.g. add your own user to the docker system group)")
 	}
 	if err := checkCommandSetup("docker-compose", "version", "--short"); err != nil {
-		return errors.Wrapf(err, "docker-compose check failed - make sure it's installed and works properly")
+		if err := checkCommandSetup("docker", "compose", "version", "--short"); err != nil {
+			return errors.Wrapf(err, "Docker Compose check failed - make sure it's installed and works properly")
+		}
 	}
 	return nil
 }
