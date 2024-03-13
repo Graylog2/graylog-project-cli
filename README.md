@@ -38,8 +38,10 @@ Additionally, there is the apply-manifest file. This file is used during release
 | npm                     | Run npm commands across all modules |
 | npm-clean               | Cleanup npm/yarn related state |
 | npm-version             | Set package.json version |
+| project-changelog       | Project-wide changelog management |
 | regenerate              | Regenerate files for the current checkout |
 | run                     | Run Graylog server, MongoDB , Elasticsearch and other services |
+| self-update             | Update the CLI tool to the latest version. |
 | status                  | Shows the current version and branch of each managed repo. |
 | update                  | Update all repositories for the current manifest |
 | version                 | Display version of the Graylog CLI tool |
