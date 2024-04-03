@@ -105,7 +105,7 @@ func TestParseGitHubURL(t *testing.T) {
 	}
 
 	url, _ = ParseGitHubURL("github://Graylog2/graylog2-server.git")
-	if url.IsHTTPS() || url.IsHTTPS() {
+	if url.IsSSH() || url.IsHTTPS() {
 		t.Error("expected URL to not be SSH or HTTPS")
 	}
 	url, _ = ParseGitHubURL("https://github.com/Graylog2/graylog2-server.git")

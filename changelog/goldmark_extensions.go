@@ -21,14 +21,14 @@ var mdDetailsRenderer = goldmark.New(goldmark.WithExtensions(extension.GFM))
 type noParagraphRenderer struct {
 }
 
-func (n *noParagraphRenderer) Extend(m goldmark.Markdown) {
+func (r *noParagraphRenderer) Extend(m goldmark.Markdown) {
 	m.Renderer().AddOptions(renderer.WithNodeRenderers(
-		util.Prioritized(n, 500),
+		util.Prioritized(r, 500),
 	))
 }
 
-func (n *noParagraphRenderer) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
-	reg.Register(ast.KindParagraph, n.renderParagraph)
+func (r *noParagraphRenderer) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
+	reg.Register(ast.KindParagraph, r.renderParagraph)
 }
 func (r *noParagraphRenderer) renderParagraph(w util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
 	return ast.WalkContinue, nil
