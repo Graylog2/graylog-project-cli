@@ -2,11 +2,9 @@ package pomparse
 
 import (
 	"encoding/xml"
-	"github.com/Graylog2/graylog-project-cli/exec"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/Graylog2/graylog-project-cli/utils"
 	"io/ioutil"
-	"os"
 	"path/filepath"
 	"strings"
 )
@@ -118,23 +116,6 @@ func ParsePom(filename string) MavenPom {
 	}
 
 	return mavenPom
-}
-
-func ParseEffectivePom(moduleName string, modulePath string) MavenPom {
-	file, err := ioutil.TempFile("", moduleName)
-	defer os.Remove(file.Name())
-	if err != nil {
-		logger.Fatal("Unable to create temp file for module %s: %v", moduleName, err)
-	}
-
-	output, err := exec.ExecCommandInPath(modulePath, "mvn", "help:effective-pom", "-Doutput="+file.Name())
-	if err != nil {
-		logger.Error("Unable to build effective pom for %s: %v", moduleName, err)
-		logger.Error("%s", output.Stdout.String())
-		logger.Fatal("%s", output.Stderr.String())
-	}
-
-	return ParsePom(file.Name())
 }
 
 // Return pom.xml files for the given module directory and all its submodules. If the given path is empty, the current

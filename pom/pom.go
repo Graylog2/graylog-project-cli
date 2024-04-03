@@ -2,7 +2,6 @@ package pom
 
 import (
 	c "github.com/Graylog2/graylog-project-cli/config"
-	"github.com/Graylog2/graylog-project-cli/exec"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/Graylog2/graylog-project-cli/pomparse"
 	p "github.com/Graylog2/graylog-project-cli/project"
@@ -86,25 +85,6 @@ func SetParentIfMatches(module p.Module, groupId string, artifactId string, vers
 
 	if err := ioutil.WriteFile(pomFile, []byte(newContent), 0); err != nil {
 		logger.Fatal("Unable to set version in %v: %v", pomFile, err)
-	}
-}
-
-func SetDependencyVersion(module p.Module, groupId string, artifactId string, newVersion string) {
-	if groupId == "" || artifactId == "" || newVersion == "" {
-		logger.Fatal("One of groupId, artifactId or newVersion is empty: groupId=%s artifactId=%s newVersion=%s", groupId, artifactId, newVersion)
-	}
-
-	// Example maven invocation:
-	// mvn versions:use-dep-version -DdepVersion=2.0.0 -DforceVersion -Dincludes=org.graylog.plugins:graylog-plugin-processing-pipeline
-	output, err := exec.ExecCommandInPath(module.Path, "mvn", "versions:use-dep-version",
-		"-DdepVersion="+newVersion,
-		"-DforceVersion", // Needed to avoid check if version actually exists
-		"-Dincludes="+strings.Join([]string{groupId, artifactId}, ":"))
-
-	if err != nil {
-		logger.Error("Unable to build effective pom for %s: %v", module.Name, err)
-		logger.Error("%s", output.Stdout.String())
-		logger.Fatal("%s", output.Stderr.String())
 	}
 }
 
