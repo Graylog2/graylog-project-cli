@@ -2,6 +2,7 @@ package apply
 
 import (
 	"github.com/Graylog2/graylog-project-cli/project"
+	"github.com/Graylog2/graylog-project-cli/utils"
 	"os"
 	"strings"
 )
@@ -12,7 +13,7 @@ type CommonMaven struct {
 }
 
 func (common CommonMaven) MavenRunWithProfiles(profiles []string, args ...string) {
-	commands := []string{"mvn --show-version --batch-mode --fail-fast"}
+	commands := []string{utils.MavenBin() + " --show-version --batch-mode --fail-fast"}
 
 	// Force maven color output when executed on Jenkins to prettify the logs
 	if os.Getenv("BUILD_ID") != "" {
