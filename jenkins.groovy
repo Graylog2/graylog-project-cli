@@ -33,6 +33,11 @@ pipeline
 
       stage('Sign Windows Binaries')
       {
+        when
+        {
+          buildingTag()
+        }
+
         agent
         {
           docker
