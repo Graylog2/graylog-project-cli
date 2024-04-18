@@ -20,6 +20,7 @@ var runConfigurations = map[string]string{
   <configuration default="false" name="Graylog Server" type="Application" factoryName="Application" singleton="true">
     <envs>
       <env name="DEVELOPMENT" value="true" />
+      <env name="GRAYLOG_BIN_DIR" value="../graylog-plugin-enterprise/enterprise/bin" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="org.graylog2.bootstrap.Main" />
     <module name="runner" />
