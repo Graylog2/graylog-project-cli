@@ -25,6 +25,11 @@ func execRunnerScript(config Config, env []string) error {
 	go monitorCommandExecSignals()
 
 	if err := command.Run(); err != nil {
+		// Docker Compose exits with 130 when ctrl-c is pressed to stop the services.
+		// Other signal related error codes are 128 + signal number. (130 SIGINT/2, 137 SIGKILL/9, 143 SIGTERM/15)
+		if command.ProcessState.ExitCode() == 130 {
+			return nil
+		}
 		return errors.Wrapf(err, "couldn't run script %s", strings.Join(command.Args, " "))
 	}
 
