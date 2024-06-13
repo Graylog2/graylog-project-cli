@@ -104,6 +104,10 @@ func amgCommandBatch(newManifest *manifest.Manifest) string {
 	var newModules []manifest.ManifestModule
 
 	for _, module := range newManifest.Modules {
+		// Don't include non-modules in the release manifest
+		if module.SkipRelease {
+			continue
+		}
 		module.Revision = amgReleaseVersion
 		newModules = append(newModules, module)
 	}
@@ -154,6 +158,10 @@ func amgCommandInteractive(newManifest *manifest.Manifest) string {
 	var newModules []manifest.ManifestModule
 
 	for _, module := range newManifest.Modules {
+		// Don't include non-modules in the release manifest
+		if module.SkipRelease {
+			continue
+		}
 		module.Revision = newVersion
 
 		newModules = append(newModules, module)
