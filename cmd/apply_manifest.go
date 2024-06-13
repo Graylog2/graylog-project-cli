@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/Graylog2/graylog-project-cli/apply"
 	"github.com/Graylog2/graylog-project-cli/git"
 	"github.com/Graylog2/graylog-project-cli/logger"
@@ -11,6 +12,7 @@ import (
 	"github.com/Graylog2/graylog-project-cli/utils"
 	"github.com/fatih/color"
 	"github.com/hashicorp/go-version"
+	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
@@ -78,6 +80,14 @@ func applyManifestCommand(cmd *cobra.Command, args []string) {
 	msg := func(message string) {
 		logger.ColorInfo(color.FgYellow, "===> %s", message)
 	}
+
+	// Remove modules that should not be part of the release build.
+	proj.Modules = lo.Filter(proj.Modules, func(item project.Module, index int) bool {
+		if item.SkipRelease {
+			msg(fmt.Sprintf("Skipping release for module %s", item.Name))
+		}
+		return !item.SkipRelease
+	})
 
 	msg("Sanity check for apply manifest")
 	applyManifestErrors := 0

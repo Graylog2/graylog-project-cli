@@ -30,6 +30,7 @@ type ManifestModule struct {
 	Server             bool             `json:"server,omitempty"`
 	SubModules         []ManifestModule `json:"submodules,omitempty"`
 	Apply              ManifestApply    `json:"apply,omitempty"`
+	SkipRelease        bool             `json:"skip_release,ommitempty"`
 }
 
 func (mod ManifestModule) HasSubmodules() bool {

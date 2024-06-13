@@ -41,6 +41,7 @@ type Module struct {
 	Submodules         []Module
 	apply              Apply
 	ApplyExecute       bool
+	SkipRelease        bool
 }
 
 func (module *Module) IsMavenModule() bool {
@@ -214,6 +215,7 @@ func New(config config.Config, manifestFiles []string, options ...projectOption)
 					Revision:           module.Revision,
 					Assemblies:         submodule.Assemblies,
 					AssemblyAttachment: submodule.AssemblyAttachment,
+					SkipRelease:        submodule.SkipRelease,
 					apply:              submoduleApply,
 				})
 			}
@@ -234,6 +236,7 @@ func New(config config.Config, manifestFiles []string, options ...projectOption)
 			BaseRevision:       module.Revision,
 			Assemblies:         module.Assemblies,
 			AssemblyAttachment: module.AssemblyAttachment,
+			SkipRelease:        module.SkipRelease,
 			Server:             module.Server,
 			Submodules:         submodules,
 			apply:              moduleApply,
