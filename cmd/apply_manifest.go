@@ -84,7 +84,7 @@ func applyManifestCommand(cmd *cobra.Command, args []string) {
 	// Remove modules that should not be part of the release build.
 	proj.Modules = lo.Filter(proj.Modules, func(item project.Module, index int) bool {
 		if item.SkipRelease {
-			msg(fmt.Sprintf("Skipping release for module %s", item.Name))
+			msg(fmt.Sprintf("Skipping release for module: %s", item.Name))
 		}
 		return !item.SkipRelease
 	})
