@@ -6,7 +6,7 @@ import (
 	"github.com/Graylog2/graylog-project-cli/ask"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/fatih/color"
-	"github.com/google/go-github/v60/github"
+	"github.com/google/go-github/v63/github"
 	"github.com/hashicorp/go-version"
 	"github.com/mattn/go-isatty"
 	"github.com/samber/lo"

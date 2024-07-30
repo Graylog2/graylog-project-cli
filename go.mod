@@ -7,7 +7,7 @@ toolchain go1.22.1
 require (
 	github.com/fatih/color v1.17.0
 	github.com/golang-jwt/jwt/v4 v4.5.0
-	github.com/google/go-github/v60 v60.0.0
+	github.com/google/go-github/v63 v63.0.0
 	github.com/hashicorp/go-version v1.7.0
 	github.com/imdario/mergo v0.3.16
 	github.com/k0kubun/pp/v3 v3.2.0
@@ -16,7 +16,7 @@ require (
 	github.com/pelletier/go-toml/v2 v2.2.2
 	github.com/pkg/errors v0.9.1
 	github.com/samber/lo v1.46.0
-	github.com/schollz/progressbar/v3 v3.14.4
+	github.com/schollz/progressbar/v3 v3.14.5
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
