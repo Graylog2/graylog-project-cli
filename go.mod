@@ -6,7 +6,7 @@ toolchain go1.23.2
 
 require (
 	github.com/fatih/color v1.18.0
-	github.com/golang-jwt/jwt/v4 v4.5.1
+	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/go-github/v66 v66.0.0
 	github.com/hashicorp/go-version v1.7.0
 	github.com/imdario/mergo v0.3.16
