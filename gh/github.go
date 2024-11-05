@@ -3,7 +3,7 @@ package gh
 import (
 	"context"
 	"fmt"
-	"github.com/google/go-github/v63/github"
+	"github.com/google/go-github/v66/github"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	"golang.org/x/oauth2"
