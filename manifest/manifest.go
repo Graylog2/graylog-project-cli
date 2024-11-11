@@ -20,6 +20,7 @@ type Manifest struct {
 }
 
 type ManifestModule struct {
+	Name               string           `json:"name,omitempty"`
 	Repository         string           `json:"repository,omitempty"`
 	Revision           string           `json:"revision,omitempty"`
 	Maven              string           `json:"maven,omitempty"`
