@@ -185,7 +185,7 @@ func New(config config.Config, manifestFiles []string, options ...projectOption)
 	}
 
 	for _, module := range readManifest.Modules {
-		moduleName := utils.NameFromRepository(module.Repository)
+		moduleName, _ := utils.FirstNonEmpty(module.Name, utils.NameFromRepository(module.Repository))
 		moduleRepository := module.Repository
 		submodules := make([]Module, 0)
 
