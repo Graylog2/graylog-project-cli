@@ -47,7 +47,7 @@ var ideaRunConfigsCreateCmd = &cobra.Command{
 	Long: `This command adds default IntelliJ run configurations for Graylog Server,
 Data Node, and the web development server.
 
-The run configurations are created in the $PWD/.idea/runConfigurations/ directory.
+The run configurations are created in the $PWD/.run/ directory.
 
 Examples:
     # Create default run configurations
