@@ -29,11 +29,12 @@ var DefaultInstanceCounts = map[string]int{
 	"data-node": 2,
 }
 
-var runConfigDir = filepath.Join(".idea", "runConfigurations")
 var runConfigTemplateDir = filepath.Join(".config", "idea", "templates", "run-configurations")
 var configFile = filepath.Join(".config", "idea", "config.yml")
 
-const runConfigSuffix = ".xml.template"
+const runConfigDir = ".run"
+const runConfigSuffix = ".run.xml"
+const runConfigTemplateSuffix = ".run.xml.template"
 const envFileSuffix = ".env.template"
 const generatedFilePrefix = "project-generated-"
 
@@ -182,7 +183,7 @@ func CreateRunConfigurations(config RunConfig) error {
 				Template:        tmpl,
 				EnvTemplate:     envTmpl,
 				DataDirectories: configData.DataDirectories[instanceType],
-				Filename:        fmt.Sprintf("%s%s-%d.xml", generatedFilePrefix, instanceType, num),
+				Filename:        fmt.Sprintf("%s%s-%d%s", generatedFilePrefix, instanceType, num, runConfigSuffix),
 				EnvFilename:     fmt.Sprintf(".env.%s-%d", instanceType, num),
 				DataDir:         filepath.Join("data", fmt.Sprintf("%s-%d", instanceType, num)),
 			}
@@ -245,7 +246,7 @@ func CreateRunConfigurations(config RunConfig) error {
 			return fmt.Errorf("couldn't parse compunt template %q: %w", cfg.Name, err)
 		}
 
-		compoundFilename := fmt.Sprintf("%scompound-%s.xml", generatedFilePrefix, name)
+		compoundFilename := fmt.Sprintf("%scompound-%s%s", generatedFilePrefix, name, runConfigSuffix)
 
 		file, err := renameio.TempFile("", filepath.Join(config.Workdir, runConfigDir, compoundFilename))
 		if err != nil {
@@ -387,7 +388,7 @@ func findRunConfigTemplates(templateDir string) (map[string]*template.Template, 
 		if entry.IsDir() {
 			return nil
 		}
-		if !strings.HasSuffix(entry.Name(), runConfigSuffix) {
+		if !strings.HasSuffix(entry.Name(), runConfigTemplateSuffix) {
 			return nil
 		}
 
@@ -396,7 +397,7 @@ func findRunConfigTemplates(templateDir string) (map[string]*template.Template, 
 			return fmt.Errorf("couldn't read template: %w", err)
 		}
 
-		name := strings.TrimSuffix(entry.Name(), runConfigSuffix)
+		name := strings.TrimSuffix(entry.Name(), runConfigTemplateSuffix)
 
 		tmpl, err := template.New(name).Option("missingkey=error").Funcs(mathTemplateFuncs).Parse(string(data))
 		if err != nil {
