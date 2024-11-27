@@ -1,0 +1,42 @@
+---
+# Defines the list of data directories for each node type that should be
+# created by the "graylog-project idea run-config create" command.
+data-directories:
+  server:
+    - "journal"
+
+  data-node:
+    - "config"
+    - "logs"
+    - "opensearch-config"
+    - "opensearch-data"
+
+# Describes all comound configs that should be created.
+compound-configs:
+  servers:
+    name: "Servers"
+    instance-types:
+      - "server"
+
+  data-nodes:
+    name: "Data Nodes"
+    instance-types:
+      - "data-node"
+
+  all:
+    name: "All Nodes"
+    instance-types:
+      - "server"
+      - "data-node"
+      - "web"
+
+# The following properties help the CLI with the auto detection of the
+# OpenSearch version in Data Node.
+#
+# Path to the Data Node pom.xml file that contains the configured version property.
+data-node-pom-path: ["..", "graylog-project-repos", "graylog2-server", "data-node", "pom.xml"]
+# The property name in the Data Node pom.xml file that contains the OpenSearch
+# version.
+opensearch-version-property: "opensearch.version"
+# The fallback OpenSearch version.
+opensearch-version: "2.15.0"

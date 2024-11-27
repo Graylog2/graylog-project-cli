@@ -1,0 +1,33 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="{{ .ConfigName }}" type="Application" factoryName="Application" singleton="true">
+    <envs>
+      <env name="DEVELOPMENT" value="true" />
+{{- if not .UseEnvFile }}
+  {{- range $key, $value := .Env }}
+      <env name="{{ $key }}" value="{{ $value }}" />
+  {{- end }}
+{{- end }}
+    </envs>
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+    <option name="MAIN_CLASS_NAME" value="org.graylog.datanode.bootstrap.Main" />
+    <module name="data-node" />
+    <option name="PROGRAM_PARAMETERS" value="datanode -f $PROJECT_DIR$/../graylog-project-repos/graylog2-server/misc/datanode.conf" />
+    <option name="VM_PARAMETERS" value="-Xmx128m -XX:NewRatio=1 -server -XX:+ResizeTLAB -XX:-OmitStackTraceInFastThrow -XX:+PreserveFramePointer -XX:+UnlockDiagnosticVMOptions -XX:+DebugNonSafepoints -Dio.netty.leakDetection.level=paranoid -Dlog4j.configurationFile=file://$PROJECT_DIR$/../graylog-project-repos/graylog2-server/data-node/config/log4j2.xml" />
+{{- if .UseEnvFile }}
+    <extension name="net.ashald.envfile">
+      <option name="IS_ENABLED" value="true" />
+      <option name="IS_SUBST" value="false" />
+      <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+      <option name="IS_IGNORE_MISSING_FILES" value="false" />
+      <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+      <ENTRIES>
+        <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
+        <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH="$PROJECT_DIR$/.env.data-node-{{ .InstanceNumber }}" />
+      </ENTRIES>
+    </extension>
+{{- end }}
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
