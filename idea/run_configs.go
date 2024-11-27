@@ -33,8 +33,8 @@ var runConfigDir = filepath.Join(".idea", "runConfigurations")
 var runConfigTemplateDir = filepath.Join(".config", "idea", "templates", "run-configurations")
 var configFile = filepath.Join(".config", "idea", "config.yml")
 
-const runConfigSuffix = ".xml.tmpl"
-const envFileSuffix = ".env.tmpl"
+const runConfigSuffix = ".xml.template"
+const envFileSuffix = ".env.template"
 const generatedFilePrefix = "project-generated-"
 
 // We use a static password secret to ensure that different setups can use the same database.
