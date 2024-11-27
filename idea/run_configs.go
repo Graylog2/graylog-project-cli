@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/Graylog2/graylog-project-cli/pomparse"
-	"github.com/google/renameio/v2"
+	"github.com/Graylog2/graylog-project-cli/utils"
 	"github.com/samber/lo"
 	"github.com/subosito/gotenv"
 	"golang.org/x/text/cases"
@@ -254,17 +254,13 @@ func CreateRunConfigurations(config RunConfig) error {
 			return fmt.Errorf("couldn't parse compound template %q: %w", cfg.Name, err)
 		}
 
-		file, err := renameio.TempFile("", compoundFilepath)
-		if err != nil {
-			return fmt.Errorf("couldn't create temp file for %q: %w", compoundFilename, err)
-		}
-
-		if err := tmpl.Execute(file, map[string]any{"Name": cfg.Name, "ToRun": toRun}); err != nil {
+		var buf bytes.Buffer
+		if err := tmpl.Execute(&buf, map[string]any{"Name": cfg.Name, "ToRun": toRun}); err != nil {
 			return err
 		}
 
-		if err := file.CloseAtomicallyReplace(); err != nil {
-			return fmt.Errorf("couldn't close temp file for %q: %w", compoundFilename, err)
+		if err := utils.AtomicallyWriteFile(compoundFilepath, buf.Bytes(), 0600); err != nil {
+			return fmt.Errorf("couldn't write compound file %q: %w", compoundFilename, err)
 		}
 
 		logger.Info("Created compound configuration: %s", filepath.Join(runConfigDir, compoundFilename))
@@ -334,7 +330,7 @@ func writeEntryFiles(configDir string, config RunConfig, entry RunConfigEntry) e
 		return nil
 	}
 
-	if err := renameio.WriteFile(filepath.Join(configDir, entry.Filename), entry.RenderedTemplate.Bytes(), 0600); err != nil {
+	if err := utils.AtomicallyWriteFile(filepath.Join(configDir, entry.Filename), entry.RenderedTemplate.Bytes(), 0600); err != nil {
 		return fmt.Errorf("couldn't write file %q: %w", entry.Filename, err)
 	}
 
@@ -351,7 +347,7 @@ func writeEntryFiles(configDir string, config RunConfig, entry RunConfigEntry) e
 	}
 
 	if config.EnvFile {
-		if err := renameio.WriteFile(filepath.Join(config.Workdir, entry.EnvFilename), entry.RenderedEnvTemplate.Bytes(), 0600); err != nil {
+		if err := utils.AtomicallyWriteFile(filepath.Join(config.Workdir, entry.EnvFilename), entry.RenderedEnvTemplate.Bytes(), 0600); err != nil {
 			return fmt.Errorf("couldn't write file %q: %w", entry.EnvFilename, err)
 		}
 
