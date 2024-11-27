@@ -328,7 +328,7 @@ func writeEntryFiles(configDir string, config RunConfig, entry RunConfigEntry) e
 		return nil
 	}
 
-	if err := renameio.WriteFile(filepath.Join(configDir, entry.Filename), entry.RenderedTemplate.Bytes(), 0644); err != nil {
+	if err := renameio.WriteFile(filepath.Join(configDir, entry.Filename), entry.RenderedTemplate.Bytes(), 0600); err != nil {
 		return fmt.Errorf("couldn't write file %q: %w", entry.Filename, err)
 	}
 
