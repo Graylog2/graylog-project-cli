@@ -226,6 +226,14 @@ func CreateRunConfigurations(config RunConfig) error {
 
 	// Write all compound run configurations
 	for name, cfg := range configData.CompoundConfigs {
+		compoundFilename := fmt.Sprintf("%scompound-%s%s", generatedFilePrefix, name, runConfigSuffix)
+		compoundFilepath := filepath.Join(config.Workdir, runConfigDir, compoundFilename)
+
+		if _, err := os.Stat(compoundFilepath); !os.IsNotExist(err) && !config.Force {
+			logger.Info("Skipping existing compound configuration: %s", filepath.Join(runConfigDir, compoundFilename))
+			continue
+		}
+
 		filteredEntries := lo.Filter(entries, func(entry RunConfigEntry, index int) bool {
 			return slices.Contains(cfg.InstanceTypes, entry.InstanceType)
 		})
@@ -243,12 +251,10 @@ func CreateRunConfigurations(config RunConfig) error {
 
 		tmpl, err := template.New(cfg.Name).Parse(compoundTemplate)
 		if err != nil {
-			return fmt.Errorf("couldn't parse compunt template %q: %w", cfg.Name, err)
+			return fmt.Errorf("couldn't parse compound template %q: %w", cfg.Name, err)
 		}
 
-		compoundFilename := fmt.Sprintf("%scompound-%s%s", generatedFilePrefix, name, runConfigSuffix)
-
-		file, err := renameio.TempFile("", filepath.Join(config.Workdir, runConfigDir, compoundFilename))
+		file, err := renameio.TempFile("", compoundFilepath)
 		if err != nil {
 			return fmt.Errorf("couldn't create temp file for %q: %w", compoundFilename, err)
 		}
@@ -261,7 +267,7 @@ func CreateRunConfigurations(config RunConfig) error {
 			return fmt.Errorf("couldn't close temp file for %q: %w", compoundFilename, err)
 		}
 
-		logger.Info("Created compound configuration: %s", compoundFilename)
+		logger.Info("Created compound configuration: %s", filepath.Join(runConfigDir, compoundFilename))
 	}
 
 	return nil
@@ -324,7 +330,7 @@ func getInstanceCount(config RunConfig, instanceType string) int {
 
 func writeEntryFiles(configDir string, config RunConfig, entry RunConfigEntry) error {
 	if _, err := os.Stat(filepath.Join(configDir, entry.Filename)); !os.IsNotExist(err) && !config.Force {
-		logger.Info("Skipping existing run configuration: %s", entry.Filename)
+		logger.Info("Skipping existing run configuration: %s", filepath.Join(runConfigDir, entry.Filename))
 		return nil
 	}
 
@@ -332,7 +338,7 @@ func writeEntryFiles(configDir string, config RunConfig, entry RunConfigEntry) e
 		return fmt.Errorf("couldn't write file %q: %w", entry.Filename, err)
 	}
 
-	logger.Info("Created run configuration: %s", filepath.Join(strings.TrimPrefix(configDir, config.Workdir+"/"), entry.Filename))
+	logger.Info("Created run configuration: %s", filepath.Join(runConfigDir, entry.Filename))
 
 	for _, dir := range entry.DataDirectories {
 		dirToCreate := filepath.Join(entry.DataDir, dir)
