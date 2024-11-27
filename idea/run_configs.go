@@ -332,7 +332,7 @@ func writeEntryFiles(configDir string, config RunConfig, entry RunConfigEntry) e
 		return fmt.Errorf("couldn't write file %q: %w", entry.Filename, err)
 	}
 
-	logger.Info("Created run configuration: %s", entry.Filename)
+	logger.Info("Created run configuration: %s", filepath.Join(strings.TrimPrefix(configDir, config.Workdir+"/"), entry.Filename))
 
 	for _, dir := range entry.DataDirectories {
 		dirToCreate := filepath.Join(entry.DataDir, dir)
