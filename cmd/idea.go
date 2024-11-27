@@ -51,13 +51,13 @@ The run configurations are created in the $PWD/.run/ directory.
 
 Examples:
     # Create default run configurations
-    graylog-project idea run-config create
+    graylog-project idea run-configs create
 
     # Create default run configurations and .env files (requires installation of EnvFile plugin in IntelliJ)
-    graylog-project idea run-config create -E
+    graylog-project idea run-configs create -E
 
     # Create run configurations for two Server and three Data Node instances
-    graylog-project idea run-config create --instances server=2,data-node=3
+    graylog-project idea run-configs create --instances server=2,data-node=3
 `,
 	RunE: ideaRunConfigCreateCommand,
 }
