@@ -345,7 +345,7 @@ func writeEntryFiles(configDir string, config RunConfig, entry RunConfigEntry) e
 
 	if config.EnvFile {
 		if err := renameio.WriteFile(filepath.Join(config.Workdir, entry.EnvFilename), entry.RenderedEnvTemplate.Bytes(), 0600); err != nil {
-			return fmt.Errorf("couldn't write file %q: %w", entry.EnvTemplate, err)
+			return fmt.Errorf("couldn't write file %q: %w", entry.EnvFilename, err)
 		}
 
 		logger.Info("Created run env file: %s", entry.EnvFilename)
