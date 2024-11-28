@@ -44,7 +44,7 @@ github.com/imdario/mergo
 # github.com/inconshreveable/mousetrap v1.1.0
 ## explicit; go 1.18
 github.com/inconshreveable/mousetrap
-# github.com/k0kubun/pp/v3 v3.3.0
+# github.com/k0kubun/pp/v3 v3.4.1
 ## explicit; go 1.17
 github.com/k0kubun/pp/v3
 # github.com/magiconair/properties v1.8.7

@@ -11,7 +11,7 @@ require (
 	github.com/google/renameio/v2 v2.0.0
 	github.com/hashicorp/go-version v1.7.0
 	github.com/imdario/mergo v0.3.16
-	github.com/k0kubun/pp/v3 v3.3.0
+	github.com/k0kubun/pp/v3 v3.4.1
 	github.com/manifoldco/promptui v0.9.0
 	github.com/mattn/go-isatty v0.0.20
 	github.com/pelletier/go-toml/v2 v2.2.3
