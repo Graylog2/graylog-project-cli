@@ -4,10 +4,8 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/xml"
-	"errors"
 	"fmt"
 	"github.com/Graylog2/graylog-project-cli/logger"
-	"github.com/Graylog2/graylog-project-cli/pomparse"
 	"github.com/Graylog2/graylog-project-cli/utils"
 	"github.com/samber/lo"
 	"github.com/subosito/gotenv"
@@ -50,11 +48,8 @@ type RunConfig struct {
 }
 
 type ConfigData struct {
-	DataDirectories           map[string][]string       `yaml:"data-directories"`
-	CompoundConfigs           map[string]CompoundConfig `yaml:"compound-configs"`
-	DataNodePomPath           []string                  `yaml:"data-node-pom-path"`
-	OpenSearchVersion         string                    `yaml:"opensearch-version"`
-	OpenSearchVersionProperty string                    `yaml:"opensearch-version-property"`
+	DataDirectories map[string][]string       `yaml:"data-directories"`
+	CompoundConfigs map[string]CompoundConfig `yaml:"compound-configs"`
 }
 
 type CompoundConfig struct {
@@ -63,17 +58,16 @@ type CompoundConfig struct {
 }
 
 type templateData struct {
-	ConfigName        string
-	InstanceType      string
-	InstanceNumber    int
-	UseEnvFile        bool
-	Env               map[string]string
-	PortOffset        int
-	PasswordSecret    string
-	RootPasswordHash  string
-	DataDir           string
-	IsLeaderNode      bool
-	OpenSearchVersion string
+	ConfigName       string
+	InstanceType     string
+	InstanceNumber   int
+	UseEnvFile       bool
+	Env              map[string]string
+	PortOffset       int
+	PasswordSecret   string
+	RootPasswordHash string
+	DataDir          string
+	IsLeaderNode     bool
 }
 
 var mathTemplateFuncs = map[string]any{
@@ -157,11 +151,6 @@ func CreateRunConfigurations(config RunConfig) error {
 		return err
 	}
 
-	opensearchVersion, err := detectOpenSearchVersion(config, configData)
-	if err != nil {
-		return err
-	}
-
 	entries := make([]RunConfigEntry, 0)
 
 	// Build all run configuration entries in memory
@@ -189,16 +178,15 @@ func CreateRunConfigurations(config RunConfig) error {
 			}
 
 			data := templateData{
-				ConfigName:        entry.Name,
-				InstanceType:      entry.InstanceType,
-				InstanceNumber:    entry.InstanceNumber,
-				PortOffset:        entry.PortOffset,
-				UseEnvFile:        config.EnvFile,
-				PasswordSecret:    staticPasswordSecret,
-				RootPasswordHash:  fmt.Sprintf("%x", sha256.Sum256([]byte(config.RootPassword))),
-				DataDir:           entry.DataDir,
-				IsLeaderNode:      entry.InstanceNumber == 1, // Make the first node the leader node
-				OpenSearchVersion: opensearchVersion,
+				ConfigName:       entry.Name,
+				InstanceType:     entry.InstanceType,
+				InstanceNumber:   entry.InstanceNumber,
+				PortOffset:       entry.PortOffset,
+				UseEnvFile:       config.EnvFile,
+				PasswordSecret:   staticPasswordSecret,
+				RootPasswordHash: fmt.Sprintf("%x", sha256.Sum256([]byte(config.RootPassword))),
+				DataDir:          entry.DataDir,
+				IsLeaderNode:     entry.InstanceNumber == 1, // Make the first node the leader node
 			}
 
 			if entry.EnvTemplate != nil {
@@ -267,32 +255,6 @@ func CreateRunConfigurations(config RunConfig) error {
 	}
 
 	return nil
-}
-
-// The GRAYLOG_DATANODE_OPENSEARCH_LOCATION setting needs the OpenSearch version. Let's try to find it
-// in the data-node/pom.xml of the server repo. It's ugly. ¯\_(ツ)_/¯
-func detectOpenSearchVersion(config RunConfig, configData *ConfigData) (string, error) {
-	opensearchVersion := ""
-	dataNodePomPath := filepath.Join(append([]string{config.Workdir}, configData.DataNodePomPath...)...)
-	pom, err := pomparse.ParsePomE(dataNodePomPath)
-	if err == nil {
-		// First check the property from the pom.xml file
-		opensearchVersion = pom.PropertiesMap()[configData.OpenSearchVersionProperty]
-	}
-	if opensearchVersion == "" {
-		// Use the OpenSearch version setting from the config file as fallback
-		opensearchVersion = configData.OpenSearchVersion
-	}
-	if opensearchVersion == "" {
-		// We can't continue without an OpenSearch version
-		return "", errors.Join(
-			fmt.Errorf("couldn't find the OpenSearch version in the %q property of the %q file and the fallback opensearch-version is not set in %q",
-				configData.OpenSearchVersionProperty, dataNodePomPath, configFile),
-			err,
-		)
-	}
-
-	return opensearchVersion, nil
 }
 
 func parseConfigFile(path string) (*ConfigData, error) {

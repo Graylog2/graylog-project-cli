@@ -89,7 +89,6 @@ func TestCreateRunConfigurations(t *testing.T) {
 
 		assertFile(t, assert.Contains, path, fmt.Sprintf(`<configuration default="false" name="Data Node %d" type="Application" factoryName="Application" singleton="true">`, num))
 		assertFile(t, assert.NotContains, path, fmt.Sprintf(`PATH="$PROJECT_DIR$/.env.%s`, instance))
-		assertFile(t, assert.Contains, path, "opensearch-2.15.0-linux-x64")
 
 		assertRunConfigFileEnv(t, assert.Contains, path, map[string]any{
 			"GRAYLOG_DATANODE_PASSWORD_SECRET":           "hCXFTrzZFF88gnVon2fSV6WmAoQANRUqsYFTRbac8WStamVeJkjTXSykWv6FiXDbTYQQnvdTn59iALnkiT6m93BfhDju9Uqh",
@@ -184,7 +183,6 @@ func TestCreateRunConfigurationsWithEnv(t *testing.T) {
 
 		assertFile(t, assert.Contains, path, fmt.Sprintf(`<configuration default="false" name="Data Node %d" type="Application" factoryName="Application" singleton="true">`, num))
 		assertFile(t, assert.Contains, path, fmt.Sprintf(`PATH="$PROJECT_DIR$/.env.%s`, instance))
-		assertFile(t, assert.Contains, envPath, "opensearch-2.15.0-linux-x64")
 
 		expectedData := map[string]any{
 			"GRAYLOG_DATANODE_NODE_ID_FILE":              filepath.Join("data", instance, "node-id"),
