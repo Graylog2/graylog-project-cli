@@ -1,0 +1,15 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Web" type="js.build_tools.npm">
+    <package-json value="$PROJECT_DIR$/../graylog-project-repos/graylog2-server/graylog2-web-interface/package.json" />
+    <command value="run" />
+    <scripts>
+      <script value="start" />
+    </scripts>
+    <node-interpreter value="project" />
+    <node-options value="--max-old-space-size=3192" />
+    <envs>
+      <env name="GRAYLOG_API_URL" value="http://127.0.0.1:9000/" />
+    </envs>
+    <method v="2" />
+  </configuration>
+</component>
