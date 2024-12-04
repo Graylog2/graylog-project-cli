@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/Graylog2/graylog-project-cli/utils"
+	"github.com/fatih/color"
 	"github.com/samber/lo"
 	"github.com/subosito/gotenv"
 	"golang.org/x/text/cases"
@@ -16,6 +17,7 @@ import (
 	"maps"
 	"os"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"strings"
 	"text/template"
@@ -50,6 +52,7 @@ type RunConfig struct {
 type ConfigData struct {
 	DataDirectories map[string][]string       `yaml:"data-directories"`
 	CompoundConfigs map[string]CompoundConfig `yaml:"compound-configs"`
+	HostnameEnv     []string                  `yaml:"hostname-env"`
 }
 
 type CompoundConfig struct {
@@ -68,6 +71,9 @@ type templateData struct {
 	RootPasswordHash string
 	DataDir          string
 	IsLeaderNode     bool
+	IsLinux          bool
+	IsDarwin         bool
+	IsWindows        bool
 }
 
 var mathTemplateFuncs = map[string]any{
@@ -152,6 +158,7 @@ func CreateRunConfigurations(config RunConfig) error {
 	}
 
 	entries := make([]RunConfigEntry, 0)
+	hostnames := make(map[string]bool)
 
 	// Build all run configuration entries in memory
 	for instanceType, tmpl := range templates {
@@ -187,6 +194,9 @@ func CreateRunConfigurations(config RunConfig) error {
 				RootPasswordHash: fmt.Sprintf("%x", sha256.Sum256([]byte(config.RootPassword))),
 				DataDir:          entry.DataDir,
 				IsLeaderNode:     entry.InstanceNumber == 1, // Make the first node the leader node
+				IsLinux:          runtime.GOOS == "linux",
+				IsDarwin:         runtime.GOOS == "darwin",
+				IsWindows:        runtime.GOOS == "windows",
 			}
 
 			if entry.EnvTemplate != nil {
@@ -199,6 +209,12 @@ func CreateRunConfigurations(config RunConfig) error {
 
 			if err := entry.Template.Execute(&entry.RenderedTemplate, data); err != nil {
 				return fmt.Errorf("couldn't compile template: %w", err)
+			}
+
+			for key, value := range data.Env {
+				if slices.Contains(configData.HostnameEnv, key) {
+					hostnames[value] = true
+				}
 			}
 
 			entries = append(entries, entry)
@@ -252,6 +268,20 @@ func CreateRunConfigurations(config RunConfig) error {
 		}
 
 		logger.Info("Created compound configuration: %s", filepath.Join(runConfigDir, compoundFilename))
+	}
+
+	if len(hostnames) > 0 {
+		logger.Info("\nThe following template values seem to contain hostnames.")
+		for _, name := range slices.Sorted(maps.Keys(hostnames)) {
+			logger.Info(" - %v", name)
+		}
+		logger.Info("Please ensure all hostnames resolve correctly!")
+		if runtime.GOOS == "linux" {
+			// On Linux with systemd (basically all these days) *.localhost resolves to 127.0.0.1.
+			logger.ColorInfo(color.FgGreen, "You are on Linux, so the hostnames should work automatically.")
+		} else {
+			logger.ColorInfo(color.FgYellow, "You are on %s, please add the hostnames to your /etc/hosts file using 127.0.0.1 as the IP address.", runtime.GOOS)
+		}
 	}
 
 	return nil

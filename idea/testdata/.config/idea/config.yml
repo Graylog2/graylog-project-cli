@@ -11,6 +11,16 @@ data-directories:
     - "opensearch-config"
     - "opensearch-data"
 
+# Environment variables that might contain hostnames which must be configured correctly.
+# This is used by the CLI to notify users about setting up the hostnames. (e.g., adding them to /etc/hosts)
+hostname-env:
+  - "GRAYLOG_HTTP_PUBLISH_URI"
+  - "GRAYLOG_HTTP_EXTERNAL_URI"
+  - "GRAYLOG_HTTP_BIND_ADDRESS"
+  - "GRAYLOG_DATANODE_NODE_NAME"
+  - "GRAYLOG_DATANODE_HOSTNAME"
+  - "GRAYLOG_DATANODE_BIND_ADDRESS"
+
 # Describes all comound configs that should be created.
 compound-configs:
   servers:
