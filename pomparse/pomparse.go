@@ -2,9 +2,11 @@ package pomparse
 
 import (
 	"encoding/xml"
+	"fmt"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/Graylog2/graylog-project-cli/utils"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -116,6 +118,20 @@ func ParsePom(filename string) MavenPom {
 	}
 
 	return mavenPom
+}
+
+func ParsePomE(filename string) (*MavenPom, error) {
+	pomBytes, err := os.ReadFile(filename)
+	if err != nil {
+		return nil, fmt.Errorf("couldn't read %q: %w", filename, err)
+	}
+
+	var mavenPom MavenPom
+	if err := xml.Unmarshal(pomBytes, &mavenPom); err != nil {
+		return nil, fmt.Errorf("couldn't parse %q: %w", filename, err)
+	}
+
+	return &mavenPom, nil
 }
 
 // Return pom.xml files for the given module directory and all its submodules. If the given path is empty, the current
