@@ -6,6 +6,7 @@ import (
 	"github.com/Graylog2/graylog-project-cli/git"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/Graylog2/graylog-project-cli/utils"
+	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
@@ -61,6 +62,13 @@ var githubBranchProtectionCmd = &cobra.Command{
 	},
 }
 
+var githubParsePullDependenciesCmd = &cobra.Command{
+	Use:     "parse-pull-request-dependencies",
+	Aliases: []string{"parse-pr-deps"},
+	Short:   "Parses dependencies for a pull request",
+	RunE:    githubParsePullDependencies,
+}
+
 func init() {
 	githubAppAccessTokenGenerateCmd.Flags().StringP("app-id", "a", "", "the GitHub app ID (env: GPC_GITHUB_APP_ID)")
 	githubAppAccessTokenGenerateCmd.Flags().StringP("key-file", "k", "", "path to the private key to use for token generation (or key from env: GPC_GITHUB_APP_KEY)")
@@ -80,9 +88,14 @@ func init() {
 	githubRulesetsCmd.AddCommand(githubRulesetsEnableCmd)
 	githubRulesetsCmd.AddCommand(githubRulesetsDisableCmd)
 
+	githubParsePullDependenciesCmd.Flags().StringSliceP("add", "a", []string{}, "Add additional dependencies")
+	githubParsePullDependenciesCmd.Flags().StringP("file", "f", "-", "Read pull request body from file")
+	githubParsePullDependenciesCmd.Flags().StringP("join", "j", "", "Join output to one line by given join string")
+
 	githubCmd.AddCommand(githubAppAccessTokenGenerateCmd)
 	githubCmd.AddCommand(githubRulesetsCmd)
 	githubCmd.AddCommand(githubBranchProtectionCmd)
+	githubCmd.AddCommand(githubParsePullDependenciesCmd)
 	RootCmd.AddCommand(githubCmd)
 }
 
@@ -200,4 +213,47 @@ func githubDisableRuleset(cmd *cobra.Command, args []string) error {
 	return githubToggleRuleset(cmd, args, func(client *gh.Client, owner, repo, ruleset string) (*gh.Ruleset, error) {
 		return client.DisableRulesetByName(owner, repo, ruleset)
 	})
+}
+
+func githubParsePullDependencies(cmd *cobra.Command, args []string) error {
+	additional, err := cmd.Flags().GetStringSlice("add")
+	if err != nil {
+		return fmt.Errorf("couldn't get additional dependencies option: %w", err)
+	}
+	file, err := cmd.Flags().GetString("file")
+	if err != nil {
+		return fmt.Errorf("couldn't get file option: %w", err)
+	}
+	join, err := cmd.Flags().GetString("join")
+	if err != nil {
+		return fmt.Errorf("couldn't get join option: %w", err)
+	}
+
+	fd := os.Stdin
+	if file == "-" {
+		if isatty.IsTerminal(os.Stdin.Fd()) {
+			return fmt.Errorf("couldn't read pull request body from standard input because it's a terminal")
+		}
+	} else {
+		f, err := os.Open(file)
+		if err != nil {
+			return fmt.Errorf("couldn't open file: %w", err)
+		}
+		fd = f
+	}
+
+	dependencies, err := gh.ParsePullDependencies(fd)
+	if err != nil {
+		return err
+	}
+
+	if (len(dependencies) + len(additional)) > 0 {
+		joinValue := "\n"
+		if join != "" {
+			joinValue = join
+		}
+		fmt.Println(strings.Join(append(additional, dependencies...), joinValue))
+	}
+
+	return nil
 }
