@@ -162,6 +162,7 @@ func TestParseGitHubPRString(t *testing.T) {
 	}{
 		{"Graylog2/graylog2-server#123", "Graylog2/graylog2-server", 123, false},
 		{"https://github.com/Graylog2/graylog-plugin-collector/pull/9692", "Graylog2/graylog-plugin-collector", 9692, false},
+		{"https://api.github.com/repos/Graylog2/graylog2-server/pulls/9309", "Graylog2/graylog2-server", 9309, false},
 		{"https://github.com/Graylog2/graylog-plugin-collector/pull/", "", 0, true},
 		{"https://github.com/9692", "", 0, true},
 		{"https://example.com/Graylog2/graylog-plugin-collector/pull/9692", "", 0, true},

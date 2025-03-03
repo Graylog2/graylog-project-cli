@@ -35,7 +35,14 @@ func ParseGitHubPRString(prString string) (string, int, error) {
 
 	var parts []string
 
-	if strings.HasPrefix(strings.ToLower(prString), "https://github.com/") && strings.Contains(prString, "/pull/") {
+	if strings.HasPrefix(strings.ToLower(prString), "https://api.github.com/") && strings.Contains(prString, "/pulls/") {
+		// Input is a PR API URL like this: https://api.github.com/repos/Graylog2/graylog2-server/pulls/9309
+		u, err := neturl.Parse(prString)
+		if err != nil {
+			return "", 0, errors.Wrapf(err, "couldn't parse GitHub pull request API URL <%s>", prString)
+		}
+		parts = strings.SplitN(strings.TrimPrefix(u.Path, "/repos/"), "/pulls/", 2)
+	} else if strings.HasPrefix(strings.ToLower(prString), "https://github.com/") && strings.Contains(prString, "/pull/") {
 		// Input is a PR URL like this: https://github.com/Graylog2/graylog2-server/pull/9692
 		u, err := neturl.Parse(prString)
 		if err != nil {
