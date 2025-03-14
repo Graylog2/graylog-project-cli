@@ -6,6 +6,7 @@ import (
 	"github.com/Graylog2/graylog-project-cli/config"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	p "github.com/Graylog2/graylog-project-cli/project"
+	"github.com/Masterminds/sprig/v3"
 	"github.com/hashicorp/go-version"
 	"os"
 	"text/template"
@@ -60,7 +61,10 @@ func WriteXmlFile(config config.Config, project p.Project, templateFile string, 
 		logger.Fatal("Error parsing server version %q: %v", project.Server.Version(), err)
 	}
 
-	tmpl, err := template.New(templateFile).Funcs(versionTemplateFuncs(serverVersion)).Parse(string(bts))
+	tmpl, err := template.New(templateFile).
+		Funcs(versionTemplateFuncs(serverVersion)).
+		Funcs(sprig.FuncMap()).
+		Parse(string(bts))
 	if err != nil {
 		logger.Fatal("Error parsing template: %v", err)
 	}
