@@ -13,6 +13,7 @@ import (
 const DownloadedManifestPrefix = "downloaded-manifest"
 
 type Manifest struct {
+	JVMVersion        int              `json:"jvm_version,omitzero"`
 	Modules           []ManifestModule `json:"modules"`
 	Includes          []string         `json:"includes,omitempty"`
 	DefaultApply      ManifestApply    `json:"default_apply,omitempty"`

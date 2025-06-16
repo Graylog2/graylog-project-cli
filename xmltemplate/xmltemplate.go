@@ -18,6 +18,7 @@ type TemplateInventory struct {
 	Dependencies      []p.Module
 	Assemblies        map[string][]Assembly
 	AssemblyPlatforms []string
+	JVMVersion        int
 }
 
 type Assembly struct {
@@ -75,12 +76,14 @@ func WriteXmlFile(config config.Config, project p.Project, templateFile string, 
 		Dependencies:      p.MavenDependencies(project),
 		Assemblies:        mavenAssemblies(project),
 		AssemblyPlatforms: project.AssemblyPlatforms,
+		JVMVersion:        project.JVMVersion,
 	}
 
 	var buf bytes.Buffer
 
 	if err := tmpl.Execute(&buf, &inventory); err != nil {
-		logger.Fatal("Unable to execute template: %v", err)
+		logger.Error("Unable to execute template: %v", err)
+		logger.Fatal("Please make sure you are running the latest version. Use the `self-update` command to update the CLI.")
 	}
 
 	if err := os.WriteFile(outputFile, buf.Bytes(), 0644); err != nil {

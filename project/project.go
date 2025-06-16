@@ -20,6 +20,7 @@ type Project struct {
 	Server            Module
 	Modules           []Module
 	AssemblyPlatforms []string
+	JVMVersion        int
 }
 
 type Apply struct {
@@ -276,6 +277,7 @@ func New(config config.Config, manifestFiles []string, options ...projectOption)
 		Server:            server,
 		Modules:           projectModules,
 		AssemblyPlatforms: readManifest.AssemblyPlatforms,
+		JVMVersion:        readManifest.JVMVersion,
 	}
 
 	return project
