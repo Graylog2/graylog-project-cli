@@ -13,6 +13,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 )
 
@@ -20,8 +21,21 @@ import (
 var execCmd = &cobra.Command{
 	Use:   "exec",
 	Short: "Execute arbitrary commands",
-	Long:  "Execute arbitrary commands in modules",
-	Run:   execCommand,
+	Long: `Execute arbitrary commands in modules.
+
+The command has access to the following environment variables:
+
+- GPC_MODULE_NAME: Name of the module
+- GPC_MODULE_PATH: Path to the module
+- GPC_MODULE_REPO: Repository URL of the module
+- GPC_MODULE_REVISION: Branch or commit revision of the module
+- GPC_MODULE_GROUP_ID: Maven group ID of the module
+- GPC_MODULE_ARTIFACT_ID: Maven artifact ID of the module
+- GPC_MODULE_VERSION: Maven version of the module
+- GPC_MODULE_SERVER: Whether the module is a server module
+- GPC_MODULE_SKIP_RELEASE: Whether the module is skipped for release
+`,
+	Run: execCommand,
 }
 
 func init() {
@@ -35,8 +49,8 @@ func init() {
 
 func execCommand(cmd *cobra.Command, args []string) {
 	if len(args) < 1 {
-		logger.Info("Missing command")
-		cmd.UsageFunc()(cmd)
+		logger.Error("Missing command")
+		_ = cmd.Help()
 		os.Exit(1)
 	}
 
@@ -76,6 +90,18 @@ func execForPath(module p.Module, args []string) {
 
 	command.Stdout = os.Stdout
 	command.Stderr = os.Stderr
+	command.Env = append(
+		os.Environ(),
+		"GPC_MODULE_NAME="+module.Name,
+		"GPC_MODULE_PATH="+module.Path,
+		"GPC_MODULE_REPO="+module.Repository,
+		"GPC_MODULE_REVISION="+module.Revision,
+		"GPC_MODULE_GROUP_ID="+module.GroupId(),
+		"GPC_MODULE_ARTIFACT_ID="+module.ArtifactId(),
+		"GPC_MODULE_VERSION="+module.Version(),
+		"GPC_MODULE_SERVER="+strconv.FormatBool(module.Server),
+		"GPC_MODULE_SKIP_RELEASE="+strconv.FormatBool(module.SkipRelease),
+	)
 
 	if err := command.Run(); err != nil {
 		if viper.GetBool("exec.force") {
