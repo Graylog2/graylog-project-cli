@@ -207,7 +207,13 @@ func applyManifestCommand(cmd *cobra.Command, args []string) {
 		msg("Skipping maven deployment!")
 		applier.MavenRunWithProfiles([]string{"release"}, "-DskipTests", "clean", "package")
 	} else {
-		applier.MavenRunWithProfiles([]string{"release"}, "-DskipTests", "clean", "deploy")
+		applier.MavenRunWithProfiles(
+			[]string{"release"},
+			"-DskipTests",
+			"-Dlocal.repo.path="+filepath.Join(utils.GetCwd(), "target", "local-maven-repo"),
+			"clean",
+			"deploy",
+		)
 	}
 
 	// Set development version in all web modules
