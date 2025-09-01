@@ -12,7 +12,7 @@
     <option name="MAIN_CLASS_NAME" value="org.graylog2.bootstrap.Main" />
     <module name="runner" />
     <option name="PROGRAM_PARAMETERS" value="server -f $PROJECT_DIR$/../graylog-project-repos/graylog2-server/misc/graylog.conf -np --local" />
-    <option name="VM_PARAMETERS" value="-Xmx1g -XX:NewRatio=1 -server -XX:+ResizeTLAB -XX:-OmitStackTraceInFastThrow -XX:+PreserveFramePointer -XX:+UnlockDiagnosticVMOptions -XX:+DebugNonSafepoints -Dio.netty.leakDetection.level=paranoid -Dlog4j.configurationFile=file://$PROJECT_DIR$/../log4j2.xml" />
+    <option name="VM_PARAMETERS" value="-Xmx1g -XX:NewRatio=1 -server -XX:+ResizeTLAB -XX:-OmitStackTraceInFastThrow -XX:+PreserveFramePointer -XX:+UnlockDiagnosticVMOptions -XX:+DebugNonSafepoints -Dio.netty.leakDetection.level=paranoid" />
 {{- if .UseEnvFile }}
     <extension name="net.ashald.envfile">
       <option name="IS_ENABLED" value="true" />
