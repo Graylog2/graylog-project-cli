@@ -1,6 +1,15 @@
 package cmd
 
 import (
+	"bytes"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"runtime"
+	"strconv"
+	"strings"
+	"text/template"
+
 	"github.com/Graylog2/graylog-project-cli/config"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/Graylog2/graylog-project-cli/manifest"
@@ -9,12 +18,6 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
-	"os/exec"
-	"path/filepath"
-	"runtime"
-	"strconv"
-	"strings"
 )
 
 // execCmd represents the exec command
@@ -27,6 +30,7 @@ The command has access to the following environment variables:
 
 - GPC_MODULE_NAME: Name of the module
 - GPC_MODULE_PATH: Path to the module
+- GPC_MODULE_PATH_BASENAME: Base name of the path to the module
 - GPC_MODULE_REPO: Repository URL of the module
 - GPC_MODULE_REVISION: Branch or commit revision of the module
 - GPC_MODULE_GROUP_ID: Maven group ID of the module
@@ -42,8 +46,10 @@ func init() {
 	RootCmd.AddCommand(execCmd)
 
 	execCmd.Flags().BoolP("force", "f", false, "Continue to execute the command even when it returns a non-zero code")
+	execCmd.Flags().BoolP("template", "t", false, "Process the command as Go template")
 	execCmd.Flags().BoolP("web", "w", false, "Exec command only in web modules")
 	viper.BindPFlag("exec.force", execCmd.Flags().Lookup("force"))
+	viper.BindPFlag("exec.template", execCmd.Flags().Lookup("template"))
 	viper.BindPFlag("exec.web", execCmd.Flags().Lookup("web"))
 }
 
@@ -81,27 +87,55 @@ func execForPath(module p.Module, args []string) {
 
 	utils.Chdir(module.Path)
 
+	cmdLine := strings.Join(args, " ")
+
+	var tmpl *template.Template
+	if viper.GetBool("exec.template") {
+		var err error
+		tmpl, err = template.New("cmd").Option("missingkey=error").Parse(cmdLine)
+		if err != nil {
+			logger.Fatal("Couldn't parse template: %v", err)
+		}
+	}
+
+	inventory := map[string]string{
+		"GPC_MODULE_NAME":          module.Name,
+		"GPC_MODULE_PATH":          module.Path,
+		"GPC_MODULE_PATH_BASENAME": filepath.Base(module.Path),
+		"GPC_MODULE_REPO":          module.Repository,
+		"GPC_MODULE_REVISION":      module.Revision,
+		"GPC_MODULE_GROUP_ID":      module.GroupId(),
+		"GPC_MODULE_ARTIFACT_ID":   module.ArtifactId(),
+		"GPC_MODULE_VERSION":       module.Version(),
+		"GPC_MODULE_SERVER":        strconv.FormatBool(module.Server),
+		"GPC_MODULE_SKIP_RELEASE":  strconv.FormatBool(module.SkipRelease),
+	}
+	env := make([]string, 0)
+
+	for k, v := range inventory {
+		env = append(env, k+"="+v)
+	}
+
+	var cmdBuf bytes.Buffer
+
+	if viper.GetBool("exec.template") {
+		if err := tmpl.Execute(&cmdBuf, inventory); err != nil {
+			logger.Fatal("Couldn't execute template: %v", err)
+		}
+	} else {
+		cmdBuf.WriteString(cmdLine)
+	}
+
 	var command *exec.Cmd
 	if runtime.GOOS == "windows" {
-		command = exec.Command("cmd.exe", "/c", strings.Join(args, " "))
+		command = exec.Command("cmd.exe", "/c", cmdBuf.String())
 	} else {
-		command = exec.Command("sh", "-c", strings.Join(args, " "))
+		command = exec.Command("sh", "-c", cmdBuf.String())
 	}
 
 	command.Stdout = os.Stdout
 	command.Stderr = os.Stderr
-	command.Env = append(
-		os.Environ(),
-		"GPC_MODULE_NAME="+module.Name,
-		"GPC_MODULE_PATH="+module.Path,
-		"GPC_MODULE_REPO="+module.Repository,
-		"GPC_MODULE_REVISION="+module.Revision,
-		"GPC_MODULE_GROUP_ID="+module.GroupId(),
-		"GPC_MODULE_ARTIFACT_ID="+module.ArtifactId(),
-		"GPC_MODULE_VERSION="+module.Version(),
-		"GPC_MODULE_SERVER="+strconv.FormatBool(module.Server),
-		"GPC_MODULE_SKIP_RELEASE="+strconv.FormatBool(module.SkipRelease),
-	)
+	command.Env = append(os.Environ(), env...)
 
 	if err := command.Run(); err != nil {
 		if viper.GetBool("exec.force") {
