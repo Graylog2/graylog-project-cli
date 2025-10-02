@@ -3,20 +3,20 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"github.com/Graylog2/graylog-project-cli/changelog"
-	c "github.com/Graylog2/graylog-project-cli/config"
-	"github.com/Graylog2/graylog-project-cli/git"
-	"github.com/Graylog2/graylog-project-cli/logger"
-	"github.com/Graylog2/graylog-project-cli/manifest"
-	p "github.com/Graylog2/graylog-project-cli/project"
-	"github.com/hashicorp/go-version"
-	"github.com/samber/lo"
-	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/Graylog2/graylog-project-cli/changelog"
+	c "github.com/Graylog2/graylog-project-cli/config"
+	"github.com/Graylog2/graylog-project-cli/git"
+	"github.com/Graylog2/graylog-project-cli/logger"
+	p "github.com/Graylog2/graylog-project-cli/project"
+	"github.com/hashicorp/go-version"
+	"github.com/samber/lo"
+	"github.com/spf13/cobra"
 )
 
 var changelogCmd = &cobra.Command{
@@ -51,7 +51,8 @@ var changelogReleaseCmd = &cobra.Command{
 Example:
     graylog-project changelog release path/to/unreleased/changelog
 `,
-	Run: changelogReleaseCommand,
+	Args: cobra.ExactArgs(1),
+	RunE: changelogReleaseCommand,
 }
 
 var changelogReleasePathCmd = &cobra.Command{
@@ -123,7 +124,7 @@ func init() {
 	changelogNewCmd.Flags().BoolVarP(&changelogEntryMinimalTemplate, "minimal-template", "m", false, "Use a minimal entry template")
 	changelogNewCmd.Flags().BoolVarP(&changelogEntryInteractive, "interactive", "i", false, "Fill template values interactively")
 
-	changelogReleaseCmd.Flags().StringVarP(&changelogReleaseVersionPattern, "version-pattern", "P", changelog.SemverVersionPattern.String(), "version number pattern")
+	changelogReleaseCmd.Flags().BoolVar(&changelogReleaseAllowPreRelease, "allow-pre-release", false, "allow pre-release")
 	changelogReleasePathCmd.Flags().StringVarP(&changelogReleaseVersionPattern, "version-pattern", "P", changelog.SemverVersionPattern.String(), "version number pattern")
 	changelogReleasePathCmd.Flags().BoolVar(&changelogReleaseAllowPreRelease, "allow-pre-release", false, "allow pre-release")
 
@@ -217,20 +218,32 @@ func execChangelogRenderCommand(snippetsPaths []string) error {
 	return nil
 }
 
-func changelogReleaseCommand(cmd *cobra.Command, args []string) {
-	// TODO: We might have to take the manifest as argument
-	config := c.Get()
-	manifestFiles := manifest.ReadState().Files()
-	project := p.New(config, manifestFiles)
+func changelogReleaseCommand(cmd *cobra.Command, args []string) error {
+	// We only expect one manifest file in args (validated in the command definition)
+	project := p.New(c.Get(), args)
 
-	versionPattern, err := regexp.Compile(changelogReleaseVersionPattern)
-	if err != nil {
-		logger.Fatal("Invalid version pattern: %s", changelogReleaseVersionPattern)
-	}
+	return p.ForEachSelectedModuleE(project, func(module p.Module) error {
+		semver, err := version.NewSemver(module.Revision)
+		if err != nil {
+			return fmt.Errorf("invalid version %q: %w", module.Revision, err)
+		}
 
-	if err := changelog.Release(project, versionPattern); err != nil {
-		logger.Fatal(err.Error())
-	}
+		if semver.Prerelease() != "" && !changelogReleaseAllowPreRelease {
+			logger.Info("Skipping changelog release for pre-release version %q in module: %s", module.Revision, module.Name)
+			return nil
+		}
+
+		versionPattern := changelog.SemverVersionPattern
+		if changelogReleaseAllowPreRelease {
+			versionPattern = changelog.SemverVersionPatternWithPreRelease
+		}
+
+		err = changelog.ReleaseInPath(module.Path, module.Revision, versionPattern)
+		if err != nil {
+			return fmt.Errorf("couldn't release changelog in path %s: %w", module.Path, err)
+		}
+		return nil
+	})
 }
 
 func changelogReleasePathCommand(cmd *cobra.Command, args []string) {
