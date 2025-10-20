@@ -1,14 +1,15 @@
 package cmd
 
 import (
+	"io/ioutil"
+	"os"
+
 	"github.com/Graylog2/graylog-project-cli/ask"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/Graylog2/graylog-project-cli/manifest"
 	"github.com/fatih/color"
 	"github.com/hashicorp/go-version"
 	"github.com/spf13/cobra"
-	"io/ioutil"
-	"os"
 )
 
 var applyManifestGenerateCmd = &cobra.Command{
@@ -107,6 +108,12 @@ func amgCommandBatch(newManifest *manifest.Manifest) string {
 		// Don't include non-modules in the release manifest
 		if module.SkipRelease {
 			continue
+		}
+		// Using "master" as base revision is the same as using "main" for modules that use "main" as default branch
+		if amgBaseRev == "master" && module.Revision == "main" {
+			module.Apply = manifest.ManifestApply{
+				FromRevision: "main",
+			}
 		}
 		module.Revision = amgReleaseVersion
 		newModules = append(newModules, module)
