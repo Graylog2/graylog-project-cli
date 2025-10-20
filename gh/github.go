@@ -3,15 +3,16 @@ package gh
 import (
 	"context"
 	"fmt"
-	"github.com/google/go-github/v66/github"
+	"slices"
+	"strings"
+
+	"github.com/google/go-github/v76/github"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	"golang.org/x/oauth2"
-	"slices"
-	"strings"
 )
 
-var validRulesetEnforcements = []string{"active", "disabled"}
+var validRulesetEnforcements = []github.RulesetEnforcement{github.RulesetEnforcementActive, github.RulesetEnforcementDisabled}
 
 type Ruleset struct {
 	ID          int64
@@ -26,23 +27,25 @@ type Client struct {
 	ctx    context.Context
 }
 
-func (gh *Client) updateRulesetEnforcementByName(owner string, repo string, rulesetName string, enforcement string) (*Ruleset, error) {
+func (gh *Client) updateRulesetEnforcementByName(owner string, repo string, rulesetName string, enforcement github.RulesetEnforcement) (*Ruleset, error) {
 	if !slices.Contains(validRulesetEnforcements, enforcement) {
-		return nil, fmt.Errorf("invalid ruleset enforement value: %s (valid: %s)", enforcement, strings.Join(validRulesetEnforcements, ", "))
+		return nil, fmt.Errorf("invalid ruleset enforement value: %s (valid: %v)", enforcement, validRulesetEnforcements)
 	}
 
-	rulesets, _, err := gh.client.Repositories.GetAllRulesets(gh.ctx, owner, repo, false)
+	rulesets, _, err := gh.client.Repositories.GetAllRulesets(gh.ctx, owner, repo, &github.RepositoryListRulesetsOptions{
+		IncludesParents: github.Ptr(false),
+	})
 
 	if err != nil {
 		return nil, fmt.Errorf("couldn't retrieve rulesets for %s/%s: %w", owner, repo, err)
 	}
 
-	ruleset, found := lo.Find(rulesets, func(item *github.Ruleset) bool {
+	ruleset, found := lo.Find(rulesets, func(item *github.RepositoryRuleset) bool {
 		return item.Name == rulesetName
 	})
 	if !found {
 		return nil, fmt.Errorf("couldn't find ruleset with name %q in rulesets: %s", rulesetName,
-			strings.Join(lo.Map(rulesets, func(item *github.Ruleset, index int) string {
+			strings.Join(lo.Map(rulesets, func(item *github.RepositoryRuleset, index int) string {
 				return item.Name
 			}), ", "))
 	}
@@ -50,7 +53,7 @@ func (gh *Client) updateRulesetEnforcementByName(owner string, repo string, rule
 	rs := &Ruleset{
 		ID:          ruleset.GetID(),
 		Name:        ruleset.Name,
-		Enforcement: ruleset.Enforcement,
+		Enforcement: string(ruleset.Enforcement),
 		Owner:       owner,
 		Repo:        repo,
 	}
@@ -61,9 +64,9 @@ func (gh *Client) updateRulesetEnforcementByName(owner string, repo string, rule
 	}
 
 	ruleset.Enforcement = enforcement
-	rs.Enforcement = enforcement
+	rs.Enforcement = string(enforcement)
 
-	if _, _, err := gh.client.Repositories.UpdateRuleset(gh.ctx, owner, repo, ruleset.GetID(), ruleset); err != nil {
+	if _, _, err := gh.client.Repositories.UpdateRuleset(gh.ctx, owner, repo, ruleset.GetID(), *ruleset); err != nil {
 		return nil, fmt.Errorf("couldn't update ruleset %q in repo %s/%s: %w", ruleset.Name, owner, repo, err)
 	}
 
@@ -71,11 +74,11 @@ func (gh *Client) updateRulesetEnforcementByName(owner string, repo string, rule
 }
 
 func (gh *Client) EnableRulesetByName(owner string, repo string, rulesetName string) (*Ruleset, error) {
-	return gh.updateRulesetEnforcementByName(owner, repo, rulesetName, "active")
+	return gh.updateRulesetEnforcementByName(owner, repo, rulesetName, github.RulesetEnforcementActive)
 }
 
 func (gh *Client) DisableRulesetByName(owner string, repo string, rulesetName string) (*Ruleset, error) {
-	return gh.updateRulesetEnforcementByName(owner, repo, rulesetName, "disabled")
+	return gh.updateRulesetEnforcementByName(owner, repo, rulesetName, github.RulesetEnforcementDisabled)
 }
 
 func NewGitHubClient(accessToken string) *Client {

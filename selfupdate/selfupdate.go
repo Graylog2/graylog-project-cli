@@ -3,14 +3,6 @@ package selfupdate
 import (
 	"context"
 	"fmt"
-	"github.com/Graylog2/graylog-project-cli/ask"
-	"github.com/Graylog2/graylog-project-cli/logger"
-	"github.com/fatih/color"
-	"github.com/google/go-github/v66/github"
-	"github.com/hashicorp/go-version"
-	"github.com/mattn/go-isatty"
-	"github.com/samber/lo"
-	"github.com/schollz/progressbar/v3"
 	"io"
 	"net/http"
 	"os"
@@ -19,6 +11,15 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/Graylog2/graylog-project-cli/ask"
+	"github.com/Graylog2/graylog-project-cli/logger"
+	"github.com/fatih/color"
+	"github.com/google/go-github/v76/github"
+	"github.com/hashicorp/go-version"
+	"github.com/mattn/go-isatty"
+	"github.com/samber/lo"
+	"github.com/schollz/progressbar/v3"
 )
 
 const (
@@ -68,7 +69,7 @@ func SelfUpdate(runningVersion *version.Version, requestedVersion string, force 
 		release, response, err = client.Repositories.GetLatestRelease(ctx, repoOwner, repoName)
 	}
 	if err != nil {
-		if response.StatusCode == 404 {
+		if response != nil && response.StatusCode == 404 {
 			return fmt.Errorf("version %s doesn't exist", requestedVersion)
 		}
 		return fmt.Errorf("couldn't get release: %w", err)
