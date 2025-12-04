@@ -2,10 +2,11 @@ package project
 
 import (
 	"fmt"
-	"github.com/samber/lo"
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/samber/lo"
 
 	"github.com/Graylog2/graylog-project-cli/config"
 	"github.com/Graylog2/graylog-project-cli/logger"
@@ -186,6 +187,9 @@ func New(config config.Config, manifestFiles []string, options ...projectOption)
 	}
 
 	for _, module := range readManifest.Modules {
+		if config.ReleaseMode && module.SkipRelease {
+			continue
+		}
 		moduleName, _ := utils.FirstNonEmpty(module.Name, utils.NameFromRepository(module.Repository))
 		moduleRepository := module.Repository
 		submodules := make([]Module, 0)

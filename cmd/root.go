@@ -27,6 +27,7 @@ var selectedAssemblies string
 var loggerPrefix string
 var noUpdateCheck bool
 var forceHttpsRepos bool
+var releaseMode bool
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
@@ -56,6 +57,7 @@ Configuration file lookup order
 Environment variables:
 
 - GPC_REPOSITORY_ROOT: can be used instead of the "repository-root" command line flag
+- GPC_RELEASE_MODE: can be used instead of the "release-mode" command line flag
 
 Example usage:
 
@@ -100,6 +102,7 @@ func init() {
 	RootCmd.PersistentFlags().StringVarP(&loggerPrefix, "logger-prefix", "", "", "output logger prefix")
 	RootCmd.PersistentFlags().BoolVarP(&noUpdateCheck, "disable-update-check", "U", false, "disable checking for graylog-project-cli updates")
 	RootCmd.PersistentFlags().BoolVarP(&forceHttpsRepos, "force-https-repos", "", false, "convert all git@github.com:... repository URLs to https://github.com/...")
+	RootCmd.PersistentFlags().BoolVar(&releaseMode, "release-mode", false, "Enable release mode. Only include modules in the project that can be released.")
 
 	viper.BindPFlag("repository-root", RootCmd.PersistentFlags().Lookup("repository-root"))
 	viper.BindPFlag("debug", RootCmd.PersistentFlags().Lookup("debug"))
@@ -110,8 +113,10 @@ func init() {
 	viper.BindPFlag("logger-prefix", RootCmd.PersistentFlags().Lookup("logger-prefix"))
 	viper.BindPFlag("disable-update-check", RootCmd.PersistentFlags().Lookup("disable-update-check"))
 	viper.BindPFlag("force-https-repos", RootCmd.PersistentFlags().Lookup("force-https-repos"))
+	viper.BindPFlag("release-mode", RootCmd.PersistentFlags().Lookup("release-mode"))
 
 	viper.BindEnv("repository-root", "GPC_REPOSITORY_ROOT")
+	viper.BindEnv("release-mode", "GPC_RELEASE_MODE")
 }
 
 // initConfig reads in config file and ENV variables if set.

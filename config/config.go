@@ -1,10 +1,11 @@
 package config
 
 import (
+	"os"
+
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/k0kubun/pp/v3"
 	"github.com/spf13/viper"
-	"os"
 )
 
 const DefaultRepositoryRoot = "../graylog-project-repos"
@@ -40,6 +41,7 @@ type Config struct {
 	NoUpdateCheck      bool          `mapstructure:"disable-update-check"`
 	ForceHttpsRepos    bool          `mapstructure:"force-https-repos"`
 	Update             Update        `mapstructure:"update"`
+	ReleaseMode        bool          `mapstructure:"release-mode"`
 }
 
 // Returns true if running a CI environment. Detected environments: Jenkins, TravisCI
