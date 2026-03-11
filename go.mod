@@ -1,6 +1,6 @@
 module github.com/Graylog2/graylog-project-cli
 
-go 1.25
+go 1.26
 
 require (
 	github.com/Masterminds/sprig/v3 v3.3.0

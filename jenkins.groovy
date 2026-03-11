@@ -17,7 +17,7 @@ pipeline
 
    tools
    {
-     go 'Go 1.25'
+     go 'Go 1.26'
    }
 
    stages
