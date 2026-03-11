@@ -1,6 +1,20 @@
 # Changelog
 
-## [v3.5.0](https://github.com/k0kubun/pp/tree/HEAD)
+## [v3.5.1](https://github.com/k0kubun/pp/tree/v3.5.1)
+
+[Full Changelog](https://github.com/k0kubun/pp/compare/v3.5.0...v3.5.1)
+
+**Merged pull requests:**
+
+- FIX: 1. fix format when withLineInfo=true; 2. add .gitignore [\#106](https://github.com/k0kubun/pp/pull/106) ([kuchaguangjie](https://github.com/kuchaguangjie))
+- Bump golang.org/x/text from 0.31.0 to 0.32.0 [\#105](https://github.com/k0kubun/pp/pull/105) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump golang.org/x/text from 0.30.0 to 0.31.0 [\#104](https://github.com/k0kubun/pp/pull/104) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump golang.org/x/text from 0.29.0 to 0.30.0 [\#103](https://github.com/k0kubun/pp/pull/103) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump golang.org/x/text from 0.28.0 to 0.29.0 [\#102](https://github.com/k0kubun/pp/pull/102) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump golang.org/x/text from 0.27.0 to 0.28.0 [\#101](https://github.com/k0kubun/pp/pull/101) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump golang.org/x/text from 0.26.0 to 0.27.0 [\#100](https://github.com/k0kubun/pp/pull/100) ([dependabot[bot]](https://github.com/apps/dependabot))
+
+## [v3.5.0](https://github.com/k0kubun/pp/tree/v3.5.0) (2025-07-09)
 
 [Full Changelog](https://github.com/k0kubun/pp/compare/v3.4.1...v3.5.0)
 

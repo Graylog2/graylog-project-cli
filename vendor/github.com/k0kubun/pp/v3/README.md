@@ -115,6 +115,21 @@ NoColor
 
 ![](http://i.gyazo.com/ab791997a980f1ab3ee2a01586efdce6.png)
 
+## Releasing
+
+```sh
+export CHANGELOG_GITHUB_TOKEN="..."
+gem install github_changelog_generator
+github_changelog_generator --unreleased-label vX.Y.Z
+
+# Update HEAD to vX.Y.Z
+vim CHANGELOG.md
+git add CHANGELOG.md
+git commit -m "Version X.Y.Z"
+git tag vX.Y.Z
+git push origin master && git push origin --tags
+```
+
 ## License
 
 MIT License

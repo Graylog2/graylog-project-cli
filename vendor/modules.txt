@@ -23,21 +23,21 @@ github.com/fatih/color
 ## explicit; go 1.17
 github.com/fsnotify/fsnotify
 github.com/fsnotify/fsnotify/internal
-# github.com/go-viper/mapstructure/v2 v2.4.0
+# github.com/go-viper/mapstructure/v2 v2.5.0
 ## explicit; go 1.18
 github.com/go-viper/mapstructure/v2
 github.com/go-viper/mapstructure/v2/internal/errors
-# github.com/golang-jwt/jwt/v5 v5.3.0
+# github.com/golang-jwt/jwt/v5 v5.3.1
 ## explicit; go 1.21
 github.com/golang-jwt/jwt/v5
 # github.com/google/go-github/v76 v76.0.0
 ## explicit; go 1.24.0
 github.com/google/go-github/v76/github
-# github.com/google/go-querystring v1.1.0
-## explicit; go 1.10
-github.com/google/go-querystring/query
-# github.com/google/renameio/v2 v2.0.1
+# github.com/google/go-querystring v1.2.0
 ## explicit; go 1.13
+github.com/google/go-querystring/query
+# github.com/google/renameio/v2 v2.0.2
+## explicit; go 1.25
 github.com/google/renameio/v2
 # github.com/google/uuid v1.6.0
 ## explicit
@@ -54,8 +54,8 @@ github.com/imdario/mergo
 # github.com/inconshreveable/mousetrap v1.1.0
 ## explicit; go 1.18
 github.com/inconshreveable/mousetrap
-# github.com/k0kubun/pp/v3 v3.5.0
-## explicit; go 1.23.0
+# github.com/k0kubun/pp/v3 v3.5.1
+## explicit; go 1.24.0
 github.com/k0kubun/pp/v3
 # github.com/manifoldco/promptui v0.9.0
 ## explicit; go 1.12
@@ -97,14 +97,14 @@ github.com/rivo/uniseg
 ## explicit; go 1.23.0
 github.com/sagikazarmark/locafero
 github.com/sagikazarmark/locafero/internal/queue
-# github.com/samber/lo v1.52.0
+# github.com/samber/lo v1.53.0
 ## explicit; go 1.18
 github.com/samber/lo
 github.com/samber/lo/internal/constraints
 github.com/samber/lo/internal/xrand
 github.com/samber/lo/internal/xtime
 github.com/samber/lo/mutable
-# github.com/schollz/progressbar/v3 v3.18.0
+# github.com/schollz/progressbar/v3 v3.19.0
 ## explicit; go 1.22
 github.com/schollz/progressbar/v3
 # github.com/shopspring/decimal v1.4.0
@@ -141,7 +141,7 @@ github.com/stretchr/testify/require
 # github.com/subosito/gotenv v1.6.0
 ## explicit; go 1.18
 github.com/subosito/gotenv
-# github.com/yuin/goldmark v1.7.13
+# github.com/yuin/goldmark v1.7.16
 ## explicit; go 1.22
 github.com/yuin/goldmark
 github.com/yuin/goldmark/ast
@@ -155,29 +155,29 @@ github.com/yuin/goldmark/util
 # go.yaml.in/yaml/v3 v3.0.4
 ## explicit; go 1.16
 go.yaml.in/yaml/v3
-# golang.org/x/crypto v0.45.0
+# golang.org/x/crypto v0.48.0
 ## explicit; go 1.24.0
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
 golang.org/x/crypto/pbkdf2
 golang.org/x/crypto/scrypt
-# golang.org/x/exp v0.0.0-20251125195548-87e1e737ad39
-## explicit; go 1.24.0
+# golang.org/x/exp v0.0.0-20260218203240-3dfff04db8fa
+## explicit; go 1.25.0
 golang.org/x/exp/slices
-# golang.org/x/oauth2 v0.33.0
-## explicit; go 1.24.0
+# golang.org/x/oauth2 v0.36.0
+## explicit; go 1.25.0
 golang.org/x/oauth2
 golang.org/x/oauth2/internal
-# golang.org/x/sys v0.38.0
-## explicit; go 1.24.0
+# golang.org/x/sys v0.42.0
+## explicit; go 1.25.0
 golang.org/x/sys/plan9
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# golang.org/x/term v0.37.0
-## explicit; go 1.24.0
+# golang.org/x/term v0.41.0
+## explicit; go 1.25.0
 golang.org/x/term
-# golang.org/x/text v0.31.0
-## explicit; go 1.24.0
+# golang.org/x/text v0.35.0
+## explicit; go 1.25.0
 golang.org/x/text/cases
 golang.org/x/text/encoding
 golang.org/x/text/encoding/internal
