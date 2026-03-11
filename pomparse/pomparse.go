@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/Graylog2/graylog-project-cli/utils"
-	"io/ioutil"
+
 	"os"
 	"path/filepath"
 	"strings"
@@ -106,7 +106,7 @@ func GetMavenCoordinates(path string) MavenCoordinates {
 }
 
 func ParsePom(filename string) MavenPom {
-	pomBytes, err := ioutil.ReadFile(filename)
+	pomBytes, err := os.ReadFile(filename)
 	if err != nil {
 		logger.Fatal("Error reading pom file: %v", filename)
 	}

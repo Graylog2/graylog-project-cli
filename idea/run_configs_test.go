@@ -212,19 +212,19 @@ func assertCompoundRunConfigFile(t *testing.T, path string, title string, values
 	}
 }
 
-func assertRunConfigFileEnv(t *testing.T, check func(assert.TestingT, interface{}, interface{}, ...interface{}) bool, path string, values map[string]any) {
+func assertRunConfigFileEnv(t *testing.T, check func(assert.TestingT, any, any, ...any) bool, path string, values map[string]any) {
 	for key, value := range values {
 		assertFile(t, check, path, fmt.Sprintf(`<env name="%s" value="%v" />`, key, value), fmt.Sprintf("run config file %q - %s=%s", path, key, value))
 	}
 }
 
-func assertEnvFile(t *testing.T, check func(assert.TestingT, interface{}, interface{}, ...interface{}) bool, path string, values map[string]any) {
+func assertEnvFile(t *testing.T, check func(assert.TestingT, any, any, ...any) bool, path string, values map[string]any) {
 	for key, value := range values {
 		assertFile(t, check, path, fmt.Sprintf("%s=%v", key, value), fmt.Sprintf("env file %q - %s=%s", path, key, value))
 	}
 }
 
-func assertFile(t *testing.T, check func(assert.TestingT, interface{}, interface{}, ...interface{}) bool, path string, needle string, message ...string) {
+func assertFile(t *testing.T, check func(assert.TestingT, any, any, ...any) bool, path string, needle string, message ...string) {
 	require.FileExists(t, path)
 	buf, err := os.ReadFile(path)
 	require.NoError(t, err)

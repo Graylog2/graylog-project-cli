@@ -1,17 +1,17 @@
 package pom
 
 import (
+	"os"
+	"path/filepath"
+	"regexp"
+	"strings"
+
 	c "github.com/Graylog2/graylog-project-cli/config"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/Graylog2/graylog-project-cli/pomparse"
 	p "github.com/Graylog2/graylog-project-cli/project"
 	"github.com/Graylog2/graylog-project-cli/utils"
 	"github.com/Graylog2/graylog-project-cli/xmltemplate"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"regexp"
-	"strings"
 )
 
 func SetProperty(module p.Module, name string, value string) {
@@ -30,7 +30,7 @@ func SetProperty(module p.Module, name string, value string) {
 		return
 	}
 
-	buf, err := ioutil.ReadFile(pomFile)
+	buf, err := os.ReadFile(pomFile)
 	if err != nil {
 		logger.Fatal("Unable to read %v: %v", pomFile, err)
 	}
@@ -43,7 +43,7 @@ func SetProperty(module p.Module, name string, value string) {
 
 		newContent := re.ReplaceAllString(string(buf), "<"+name+">"+value+"</"+name+">")
 
-		if err := ioutil.WriteFile(pomFile, []byte(newContent), 0); err != nil {
+		if err := os.WriteFile(pomFile, []byte(newContent), 0); err != nil {
 			logger.Fatal("Unable to set version in %v: %v", pomFile, err)
 		}
 	} else {
@@ -71,7 +71,7 @@ func SetParentIfMatches(module p.Module, groupId string, artifactId string, vers
 		return
 	}
 
-	buf, err := ioutil.ReadFile(pomFile)
+	buf, err := os.ReadFile(pomFile)
 	if err != nil {
 		logger.Fatal("Unable to read %v: %v", pomFile, err)
 	}
@@ -83,7 +83,7 @@ func SetParentIfMatches(module p.Module, groupId string, artifactId string, vers
 
 	newContent := re.ReplaceAllString(string(buf), "<parent>\n        <groupId>"+groupId+"</groupId>\n        <artifactId>"+artifactId+"</artifactId>\n        <version>"+version+"</version>\n        <relativePath>"+relativePath+"</relativePath>\n    </parent>")
 
-	if err := ioutil.WriteFile(pomFile, []byte(newContent), 0); err != nil {
+	if err := os.WriteFile(pomFile, []byte(newContent), 0); err != nil {
 		logger.Fatal("Unable to set version in %v: %v", pomFile, err)
 	}
 }

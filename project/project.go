@@ -479,9 +479,9 @@ func SelectedModules(project Project) []Module {
 
 			selected := false
 
-			for _, assembly := range strings.Split(project.config.SelectedAssemblies, ",") {
-				if strings.HasPrefix(assembly, "-") {
-					selected = !lo.Contains(moduleAssemblies, strings.TrimPrefix(assembly, "-"))
+			for assembly := range strings.SplitSeq(project.config.SelectedAssemblies, ",") {
+				if after, ok := strings.CutPrefix(assembly, "-"); ok {
+					selected = !lo.Contains(moduleAssemblies, after)
 				} else {
 					selected = lo.Contains(moduleAssemblies, assembly)
 				}

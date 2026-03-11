@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"io/ioutil"
 	"os"
 
 	"github.com/Graylog2/graylog-project-cli/ask"
@@ -82,7 +81,7 @@ func applyManifestGenerateCommand(cmd *cobra.Command, args []string) {
 
 	newManifestFile := "manifests/release-" + releaseVersion + ".json"
 
-	if err := ioutil.WriteFile(newManifestFile, buf, 0644); err != nil {
+	if err := os.WriteFile(newManifestFile, buf, 0644); err != nil {
 		logger.Fatal("Unable to write new manifest file %s: %v", newManifestFile, err)
 	}
 

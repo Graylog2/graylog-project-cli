@@ -59,7 +59,7 @@ func statusCommand(cmd *cobra.Command, args []string) {
 			filesModified, filesDeleted, filesAdded := 0, 0, 0
 			filesModifiedStaged, filesDeletedStaged, filesAddedStaged := 0, 0, 0
 
-			for _, line := range strings.Split(gitStatus, "\n") {
+			for line := range strings.SplitSeq(gitStatus, "\n") {
 				if strings.HasPrefix(line, "M") {
 					filesModifiedStaged++
 				}

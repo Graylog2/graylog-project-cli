@@ -2,7 +2,8 @@ package cmd
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
+
 	"net/http"
 
 	"github.com/Graylog2/graylog-project-cli/config"
@@ -59,7 +60,7 @@ func getLatestRelease() GithubRelease {
 	}
 
 	var latestRelease GithubRelease
-	body, _ := ioutil.ReadAll(resp.Body)
+	body, _ := io.ReadAll(resp.Body)
 	json.Unmarshal(body, &latestRelease)
 	return latestRelease
 }

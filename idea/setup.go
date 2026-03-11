@@ -6,7 +6,6 @@ import (
 	p "github.com/Graylog2/graylog-project-cli/project"
 	"github.com/Graylog2/graylog-project-cli/utils"
 	"github.com/pkg/errors"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -104,7 +103,7 @@ func ensureRunConfigurations() {
 			logger.Fatal("Couldn't create run configuration directory: %s")
 		}
 
-		tmpFile, err := ioutil.TempFile(runConfigurationDir, filename)
+		tmpFile, err := os.CreateTemp(runConfigurationDir, filename)
 		if err != nil {
 			logger.Fatal("Couldn't create temp file for %s: %v", filename, err)
 		}
@@ -113,7 +112,7 @@ func ensureRunConfigurations() {
 			logger.Fatal("Couldn't write to temp file for %s: %v", filename, err)
 		}
 
-		if err := ioutil.WriteFile(runConfigurationFile, []byte(content), 0644); err != nil {
+		if err := os.WriteFile(runConfigurationFile, []byte(content), 0644); err != nil {
 			logger.Fatal("Couldn't write run configuration file %s: %v", runConfigurationFile, err)
 		}
 
@@ -172,7 +171,7 @@ func ensureWebBuildExclude(module p.Module) {
 }
 
 func parseIMLFile(imlFile string) (*IMLModule, error) {
-	bytes, err := ioutil.ReadFile(imlFile)
+	bytes, err := os.ReadFile(imlFile)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Error reading IML file: %v", imlFile)
 	}
@@ -214,7 +213,7 @@ func addExcludeFolderToIML(imlFile string, url string) error {
 
 	logger.Info("Adding [%s] to file %s", excludeFolder, imlFile)
 
-	buf, err := ioutil.ReadFile(imlFile)
+	buf, err := os.ReadFile(imlFile)
 	if err != nil {
 		return errors.Wrapf(err, "Couldn't read IML file: %v", imlFile)
 	}
@@ -224,7 +223,7 @@ func addExcludeFolderToIML(imlFile string, url string) error {
 
 	newContent := re.ReplaceAllLiteralString(string(buf), "      "+excludeFolder+"\n    </content>")
 
-	if err := ioutil.WriteFile(imlFile, []byte(newContent), 0); err != nil {
+	if err := os.WriteFile(imlFile, []byte(newContent), 0); err != nil {
 		return errors.Wrapf(err, "Couldn't write IML file %s", imlFile)
 	}
 

@@ -2,12 +2,14 @@ package projectstate
 
 import (
 	"encoding/json"
+	"os"
+
 	"github.com/Graylog2/graylog-project-cli/config"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/Graylog2/graylog-project-cli/pom"
 	p "github.com/Graylog2/graylog-project-cli/project"
 	"github.com/pkg/errors"
-	"io/ioutil"
+
 	"path/filepath"
 )
 
@@ -88,7 +90,7 @@ func writeWebModulesFile(path string, modules []WebModule) error {
 	}
 
 	logger.Info("Generating %s", path)
-	if err := ioutil.WriteFile(path, buf, 0644); err != nil {
+	if err := os.WriteFile(path, buf, 0644); err != nil {
 		return errors.Wrapf(err, "Unable to write file %v", path)
 	}
 

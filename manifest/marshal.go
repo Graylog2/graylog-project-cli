@@ -28,9 +28,9 @@ func Marshal(manifest Manifest) ([]byte, error) {
 	return buf, nil
 }
 
-func marshalCleanup(buf []byte) (map[string]interface{}, error) {
+func marshalCleanup(buf []byte) (map[string]any, error) {
 	// Unmarshal the given data into a map structure so we can remove unwanted stuff
-	var tempValue map[string]interface{}
+	var tempValue map[string]any
 
 	if err := json.Unmarshal(buf, &tempValue); err != nil {
 		return tempValue, errors.Wrap(err, "unable to read serialized manifest")
@@ -38,26 +38,26 @@ func marshalCleanup(buf []byte) (map[string]interface{}, error) {
 
 	for key, value := range tempValue {
 		if key == "modules" {
-			marshalCleanupModuleData(value.([]interface{}))
+			marshalCleanupModuleData(value.([]any))
 		}
 	}
 
 	return tempValue, nil
 }
 
-func marshalCleanupModuleData(modules []interface{}) {
+func marshalCleanupModuleData(modules []any) {
 	// Cleanup the modules and submodules so that there are no `"apply": {}` left in the JSON structure
 	for _, m := range modules {
-		module := m.(map[string]interface{})
+		module := m.(map[string]any)
 		for k, v := range module {
 			if k == "apply" {
-				if len(v.(map[string]interface{})) == 0 {
+				if len(v.(map[string]any)) == 0 {
 					delete(module, "apply")
 				}
 			}
 			// Recurse into submodules
 			if k == "submodules" {
-				marshalCleanupModuleData(v.([]interface{}))
+				marshalCleanupModuleData(v.([]any))
 			}
 		}
 	}

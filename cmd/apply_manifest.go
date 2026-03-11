@@ -121,7 +121,7 @@ func applyManifestCommand(cmd *cobra.Command, args []string) {
 
 			if output != "" {
 				logger.Error("Module %s has uncommitted changes:", module.Name)
-				for _, line := range strings.Split(output, "\n") {
+				for line := range strings.SplitSeq(output, "\n") {
 					logger.Error("%s", line)
 				}
 				if !applyManifestForce {

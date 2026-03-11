@@ -142,7 +142,7 @@ func logOutputBuffer(buf []byte) {
 }
 
 func logOutputBufferWithColor(buf []byte, c color.Attribute) {
-	for _, s := range strings.Split(string(buf), "\n") {
+	for s := range strings.SplitSeq(string(buf), "\n") {
 		if len(strings.TrimSpace(s)) > 0 {
 			logger.ColorInfo(c, "      %v", s)
 		}

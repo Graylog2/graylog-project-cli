@@ -33,7 +33,7 @@ func (gh *Client) updateRulesetEnforcementByName(owner string, repo string, rule
 	}
 
 	rulesets, _, err := gh.client.Repositories.GetAllRulesets(gh.ctx, owner, repo, &github.RepositoryListRulesetsOptions{
-		IncludesParents: github.Ptr(false),
+		IncludesParents: new(false),
 	})
 
 	if err != nil {

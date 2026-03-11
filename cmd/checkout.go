@@ -1,6 +1,10 @@
 package cmd
 
 import (
+	"os"
+	"path/filepath"
+	"strings"
+
 	c "github.com/Graylog2/graylog-project-cli/config"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/Graylog2/graylog-project-cli/manifest"
@@ -10,10 +14,6 @@ import (
 	"github.com/Graylog2/graylog-project-cli/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"strings"
 )
 
 // checkoutCmd represents the checkout command
@@ -142,14 +142,14 @@ manifest_files:
 
 		// If the manifest file looks like a downloaded one, copy it into the local manifests folder
 		// so we can access it later
-		buf, err := ioutil.ReadFile(file)
+		buf, err := os.ReadFile(file)
 		if err != nil {
 			logger.Fatal("Unable to read file <%s>: %v", file, err)
 		}
 
 		output := filepath.Join("manifests", filepath.Base(file))
 		logger.Info("Writing downloaded manifest to: %s", output)
-		if err = ioutil.WriteFile(output, buf, 0644); err != nil {
+		if err = os.WriteFile(output, buf, 0644); err != nil {
 			logger.Fatal("Unable to write file <%s>: %v", output, err)
 		}
 		files = append(files, output)

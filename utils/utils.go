@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Graylog2/graylog-project-cli/logger"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -173,11 +172,11 @@ func InDirectoryE(path string, callback DirectoryCallbackWithError) error {
 }
 
 func FilesIdentical(file1, file2 string) bool {
-	buf1, err := ioutil.ReadFile(file1)
+	buf1, err := os.ReadFile(file1)
 	if err != nil {
 		logger.Fatal("Unable to read file <%s>: %v", file1, err)
 	}
-	buf2, err := ioutil.ReadFile(file2)
+	buf2, err := os.ReadFile(file2)
 	if err != nil {
 		logger.Fatal("Unable to read file <%s>: %v", file2, err)
 	}
@@ -208,14 +207,14 @@ func ReplaceInFile(filename string, re *regexp.Regexp, replacement string) error
 		return err
 	}
 
-	buf, err := ioutil.ReadFile(absFilename)
+	buf, err := os.ReadFile(absFilename)
 	if err != nil {
 		return err
 	}
 
 	lines := make([]string, 0)
 
-	for _, line := range strings.Split(string(buf), "\n") {
+	for line := range strings.SplitSeq(string(buf), "\n") {
 		if re.MatchString(line) {
 			lines = append(lines, re.ReplaceAllString(line, replacement))
 		} else {
@@ -223,7 +222,7 @@ func ReplaceInFile(filename string, re *regexp.Regexp, replacement string) error
 		}
 	}
 
-	f, err := ioutil.TempFile(filepath.Dir(absFilename), fileInfo.Name())
+	f, err := os.CreateTemp(filepath.Dir(absFilename), fileInfo.Name())
 	if err != nil {
 		return err
 	}

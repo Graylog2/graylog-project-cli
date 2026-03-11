@@ -2,12 +2,14 @@ package manifest
 
 import (
 	"encoding/json"
+	"io"
+	"net/http"
+	"os"
+	"path/filepath"
+
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/Graylog2/graylog-project-cli/utils"
 	"github.com/fatih/color"
-	"io/ioutil"
-	"net/http"
-	"path/filepath"
 )
 
 const DownloadedManifestPrefix = "downloaded-manifest"
@@ -16,7 +18,7 @@ type Manifest struct {
 	JVMVersion        int              `json:"jvm_version,omitzero"`
 	Modules           []ManifestModule `json:"modules"`
 	Includes          []string         `json:"includes,omitempty"`
-	DefaultApply      ManifestApply    `json:"default_apply,omitempty"`
+	DefaultApply      ManifestApply    `json:"default_apply"`
 	AssemblyPlatforms []string         `json:"assembly_platforms,omitempty"`
 }
 
@@ -31,7 +33,7 @@ type ManifestModule struct {
 	AssemblyAttachment string           `json:"assembly_attachment,omitempty"`
 	Server             bool             `json:"server,omitempty"`
 	SubModules         []ManifestModule `json:"submodules,omitempty"`
-	Apply              ManifestApply    `json:"apply,omitempty"`
+	Apply              ManifestApply    `json:"apply"`
 	SkipRelease        bool             `json:"skip_release,ommitempty"`
 }
 
@@ -46,7 +48,7 @@ type ManifestApply struct {
 }
 
 func readManifestFile(filename string) Manifest {
-	bytes, err := ioutil.ReadFile(filename)
+	bytes, err := os.ReadFile(filename)
 	if err != nil {
 		logger.Fatal("Unable to read manifest: %v", err)
 	}
@@ -158,7 +160,7 @@ func readManifestWithDoneState(paths []string, done *map[string]bool) Manifest {
 // Downloads the given manifest URL into a local temporary file.
 // It returns the path to the temporary file. (The caller is responsible to remove the temporary file!)
 func DownloadManifestFromGitHub(manifestUrl string, authToken string) string {
-	f, err := ioutil.TempFile("", DownloadedManifestPrefix)
+	f, err := os.CreateTemp("", DownloadedManifestPrefix)
 	if err != nil {
 		logger.Fatal("Unable to create temp file: %v", err)
 	}
@@ -190,7 +192,7 @@ func fetchManifestFromGitHub(url string, authToken string) []byte {
 		logger.Fatal("Requesting manifest <%s> failed: %s\nUse GPC_AUTH_TOKEN or --auth-token to access private repositories!", req.URL, res.Status)
 	}
 
-	bytes, err := ioutil.ReadAll(res.Body)
+	bytes, err := io.ReadAll(res.Body)
 	if err != nil {
 		logger.Fatal("Unable to read body from <%s>: %v", req.URL, err)
 	}
@@ -228,7 +230,7 @@ func WriteState(filenames []string) {
 	}
 
 	logger.Info("Writing manifest state to %v", ManifestStateFile)
-	if err := ioutil.WriteFile(ManifestStateFile, buf, 0644); err != nil {
+	if err := os.WriteFile(ManifestStateFile, buf, 0644); err != nil {
 		logger.Fatal("Unable to write manifest state to %v: %v", ManifestStateFile, err)
 	}
 }
@@ -238,7 +240,7 @@ func ReadState() ManifestState {
 
 	var state ManifestStateJSON
 
-	buf, err := ioutil.ReadFile(ManifestStateFile)
+	buf, err := os.ReadFile(ManifestStateFile)
 	if err != nil {
 		logger.Fatal("Unable to read manifest state from %v: %v", ManifestStateFile, err)
 	}
