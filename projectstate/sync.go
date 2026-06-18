@@ -2,12 +2,14 @@ package projectstate
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 
 	"github.com/Graylog2/graylog-project-cli/config"
 	"github.com/Graylog2/graylog-project-cli/logger"
 	"github.com/Graylog2/graylog-project-cli/pom"
 	p "github.com/Graylog2/graylog-project-cli/project"
+	"github.com/Graylog2/graylog-project-cli/utils"
 	"github.com/pkg/errors"
 
 	"path/filepath"
@@ -21,6 +23,29 @@ func Sync(project p.Project, config config.Config) {
 	if err := writeWebModules(project); err != nil {
 		logger.Fatal("%s", err)
 	}
+
+	if err := writeJavaVersion(project); err != nil {
+		logger.Fatal("%s", err)
+	}
+}
+
+func writeJavaVersion(project p.Project) error {
+	if project.JVMVersion == 0 {
+		return fmt.Errorf("java version not set in project state")
+	}
+
+	rootPath, err := utils.GetCwdE()
+	if err != nil {
+		return fmt.Errorf("error getting cwd: %w", err)
+	}
+
+	filename := filepath.Join(rootPath, ".java-version")
+
+	if err := os.WriteFile(filename, []byte(fmt.Sprintf("%d\n", project.JVMVersion)), 0o644); err != nil {
+		return fmt.Errorf("couldn't write Java version to file %s: %w", filename, err)
+	}
+
+	return nil
 }
 
 type WebModules struct {
