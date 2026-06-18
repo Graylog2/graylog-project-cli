@@ -41,6 +41,12 @@ func writeJavaVersion(project p.Project) error {
 
 	filename := filepath.Join(rootPath, ".java-version")
 
+	basePath, err := filepath.Rel(rootPath, filename)
+	if err != nil {
+		return fmt.Errorf("error getting relative path: %w", err)
+	}
+
+	logger.Info("Generating %s (version: %d)", basePath, project.JVMVersion)
 	if err := os.WriteFile(filename, []byte(fmt.Sprintf("%d\n", project.JVMVersion)), 0o644); err != nil {
 		return fmt.Errorf("couldn't write Java version to file %s: %w", filename, err)
 	}
