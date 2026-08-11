@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -82,10 +83,20 @@ func TestParseGitHubURL(t *testing.T) {
 		t.Errorf("expected <%s> to not match <%s>", url, match)
 	}
 
-	// Missing .git suffix
-	_, err = ParseGitHubURL("https://github.com/Graylog2/graylog2-server")
+	// Missing .git suffix for non-https URL
+	_, err = ParseGitHubURL("git@github.com:Graylog2/graylog2-server")
 	if err == nil {
 		t.Error("expected URL without .git suffix to fail")
+	}
+
+	// Missing .git suffix for https URL
+	urlWithoutSuffix, err := ParseGitHubURL("https://github.com/Graylog2/graylog2-server")
+	if err != nil {
+		t.Error("expected HTTPS URL without .git suffix not to fail")
+	} else {
+		if !strings.HasSuffix(urlWithoutSuffix.Repository(), ".git") {
+			t.Error("expected .git suffix to end with .git")
+		}
 	}
 
 	// With authentication

@@ -2,16 +2,17 @@ package utils
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	neturl "net/url"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 func ParseGitHubURL(url string) (GitHubURL, error) {
-	if !strings.HasSuffix(url, ".git") {
+	if !strings.HasPrefix(url, "https://github.com/") && !strings.HasSuffix(url, ".git") {
 		return GitHubURL{}, errors.Errorf("GitHub URL is missing .git suffix: %s", url)
 	}
 
@@ -23,6 +24,9 @@ func ParseGitHubURL(url string) (GitHubURL, error) {
 		repository = strings.Split(url, ":")[1]
 	case strings.HasPrefix(url, "https://"):
 		repository = strings.Split(url, "github.com/")[1]
+		if !strings.HasSuffix(repository, ".git") {
+			repository += ".git"
+		}
 	default:
 		return GitHubURL{}, errors.Errorf("unknown GitHub URL: %s", url)
 	}
