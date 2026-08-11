@@ -10,21 +10,21 @@ require (
 	github.com/google/renameio/v2 v2.0.2
 	github.com/hashicorp/go-version v1.9.0
 	github.com/imdario/mergo v0.3.16
-	github.com/k0kubun/pp/v3 v3.5.1
+	github.com/k0kubun/pp/v3 v3.5.2
 	github.com/manifoldco/promptui v0.9.0
-	github.com/mattn/go-isatty v0.0.22
-	github.com/pelletier/go-toml/v2 v2.4.0
+	github.com/mattn/go-isatty v0.0.24
+	github.com/pelletier/go-toml/v2 v2.4.3
 	github.com/pkg/errors v0.9.1
 	github.com/samber/lo v1.53.0
-	github.com/schollz/progressbar/v3 v3.19.0
+	github.com/schollz/progressbar/v3 v3.19.1
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
 	github.com/subosito/gotenv v1.6.0
-	github.com/yuin/goldmark v1.8.2
-	golang.org/x/exp v0.0.0-20260611194520-c48552f49976
+	github.com/yuin/goldmark v1.8.5
+	golang.org/x/exp v0.0.0-20260811152304-ee035b5b010f
 	golang.org/x/oauth2 v0.36.0
-	golang.org/x/text v0.38.0
+	golang.org/x/text v0.41.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -51,10 +51,10 @@ require (
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
-	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/crypto v0.53.0 // indirect
-	golang.org/x/sys v0.46.0 // indirect
-	golang.org/x/term v0.44.0 // indirect
+	go.yaml.in/yaml/v3 v3.0.5 // indirect
+	golang.org/x/crypto v0.54.0 // indirect
+	golang.org/x/sys v0.47.0 // indirect
+	golang.org/x/term v0.45.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 )
 

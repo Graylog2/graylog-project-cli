@@ -1,6 +1,21 @@
 # Changelog
 
-## [v3.5.1](https://github.com/k0kubun/pp/tree/v3.5.1)
+## [v3.5.2](https://github.com/k0kubun/pp/tree/HEAD)
+
+[Full Changelog](https://github.com/k0kubun/pp/compare/v3.5.1...HEAD)
+
+**Merged pull requests:**
+
+- Reduce allocations in nested rendering [\#114](https://github.com/k0kubun/pp/pull/114) ([apstndb](https://github.com/apstndb))
+- Bump golang.org/x/text from 0.37.0 to 0.38.0 [\#113](https://github.com/k0kubun/pp/pull/113) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump github.com/mattn/go-colorable from 0.1.14 to 0.1.15 [\#112](https://github.com/k0kubun/pp/pull/112) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump golang.org/x/text from 0.36.0 to 0.37.0 [\#111](https://github.com/k0kubun/pp/pull/111) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump golang.org/x/text from 0.35.0 to 0.36.0 [\#110](https://github.com/k0kubun/pp/pull/110) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump golang.org/x/text from 0.34.0 to 0.35.0 [\#109](https://github.com/k0kubun/pp/pull/109) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump golang.org/x/text from 0.33.0 to 0.34.0 [\#108](https://github.com/k0kubun/pp/pull/108) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump golang.org/x/text from 0.32.0 to 0.33.0 [\#107](https://github.com/k0kubun/pp/pull/107) ([dependabot[bot]](https://github.com/apps/dependabot))
+
+## [v3.5.1](https://github.com/k0kubun/pp/tree/v3.5.1) (2026-01-23)
 
 [Full Changelog](https://github.com/k0kubun/pp/compare/v3.5.0...v3.5.1)
 
@@ -163,7 +178,6 @@
 
 - Fix newline of map type [\#29](https://github.com/k0kubun/pp/pull/29) ([itchyny](https://github.com/itchyny))
 - add MIT license file [\#28](https://github.com/k0kubun/pp/pull/28) ([alteholz](https://github.com/alteholz))
-- Update the map printer to properly print maps. [\#25](https://github.com/k0kubun/pp/pull/25) ([denniszl](https://github.com/denniszl))
 
 ## [v2.3.0](https://github.com/k0kubun/pp/tree/v2.3.0) (2017-01-23)
 
